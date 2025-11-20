@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Z21Dashboard.Application.Models;
+namespace Z21Client.Models;
 
 public sealed class BroadcastFlagsChangedEventArgs : EventArgs
 {

@@ -1,6 +1,6 @@
-﻿using Z21Dashboard.Application.Models;
+﻿using Z21Client.Models;
 
-namespace Z21Dashboard.Application.Interfaces;
+namespace Z21Client.Interfaces;
 
 /// <summary>
 /// Defines the public contract for a Z21 client.
