@@ -81,15 +81,14 @@ public sealed record LocoInfo
 
         Direction = (db3 & 0b10000000) > 0 ? DrivingDirection.Forward : DrivingDirection.Reverse;
         var rawSpeed = (byte)(db3 & 0b01111111);
+        var speed = DccSpeedSteps.GetSpeedStep(rawSpeed, (SpeedSteps)NativeSpeedSteps);
 
         if (LocomotiveMode is LocoMode.MM)
         {
             // Please note!
             // In the MM protocol the speed is still reported in DCC speed steps. Meaning
-            // even if the protocol is MM2_14, the 'rawspeed' will have a roco value and we
-            // will have to devide the value by two.
-            var speed = DccSpeedSteps.GetSpeedStep(rawSpeed, (SpeedSteps)NativeSpeedSteps);
-
+            // even if the protocol is MM2_14, the 'rawspeed' will have a roco value (0 - 28) and we
+            // will have to devide the value by a factor.
             CurrentSpeed = NativeSpeedSteps switch
             {
                 NativeSpeedSteps.Steps14 => speed,
@@ -107,15 +106,7 @@ public sealed record LocoInfo
         }
         else
         {
-
-            CurrentSpeed = NativeSpeedSteps switch
-            {
-                NativeSpeedSteps.Steps14 => (byte)DccSpeedSteps.GetSpeedStep14(rawSpeed),
-                NativeSpeedSteps.Steps28 => (byte)DccSpeedSteps.GetSpeedStep28(rawSpeed),
-                NativeSpeedSteps.Steps128 => (byte)DccSpeedSteps.GetSpeedStep128(rawSpeed),
-                _ => 0
-            };
-
+            CurrentSpeed = speed;
             SpeedSteps = (SpeedSteps)NativeSpeedSteps;
         }
 
@@ -163,8 +154,8 @@ public sealed record LocoInfo
         {
             CurrentSpeed = SpeedSteps switch
             {
-                SpeedSteps.Steps14 => DccSpeedSteps.GetSpeedStep14(speed),
-                SpeedSteps.Steps28 => DccSpeedSteps.GetSpeedStep14(speed),
+                SpeedSteps.Steps14 => DccSpeedSteps.GetSpeedStep(speed, SpeedSteps.Steps14),
+                SpeedSteps.Steps28 => DccSpeedSteps.GetSpeedStep(speed, SpeedSteps.Steps14),
                 SpeedSteps.Steps128 => (byte)(Math.Floor(speed / (decimal)4.6)),
                 _ => 0
             };

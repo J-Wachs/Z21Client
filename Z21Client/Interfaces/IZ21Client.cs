@@ -187,11 +187,11 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <param name="address">The locomotive address to control.</param>
     /// <param name="speed">The desired speed in (0-126).</param>
-    /// <param name="nativeSpeedSteps">The native speed steps used by z21/Z21.</param>
+    /// <param name="nativeSpeedStep">The native speed steps used by z21/Z21.</param>
     /// <param name="direction">The driving direction.</param>
     /// <param name="locoMode">The protocol mode (DCC or MM).</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task SetLocoDriveAdaptSpeedAsync(ushort address, byte speed, NativeSpeedSteps nativeSpeedStep, DrivingDirection direction, LocoMode locoMode);
+    Task SetLocoDriveAsync(ushort address, byte speed, NativeSpeedSteps nativeSpeedStep, DrivingDirection direction, LocoMode locoMode);
 
     /// <summary>
     /// Sends a command to set the protocol mode (DCC or MM) for a specific locomotive address.

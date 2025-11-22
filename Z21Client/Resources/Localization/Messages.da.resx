@@ -1,0 +1,381 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Text0001" xml:space="preserve">
+    <value>Tilmelder til AllLocoInfoReceived-hændelse. Tilføjer AllLocoInfo broadcast-flag.</value>
+  </data>
+  <data name="Text0002" xml:space="preserve">
+    <value>Afmelder fra AllLocoInfoReceived-hændelse. Fjerner AllLocoInfo broadcast-flag.</value>
+  </data>
+  <data name="Text0003" xml:space="preserve">
+    <value>Tilmelder til RailComDataReceived-hændelse. Tilføjer AllRailCom broadcast-flag og starter polling.</value>
+  </data>
+  <data name="Text0004" xml:space="preserve">
+    <value>Afmelder fra RailComDataReceived-hændelse. Fjerner AllRailCom broadcast-flag og stopper polling.</value>
+  </data>
+  <data name="Text0005" xml:space="preserve">
+    <value>Tilmelder til RBusDataReceived-hændelse. Tilføjer RBus broadcast-flag.</value>
+  </data>
+  <data name="Text0006" xml:space="preserve">
+    <value>Afmelder fra RBusDataReceived-hændelse. Fjerner RBus broadcast-flag.</value>
+  </data>
+  <data name="Text0007" xml:space="preserve">
+    <value>Tilmelder til SystemStateChanged-hændelse. Tilføjer SystemState broadcast-flag.</value>
+  </data>
+  <data name="Text0008" xml:space="preserve">
+    <value>Afmelder fra SystemStateChanged-hændelse. Fjerner SystemState broadcast-flag.</value>
+  </data>
+  <data name="Text0009" xml:space="preserve">
+    <value>Forbinder til Z21 på {Host}:{Port}...</value>
+  </data>
+  <data name="Text0010" xml:space="preserve">
+    <value>Allerede forbundet. Frakobl venligst først.</value>
+  </data>
+  <data name="Text0011" xml:space="preserve">
+    <value>Forbindelse mislykkedes: Vært {Host} kan ikke nås (ping mislykkedes).</value>
+  </data>
+  <data name="Text0012" xml:space="preserve">
+    <value>Ugyldig IP-adresse angivet: {Host}</value>
+  </data>
+  <data name="Text0013" xml:space="preserve">
+    <value>UdpClient oprettet og bundet til at lytte på lokal port {Port}</value>
+  </data>
+  <data name="Text0014" xml:space="preserve">
+    <value>Kunne ikke oprette og binde UdpClient på port {Port}. Porten er muligvis allerede i brug af et andet program.</value>
+  </data>
+  <data name="Text0015" xml:space="preserve">
+    <value>Forbindelse mislykkedes: Vært svarede på ping, men svarede ikke på Z21-kommando (håndtryk mislykkedes).</value>
+  </data>
+  <data name="Text0016" xml:space="preserve">
+    <value>Z21-klientforbindelse verificeret og fuldt startet.</value>
+  </data>
+  <data name="Text0017" xml:space="preserve">
+    <value>Frakobler fra Z21...</value>
+  </data>
+  <data name="Text0018" xml:space="preserve">
+    <value>Modtagelses-opgave blev annulleret som forventet under frakobling.</value>
+  </data>
+  <data name="Text0019" xml:space="preserve">
+    <value>Modtagelses-opgave blev ikke annulleret inden for den forventede tid under frakobling.</value>
+  </data>
+  <data name="Text0020" xml:space="preserve">
+    <value>Frakoblet.</value>
+  </data>
+  <data name="Text0021" xml:space="preserve">
+    <value>GetLocoInfoAsync: Anmodede om lokomotiv-info for adresse {Address}</value>
+  </data>
+  <data name="Text0022" xml:space="preserve">
+    <value>GetLocoModeAsync: Anmodede om lokomotiv-tilstand for adresse {Address}</value>
+  </data>
+  <data name="Text0023" xml:space="preserve">
+    <value>GetRailComDataAsync: Anmodede om RailCom-info for lokomotiv {locoAddress}</value>
+  </data>
+  <data name="Text0024" xml:space="preserve">
+    <value>GetRBusDataAsync: Anmodede om R-Bus-data for gruppeindeks {groupIndex}</value>
+  </data>
+  <data name="Text0025" xml:space="preserve">
+    <value>GetSerialtNumberAsync: Anmodede om z21/Z21 serienummer</value>
+  </data>
+  <data name="Text0026" xml:space="preserve">
+    <value>GetSystemStateAsync: Anmodede om systemtilstand</value>
+  </data>
+  <data name="Text0027" xml:space="preserve">
+    <value>GetTurnoutModeAsync: Anmodede om sporskifte-tilstand for adresse {address}</value>
+  </data>
+  <data name="Text0028" xml:space="preserve">
+    <value>GetZ21CodeAsync: Anmodede om z21/Z21 (funktions) kode</value>
+  </data>
+  <data name="Text0029" xml:space="preserve">
+    <value>Indstiller lokomotivkørsel for adresse {Address}: Hastighed={Speed}, rocoVærdi={rocoValue} NativeSteps={NativeSpeedSteps}, Retning={Direction}</value>
+  </data>
+  <data name="Text0030" xml:space="preserve">
+    <value>Skifter funktion {functionIndex} for lokomotiv-adresse {address}</value>
+  </data>
+  <data name="Text0031" xml:space="preserve">
+    <value>Indstiller lokomotiv-tilstand for adresse {Address} til {Mode}</value>
+  </data>
+  <data name="Text0032" xml:space="preserve">
+    <value>Sender Nødstop-kommando.</value>
+  </data>
+  <data name="Text0033" xml:space="preserve">
+    <value>Indstiller sporskifte-tilstand for adresse {Address} til {Mode}</value>
+  </data>
+  <data name="Text0034" xml:space="preserve">
+    <value>Indstiller sporskifte-position for adresse {address}, position {position}</value>
+  </data>
+  <data name="Text0035" xml:space="preserve">
+    <value>Slår skinnespænding fra</value>
+  </data>
+  <data name="Text0036" xml:space="preserve">
+    <value>Slår skinnespænding til</value>
+  </data>
+  <data name="Text0037" xml:space="preserve">
+    <value>Der opstod en undtagelse under ping til {Host}.</value>
+  </data>
+  <data name="Text0038" xml:space="preserve">
+    <value>Sender keep-alive-besked til Z21.</value>
+  </data>
+  <data name="Text0039" xml:space="preserve">
+    <value>Anmoder om RailCom-data fra næste lokomotiv i ringbuffer</value>
+  </data>
+  <data name="Text0040" xml:space="preserve">
+    <value>Forbindelse til Z21 tabt. Intet svar på flere pings.</value>
+  </data>
+  <data name="Text0041" xml:space="preserve">
+    <value>Ingen besked modtaget fra Z21 i et stykke tid. Pinger for at tjekke forbindelsen...</value>
+  </data>
+  <data name="Text0042" xml:space="preserve">
+    <value>Ping lykkedes, Z21 er stadig på netværket. Venter på data.</value>
+  </data>
+  <data name="Text0043" xml:space="preserve">
+    <value>Ping mislykkedes. Antal fejl: {Count}</value>
+  </data>
+  <data name="Text0044" xml:space="preserve">
+    <value>Der opstod en undtagelse under watchdog-ping. Antal fejl: {Count}</value>
+  </data>
+  <data name="Text0045" xml:space="preserve">
+    <value>Kan ikke sende kommando. Klienten er ikke tilsluttet.</value>
+  </data>
+  <data name="Text0046" xml:space="preserve">
+    <value>Kunne ikke sende kommando til centralstationen. Fejl opstået: {message}</value>
+  </data>
+  <data name="Text0047" xml:space="preserve">
+    <value>Der opstod en fejl i modtagelses-løkken. Fejl opstået: {message}</value>
+  </data>
+  <data name="Text0048" xml:space="preserve">
+    <value>Modtog forkert formateret data: ikke nok bytes til at læse beskedlængde. Resterende bytes: {Length}</value>
+  </data>
+  <data name="Text0049" xml:space="preserve">
+    <value>Stødte på besked med længde nul i datastrøm. Stopper tolkning af denne pakke.</value>
+  </data>
+  <data name="Text0050" xml:space="preserve">
+    <value>Modtog forkert formateret data: buffer er mindre end den angivne beskedlængde. Forventet: {Expected}, Faktisk resterende: {Actual}</value>
+  </data>
+  <data name="Text0051" xml:space="preserve">
+    <value>Modtog en uhåndteret eller forkert formateret pakke. Header: 0x{Header:X4}, Længde: {Length}</value>
+  </data>
+  <data name="Text0052" xml:space="preserve">
+    <value>Modtaget 'Loco Slot Info'-pakke er for kort. Forventede mindst 24 bytes, fik {Length}</value>
+  </data>
+  <data name="Text0053" xml:space="preserve">
+    <value>Lokomotiv Slot Info for slot {SlotNumber} modtaget: Adresse={Address}</value>
+  </data>
+  <data name="Text0054" xml:space="preserve">
+    <value>Sendte en ukendt X-Bus-kommando til Z21</value>
+  </data>
+  <data name="Text0055" xml:space="preserve">
+    <value>Modtog en uhåndteret X-Bus-kommando med X-Header: 0x{XHeader:X2}</value>
+  </data>
+  <data name="Text0056" xml:space="preserve">
+    <value>RailCom-data for lokomotiv {Address} modtaget.</value>
+  </data>
+  <data name="Text0057" xml:space="preserve">
+    <value>Z21 Kode modtaget: {LockState}</value>
+  </data>
+  <data name="Text0058" xml:space="preserve">
+    <value>R-Bus-data for gruppe {GroupIndex} modtaget.</value>
+  </data>
+  <data name="Text0059" xml:space="preserve">
+    <value>Sporskifte-tilstand for adresse {Address} modtaget: {Mode}</value>
+  </data>
+  <data name="Text0060" xml:space="preserve">
+    <value>Modtaget nødstop-pakke er for kort. Forventede 7 bytes, fik {Length}</value>
+  </data>
+  <data name="Text0061" xml:space="preserve">
+    <value>Modtaget nødstop-pakke med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret.</value>
+  </data>
+  <data name="Text0062" xml:space="preserve">
+    <value>Nødstop modtaget</value>
+  </data>
+  <data name="Text0063" xml:space="preserve">
+    <value>Modtaget sporskifte-info-pakke er for kort. Forventede 9 bytes, fik {Length}</value>
+  </data>
+  <data name="Text0064" xml:space="preserve">
+    <value>Modtaget sporskifte-info-pakke med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret.</value>
+  </data>
+  <data name="Text0065" xml:space="preserve">
+    <value>Sporskifte-info for adresse {Address} modtaget: {State}</value>
+  </data>
+  <data name="Text0066" xml:space="preserve">
+    <value>Modtaget skinnespændings-info-pakke er for kort. Forventede 7 bytes, fik {Length}</value>
+  </data>
+  <data name="Text0067" xml:space="preserve">
+    <value>Modtaget skinnespændings-info-pakke med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret.</value>
+  </data>
+  <data name="Text0068" xml:space="preserve">
+    <value>Skinnespændings-tilstand modtaget: {trackPowerInfo}</value>
+  </data>
+  <data name="Text0069" xml:space="preserve">
+    <value>Serienummer modtaget: {SerialNumber}</value>
+  </data>
+  <data name="Text0070" xml:space="preserve">
+    <value>Hardware-info modtaget: {HWType}, Firmware: {FWVersion}</value>
+  </data>
+  <data name="Text0071" xml:space="preserve">
+    <value>Kunne ikke tolke firmwareversion fra LAN_GET_HWINFO-svar.</value>
+  </data>
+  <data name="Text0072" xml:space="preserve">
+    <value>Firmware-fejl-omgåelse: Kombinerede lokomotiv-info og lokomotiv-tilstand for adresse {Address} og udløste hændelse.</value>
+  </data>
+  <data name="Text0073" xml:space="preserve">
+    <value>Lokomotiv-tilstand for adresse {Address} modtaget: {Mode}</value>
+  </data>
+  <data name="Text0074" xml:space="preserve">
+    <value>Broadcast-flag modtaget og behandlet. Flag: 0x{Flags:X8}</value>
+  </data>
+  <data name="Text0075" xml:space="preserve">
+    <value>Modtaget lokomotiv-info-pakke er for kort. Forventede mindst {Length} bytes, fik {ActualLength}</value>
+  </data>
+  <data name="Text0076" xml:space="preserve">
+    <value>Modtaget lokomotiv-info-pakke med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret.</value>
+  </data>
+  <data name="Text0077" xml:space="preserve">
+    <value>Firmware-fejl-omgåelse: Gemte delvis lokomotiv-info for adresse {Address}, afventer lokomotiv-tilstand.</value>
+  </data>
+  <data name="Text0078" xml:space="preserve">
+    <value>Lokomotiv-info for adresse {Address} modtaget og behandlet.</value>
+  </data>
+  <data name="Text0079" xml:space="preserve">
+    <value>Firmwareversion modtaget og behandlet: {Version}</value>
+  </data>
+  <data name="Text0080" xml:space="preserve">
+    <value>Kunne ikke tolke firmwareversion fra modtaget data.</value>
+  </data>
+  <data name="Text0081" xml:space="preserve">
+    <value>Systemtilstands-pakke er for kort. Forventede mindst 18 bytes, fik {Length}</value>
+  </data>
+  <data name="Text0082" xml:space="preserve">
+    <value>Systemtilstand modtaget og behandlet. Intern spænding: {volt} mV</value>
+  </data>
+  <data name="Text0083" xml:space="preserve">
+    <value>Indstiller broadcast-flag til {subscripedBroadcastFlags}</value>
+  </data>
+  <data name="Text0084" xml:space="preserve">
+    <value>GetLocoSlotInfoAsync: Efterspurgte lokomotiv information for slot {slotNumber}</value>
+  </data>
+  <data name="Text0085" xml:space="preserve">
+    <value>GetBroadcastFlagsAsync: Efterspurgte underretningsflagene</value>
+  </data>
+  <data name="Text0086" xml:space="preserve">
+    <value>GetFirmwareVersionAsync: Efterspurgte firmware version</value>
+  </data>
+  <data name="Text0087" xml:space="preserve">
+    <value>GetHardwareInfoAsync: Efterspurgte hardware information</value>
+  </data>
+</root>

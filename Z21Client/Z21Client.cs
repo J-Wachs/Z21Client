@@ -6,6 +6,7 @@ using Z21Client.Helpers;
 using Z21Client.Infrastructure;
 using Z21Client.Interfaces;
 using Z21Client.Models;
+using Z21Client.Resources.Localization;
 
 namespace Z21Client;
 
@@ -47,9 +48,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     private EventHandler<RBusData>? _rBusDataReceived;
     private EventHandler<RailComData>? _railComDataReceived;
     private EventHandler<SystemStateChangedEventArgs>? _systemStateChanged;
+    private readonly SemaphoreSlim _sendToZ21Lock = new(1, 1);
 
     private Timer? _railComPollingTimer;
     private readonly HashSet<ushort> _receivedRailComAddresses = [];
+
+    #region Exposed events
 
     /// <inheritdoc/>
     public event EventHandler<BroadcastFlagsChangedEventArgs>? BroadcastFlagsReceived;
@@ -70,7 +74,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             if (_locoInfoReceived is null && _hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
             {
-                logger.LogInformation("Subscribing to AllLocoInfoReceived event. Adding AllLocoInfo broadcast flag.");
+                // "Subscribing to AllLocoInfoReceived event. Adding AllLocoInfo broadcast flag."
+                logger.LogInformation(Messages.Text0001);
                 _subscripedBroadcastFlags |= BroadcastFlags.AllLocoInfo;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -81,7 +86,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _locoInfoReceived -= value;
             if (_locoInfoReceived is null && _hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
             {
-                logger.LogInformation("Unsubscribing from AllLocoInfoReceived event. Removing AllLocoInfo broadcast flag.");
+                // "Unsubscribing from AllLocoInfoReceived event. Removing AllLocoInfo broadcast flag."
+                logger.LogInformation(Messages.Text0002);
                 _subscripedBroadcastFlags &= ~BroadcastFlags.AllLocoInfo;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -100,7 +106,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             if (_railComDataReceived is null)
             {
-                logger.LogInformation("Subscribing to RailComDataReceived event. Adding AllRailCom broadcast flag and starting polling.");
+                // "Subscribing to RailComDataReceived event. Adding AllRailCom broadcast flag and starting polling."
+                logger.LogInformation(Messages.Text0003);
                 _subscripedBroadcastFlags |= BroadcastFlags.AllRailCom;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
 
@@ -114,7 +121,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _railComDataReceived -= value;
             if (_railComDataReceived is null)
             {
-                logger.LogInformation("Unsubscribing from RailComDataReceived event. Removing AllRailCom broadcast flag and stopping polling.");
+                // "Unsubscribing from RailComDataReceived event. Removing AllRailCom broadcast flag and stopping polling."
+                logger.LogInformation(Messages.Text0004);
 
                 // Stop and dispose the timer
                 _railComPollingTimer?.Dispose();
@@ -133,7 +141,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             if (_rBusDataReceived is null)
             {
-                logger.LogInformation("Subscribing to RBusDataReceived event. Adding RBus broadcast flag.");
+                // "Subscribing to RBusDataReceived event. Adding RBus broadcast flag."
+                logger.LogInformation(Messages.Text0005);
                 _subscripedBroadcastFlags |= BroadcastFlags.RBus;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -144,7 +153,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _rBusDataReceived -= value;
             if (_rBusDataReceived is null)
             {
-                logger.LogInformation("Unsubscribing from RBusDataReceived event. Removing RBus broadcast flag.");
+                // "Unsubscribing from RBusDataReceived event. Removing RBus broadcast flag."
+                logger.LogInformation(Messages.Text0006);
                 _subscripedBroadcastFlags &= ~BroadcastFlags.RBus;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -161,7 +171,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             if (_systemStateChanged is null)
             {
-                logger.LogInformation("Subscribing to SystemStateChanged event. Adding SystemState broadcast flag.");
+                // "Subscribing to SystemStateChanged event. Adding SystemState broadcast flag."
+                logger.LogInformation(Messages.Text0007);
                 _subscripedBroadcastFlags |= BroadcastFlags.SystemState;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -172,7 +183,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _systemStateChanged -= value;
             if (_systemStateChanged is null)
             {
-                logger.LogInformation("Unsubscribing from SystemStateChanged event. Removing SystemState broadcast flag.");
+                // "Unsubscribing from SystemStateChanged event. Removing SystemState broadcast flag."
+                logger.LogInformation(Messages.Text0008);
                 _subscripedBroadcastFlags &= ~BroadcastFlags.SystemState;
                 _ = SetBroadcastFlags(_subscripedBroadcastFlags);
             }
@@ -194,19 +206,26 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     /// <inheritdoc/>
     public event EventHandler<Z21Code>? Z21CodeReceived;
 
+    #endregion Exposed events
+
+    #region Exposed methods
+
     /// <inheritdoc/>
     public async Task<bool> ConnectAsync(string host, int port = 21105)
     {
-        logger.LogInformation("Connecting to Z21 at {Host}:{Port}...", host, port);
+        // "Connecting to Z21 at {Host}:{Port}..."
+        logger.LogInformation(Messages.Text0009, host, port);
         if (_udpClient is not null)
         {
-            logger.LogWarning("Already connected. Please disconnect first.");
+            // "Already connected. Please disconnect first."
+            logger.LogWarning(Messages.Text0010);
             return true;
         }
 
         if (!await PingHostAsync(host))
         {
-            logger.LogError("Connection failed: Host {Host} is not reachable (ping failed).", host);
+            // "Connection failed: Host {Host} is not reachable (ping failed)."
+            logger.LogError(Messages.Text0011, host);
             return false;
         }
 
@@ -216,7 +235,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Invalid IP address provided: {Host}", host);
+            // "Invalid IP address provided: {Host}"
+            logger.LogError(ex, Messages.Text0012, host);
             return false;
         }
 
@@ -227,11 +247,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             {
                 _udpClient.AllowNatTraversal(true);
             }
-            logger.LogInformation("UdpClient created and bound to listen on local port {Port}", port);
+            // "UdpClient created and bound to listen on local port {Port}"
+            logger.LogInformation(Messages.Text0013, port);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create and bind UdpClient on port {Port}. The port may already be in use by another application.", port);
+            // "Failed to create and bind UdpClient on port {Port}. The port may already be in use by another application."
+            logger.LogError(ex, Messages.Text0014, port);
             return false;
         }
 
@@ -257,7 +279,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
             if (!result)
             {
-                logger.LogError("Connection failed: Host responded to ping, but did not respond to Z21 command (handshake failed).");
+                // "Connection failed: Host responded to ping, but did not respond to Z21 command (handshake failed)."
+                logger.LogError(Messages.Text0015);
                 await DisconnectAsync();
                 return false;
             }
@@ -267,21 +290,22 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         _lastMessageReceivedTimestamp = DateTime.UtcNow;
         _failedPingCount = 0;
 
-        _subscripedBroadcastFlags = BroadcastFlags.Basic;
+        _subscripedBroadcastFlags = BroadcastFlags.Basic | BroadcastFlags.SystemState;
         await SetBroadcastFlags(_subscripedBroadcastFlags);
 
         _keepAliveTimer = new Timer(KeepAliveCallback, null, TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(45));
         _watchdogTimer = new Timer(WatchdogCallback, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
 
-        logger.LogInformation("Z21 client connection verified and fully started.");
+        // "Z21 client connection verified and fully started."
+        logger.LogInformation(Messages.Text0016);
         return true;
     }
-
 
     /// <inheritdoc/>
     public async Task DisconnectAsync()
     {
-        logger.LogInformation("Disconnecting from Z21...");
+        // "Disconnecting from Z21..."
+        logger.LogInformation(Messages.Text0017);
 
         if (_keepAliveTimer is not null)
         {
@@ -321,11 +345,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
                 }
                 catch (OperationCanceledException)
                 {
-                    logger.LogDebug("Receive task was successfully cancelled as expected during disconnect.");
+                    // "Receive task was successfully cancelled as expected during disconnect."
+                    logger.LogDebug(Messages.Text0018);
                 }
                 catch (TimeoutException)
                 {
-                    logger.LogWarning("Receive task did not cancel within the expected time during disconnect.");
+                    // "Receive task did not cancel within the expected time during disconnect."
+                    logger.LogWarning(Messages.Text0019);
                 }
             }
             _cancellationTokenSource.Dispose();
@@ -339,25 +365,32 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _udpClient = null;
         }
         _hardwareInfo = null;
-        logger.LogInformation("Disconnected.");
+        // "Disconnected."
+        logger.LogInformation(Messages.Text0020);
     }
 
     /// <inheritdoc/>
     public async Task GetBroadcastFlagsAsync()
     {
         await SendCommandAsync(Z21Commands.GetBroadcastFlags);
+        // "GetBroadcastFlagsAsync: Requested the broadcast flags"
+        logger.LogInformation(Messages.Text0085);
     }
 
     /// <inheritdoc/>
     public async Task GetFirmwareVersionAsync()
     {
         await SendCommandAsync(Z21Commands.GetFirmwareVersion);
+        // "GetFirmwareVersionAsync: Requested the firmware version"
+        logger.LogInformation(Messages.Text0086);
     }
 
     /// <inheritdoc/>
     public async Task GetHardwareInfoAsync()
     {
         await SendCommandAsync(Z21Commands.GetHardwareInfo);
+        // "GetHardwareInfoAsync: Requested the hardware information"
+        logger.LogInformation(Messages.Text0087);
     }
 
     /// <inheritdoc/>
@@ -379,7 +412,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         command[7] = (byte)(address & 0xFF);
         command[8] = CalculateChecksum(command);
         await SendCommandAsync(command);
-        logger.LogInformation("GetLocoInfoAsync: Requested loco info for address {Address}", address);
+        // "GetLocoInfoAsync: Requested loco info for address {Address}"
+        logger.LogInformation(Messages.Text0021, address);
 
         // --- START: Firmware Bug Workaround ---
         // Immediately request the loco mode as well to get the correct protocol information.
@@ -396,7 +430,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
-        logger.LogInformation("GetLocoModeAsync: Requested loco mode for address {Address}", address);
+        // "GetLocoModeAsync: Requested loco mode for address {Address}"
+        logger.LogInformation(Messages.Text0022, address);
     }
 
     /// <inheritdoc/>
@@ -407,38 +442,51 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetLocoSlotInfo).CopyTo(command, 2);
         command[5] = slotNumber;
         await SendCommandAsync(command);
-        logger.LogInformation("GetLocoSlotInfoAsync: Requested loco info for slot {slotNumber}", slotNumber);
+        // "GetLocoSlotInfoAsync: Requested loco info for slot {slotNumber}"
+        logger.LogInformation(Messages.Text0084, slotNumber);
     }
 
     /// <inheritdoc/>
     public async Task GetRailComDataAsync(ushort locoAddress)
     {
-        byte[] command = [0x07, 0x00, (byte)(Z21ProtocolConstants.HeaderGetRailComData & 0xFF), (byte)(Z21ProtocolConstants.HeaderGetRailComData >> 8), 0x01, (byte)(locoAddress & 0xFF), (byte)(locoAddress >> 8)];
+        var command = new byte[Z21ProtocolConstants.LengthGetRailComData];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRailComData).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRailComData).CopyTo(command, 2);
+        command[4] = 0x01;
+        command[5] = (byte)(locoAddress & 0xFF);
+        command[6] = (byte)(locoAddress >> 8);
         await SendCommandAsync(command);
-        logger.LogInformation("GetRailComDataAsync: Requested RailCom info for loco {locoAddress}", locoAddress);
+        // "GetRailComDataAsync: Requested RailCom info for loco {locoAddress}"
+        logger.LogInformation(Messages.Text0023, locoAddress);
     }
 
 
     /// <inheritdoc/>
     public async Task GetRBusDataAsync(int groupIndex)
     {
-        byte[] command = [0x05, 0x00, (byte)(Z21ProtocolConstants.HeaderRBusGetData & 0xFF), (byte)(Z21ProtocolConstants.HeaderRBusGetData >> 8), (byte)groupIndex];
+        var command = new byte[Z21ProtocolConstants.LengthGetRBusData];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRBusData).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRBusData).CopyTo(command, 2);
+        command[4] = (byte)groupIndex;
         await SendCommandAsync(command);
-        logger.LogInformation("GetRBusDataAsync: Requested R-Bus data for group index {groupIndex}", groupIndex);
+        // "GetRBusDataAsync: Requested R-Bus data for group index {groupIndex}"
+        logger.LogInformation(Messages.Text0024, groupIndex);
     }
 
     /// <inheritdoc/>
     public async Task GetSerialNumberAsync()
     {
         await SendCommandAsync(Z21Commands.GetSerialNumber);
-        logger.LogInformation("GetSerialtNumberAsync: Requested z21/Z21 serial number");
+        // "GetSerialtNumberAsync: Requested z21/Z21 serial number"
+        logger.LogInformation(Messages.Text0025);
     }
 
     /// <inheritdoc/>
     public async Task GetSystemStateAsync()
     {
         await SendCommandAsync(Z21Commands.GetSystemState);
-        logger.LogInformation("GetSystemStateAsync: Requested system state");
+        // "GetSystemStateAsync: Requested system state"
+        logger.LogInformation(Messages.Text0026);
     }
 
     /// <inheritdoc/>
@@ -450,20 +498,187 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
-        logger.LogInformation("GetTurnoutModeAsync: Requested turnout mode for address {address}", address);
+        // "GetTurnoutModeAsync: Requested turnout mode for address {address}"
+        logger.LogInformation(Messages.Text0027, address);
     }
 
     /// <inheritdoc/>
     public async Task GetZ21CodeAsync()
     {
         await SendCommandAsync(Z21Commands.GetCode);
-        logger.LogInformation("GetZ21CodeAsync: Requested z21/Z21 (feature) code");
+        // "GetZ21CodeAsync: Requested z21/Z21 (feature) code"
+        logger.LogInformation(Messages.Text0028);
     }
 
     /// <inheritdoc/>
-    public async Task SetLocoDriveAdaptSpeedAsync(ushort address, byte speed, NativeSpeedSteps nativeSpeedStep, DrivingDirection direction, LocoMode locoMode)
+    public async Task SetLocoDriveAsync(ushort address, byte speed, NativeSpeedSteps nativeSpeedStep, DrivingDirection direction, LocoMode locoMode)
     {
-        byte rocoSpeedStep;
+        const byte FixedValue = 0x10;
+        byte rocoSpeedStep = GetRocoSpeedStep(speed, locoMode, nativeSpeedStep);
+
+        // Create the 10-byte command array
+        var command = new byte[Z21ProtocolConstants.LengthSetLocoDrive];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoDrive).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderSetLocoDrive;
+        // DB0: 0x1S (Speed steps)
+        command[5] = (byte)(FixedValue | (byte)nativeSpeedStep);
+        // DB1, DB2: Address
+        byte adrMsb = (byte)(address >> 8);
+        byte adrLsb = (byte)(address & 0xFF);
+        // Set the high bits for X-Bus addressing
+        command[6] = adrMsb;
+        if (address >= 128)
+        {
+            command[6] |= 0xC0;
+        }
+        command[7] = adrLsb;
+
+        // DB3: RVVVVVVV (Direction and Speed)
+        // Ensure speed is within 7 bits (0-127)
+
+        byte speedValue = (byte)(rocoSpeedStep & 0x7F);
+        // Set the direction bit (bit 7)
+        byte directionBit = (byte)((int)direction << 7);
+        command[8] = (byte)(directionBit | speedValue);
+
+        // DB4: Checksum
+        command[9] = CalculateChecksum(command);
+
+        // Send the command
+        await SendCommandAsync(command);
+        // "Set loco drive for address {Address}: Speed={Speed}, rocoValue={rocoValue} NativeSteps={NativeSpeedSteps}, Direction={Direction}"
+        logger.LogInformation(Messages.Text0029, address, speed, rocoSpeedStep, nativeSpeedStep, direction);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetLocoFunctionAsync(ushort address, byte functionIndex)
+    {
+        var command = new byte[Z21ProtocolConstants.LengthSetLocoFunction];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoFunction).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeaderSetLocoFunction).CopyTo(command, 4);
+        byte adrMsb = (byte)(address >> 8);
+        byte adrLsb = (byte)(address & 0xFF);
+        // Set the high bits for X-Bus addressing
+        command[6] = adrMsb;
+        if (address >= 128)
+        {
+            command[6] |= 0xC0;
+        }
+        command[7] = adrLsb;
+
+        command[8] = (byte)(0x80 | (functionIndex & 0b00111111)); // 0x80= Toggle function
+        command[9] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+        // "Toggle function {functionIndex} for loco address {address}"
+        logger.LogInformation(Messages.Text0030, functionIndex, address);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetLocoModeAsync(ushort address, LocoMode mode)
+    {
+        var command = new byte[Z21ProtocolConstants.LengthSetLocoMode];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoMode).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetLocoMode).CopyTo(command, 2);
+        command[4] = (byte)(address >> 8);
+        command[5] = (byte)(address & 0xFF);
+        command[6] = (byte)mode;
+        await SendCommandAsync(command);
+        // "Setting loco mode for address {Address} to {Mode}"
+        logger.LogInformation(Messages.Text0031, address, mode);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetEmergencyStopAsync()
+    {
+        await SendCommandAsync(Z21Commands.SetEmergencyStop);
+        // "Sending Emergency Stop command."
+        logger.LogWarning(Messages.Text0032);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetTurnoutModeAsync(ushort address, TurnoutMode mode)
+    {
+        var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
+        command[4] = (byte)(address >> 8);
+        command[5] = (byte)(address & 0xFF);
+        command[6] = (byte)mode;
+        await SendCommandAsync(command);
+        // "Setting turnout mode for address {Address} to {Mode}"
+        logger.LogInformation(Messages.Text0033, address, mode);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetTurnoutPositionAsync(ushort address, TurnoutPosition position)
+    {
+        const byte FixedValue = 0x80;
+        const byte TurnOnBit = 0x08;
+        var turnoutPosition = (byte)FixedValue | ((byte)position & 1);
+
+        // Turn on:
+        turnoutPosition |= TurnOnBit;
+
+        var command = new byte[Z21ProtocolConstants.LengthSetTurnoutPosition];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutPosition).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderSetTurnoutPosition;
+        command[5] = (byte)(address >> 8);
+        command[6] = (byte)(address & 0xFF);
+        command[7] = (byte)turnoutPosition;
+        command[8] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        await Task.Delay(100);
+        // Turn off:
+        turnoutPosition &= ~TurnOnBit;
+        command[7] = (byte)turnoutPosition;
+        command[8] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        await Task.Delay(50);
+
+        // "Setting turnout position address {address}, position {position}"
+        logger.LogInformation(Messages.Text0034, address, position);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetTrackPowerOffAsync()
+    {
+        await SendCommandAsync(Z21Commands.SetTrackPowerOff);
+        // "Setting track power off"
+        logger.LogInformation(Messages.Text0035);
+    }
+
+    /// <inheritdoc/>
+    public async Task SetTrackPowerOnAsync()
+    {
+        await SendCommandAsync(Z21Commands.SetTrackPowerOn);
+        // "Setting track power on"
+        logger.LogInformation(Messages.Text0036);
+    }
+
+    #endregion Exposed methods
+
+    /// <summary>
+    /// Converts the given speed step to the Roco-specific speed step value based on the loco mode and native speed steps.
+    /// 
+    /// The speed must be in internal interval based on the protocol speedstep.
+    /// MM1 14 steps: 0-14
+    /// MM2 14 steps: 0-14
+    /// MM2 28 steps: 0-28
+    /// DCC 14 steps : 0-14
+    /// DCC 28 steps: 0-28
+    /// DCC 128 steps: 0-126
+    /// </summary>
+    /// <param name="speed">The speed in internal interval based on the nativeSpeedStep.</param>
+    /// <param name="locoMode"></param>
+    /// <param name="nativeSpeedStep"></param>
+    /// <returns></returns>
+    private static byte GetRocoSpeedStep(byte speed, LocoMode locoMode, NativeSpeedSteps nativeSpeedStep)
+    {
         byte convertedSpeedStep;
 
         if (locoMode is LocoMode.MM)
@@ -500,157 +715,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             convertedSpeedStep = speed;
         }
         // Fetch the Roco value for the speed step
-        rocoSpeedStep = DccSpeedSteps.GetSpeedStepReverse(convertedSpeedStep, (SpeedSteps)nativeSpeedStep);
+        var rocoSpeedStep = DccSpeedSteps.GetSpeedStep(convertedSpeedStep, (SpeedSteps)nativeSpeedStep);
 
-        //logger.LogError("SetLocoDriveAdaptAsync: Address {Address}: Speed={Speed}, rocoSpeedStep={rocoSpeedStep}, NativeSteps={NativeSpeedSteps}, Direction={Direction}, Mode={LocoMode}", address, speed, rocoSpeedStep, nativeSpeedStep, direction, locoMode);
+        // Message for deug at development time
+        // logger.LogError("GetRocoSteedStep: Address {Address}: Speed={Speed}, rocoSpeedStep={rocoSpeedStep}, NativeSteps={NativeSpeedSteps}, Direction={Direction}, Mode={LocoMode}", address, speed, rocoSpeedStep, nativeSpeedStep, direction, locoMode);
 
-
-        // Create the 10-byte command array
-        var command = new byte[10];
-
-        // Length: 0x0A
-        BitConverter.GetBytes((ushort)0x0A).CopyTo(command, 0);
-
-        // Header: 0x40 0x00
-        BitConverter.GetBytes((ushort)0x0040).CopyTo(command, 2);
-
-        // X-Header: 0xE4
-        command[4] = 0xE4;
-
-        // DB0: 0x1S (Speed steps)
-        command[5] = (byte)(0x10 | (byte)nativeSpeedStep);
-
-        // DB1, DB2: Address
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
-
-        // DB3: RVVVVVVV (Direction and Speed)
-        // Ensure speed is within 7 bits (0-127)
-
-        // Adjust speed steps:
-        //speed = DccSpeedSteps.GetSpeedStepReverse(speed, speedSteps);
-
-        byte speedValue = (byte)(rocoSpeedStep & 0x7F);
-        // Set the direction bit (bit 7)
-        byte directionBit = (byte)((int)direction << 7);
-        command[8] = (byte)(directionBit | speedValue);
-
-        // DB4: Checksum
-        command[9] = CalculateChecksum(command);
-
-        // Send the command
-        await SendCommandAsync(command);
-        logger.LogInformation("Set loco drive for address {Address}: Speed={Speed}, rocoValue={rocoValue} NativeSteps={NativeSpeedSteps}, Direction={Direction}", address, speed, rocoSpeedStep, nativeSpeedStep, direction);
+        return rocoSpeedStep;
     }
-
-    /// <inheritdoc/>
-    public async Task SetLocoFunctionAsync(ushort address, byte functionIndex)
-    {
-        var command = new byte[Z21ProtocolConstants.LengthSetLocoFunction];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoFunction).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
-        BitConverter.GetBytes(Z21ProtocolConstants.XHeaderSetLocoFunction).CopyTo(command, 4);
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
-
-        command[8] = (byte)(0x80 | (functionIndex & 0b00111111)); // 0x80= Toggle function
-        command[9] = CalculateChecksum(command);
-        await SendCommandAsync(command);
-        logger.LogInformation("Toggle function {functionIndex} for loco address {address}", functionIndex, address);
-    }
-
-
-    /// <inheritdoc/>
-    public async Task SetLocoModeAsync(ushort address, LocoMode mode)
-    {
-        var command = new byte[Z21ProtocolConstants.LengthSetLocoMode];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoMode).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetLocoMode).CopyTo(command, 2);
-        command[4] = (byte)(address >> 8);
-        command[5] = (byte)(address & 0xFF);
-        command[6] = (byte)mode;
-        await SendCommandAsync(command);
-        logger.LogInformation("Setting loco mode for address {Address} to {Mode}", address, mode);
-    }
-
-    /// <inheritdoc/>
-    public async Task SetEmergencyStopAsync()
-    {
-        await SendCommandAsync(Z21Commands.SetEmergencyStop);
-        logger.LogWarning("Sending Emergency Stop command.");
-    }
-
-    /// <inheritdoc/>
-    public async Task SetTurnoutModeAsync(ushort address, TurnoutMode mode)
-    {
-        var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
-        command[4] = (byte)(address >> 8);
-        command[5] = (byte)(address & 0xFF);
-        command[6] = (byte)mode;
-        await SendCommandAsync(command);
-        logger.LogInformation("Setting turnout mode for address {Address} to {Mode}", address, mode);
-    }
-
-    /// <inheritdoc/>
-    public async Task SetTurnoutPositionAsync(ushort address, TurnoutPosition position)
-    {
-        var turnoutPosition = (byte)0x80 | ((byte)position & 1);
-
-        // Turn on:
-        turnoutPosition |= 0x08;
-
-        var command = new byte[Z21ProtocolConstants.LengthSetTurnoutPosition];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutPosition).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
-        command[4] = Z21ProtocolConstants.XHeaderSetTurnoutPosition;
-        command[5] = (byte)(address >> 8);
-        command[6] = (byte)(address & 0xFF);
-        command[7] = (byte)turnoutPosition;
-        command[8] = CalculateChecksum(command);
-        await SendCommandAsync(command);
-
-        await Task.Delay(100);
-        // Turn off:
-        turnoutPosition = (byte)0x80 | ((byte)position & 1);
-        command[7] = (byte)turnoutPosition;
-        command[8] = CalculateChecksum(command);
-        await SendCommandAsync(command);
-
-        await Task.Delay(50);
-
-        logger.LogInformation("Setting turnout position address {address}, position {position}", address, position);
-    }
-
-    /// <inheritdoc/>
-    public async Task SetTrackPowerOffAsync()
-    {
-        await SendCommandAsync(Z21Commands.SetTrackPowerOff);
-        logger.LogInformation("Setting track power off");
-    }
-
-    /// <inheritdoc/>
-    public async Task SetTrackPowerOnAsync()
-    {
-        await SendCommandAsync(Z21Commands.SetTrackPowerOn);
-        logger.LogInformation("Setting track power on");
-    }
-
 
     /// <summary>
     /// Sends an ICMP echo message to the Z21 and determines if it is reachable.
@@ -666,7 +737,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An exception occurred during ping to {Host}.", host);
+            // "An exception occurred during ping to {Host}."
+            logger.LogError(ex, Messages.Text0037, host);
             return false;
         }
     }
@@ -675,7 +747,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     {
         if (DateTime.UtcNow - _lastCommandSentTimestamp > TimeSpan.FromSeconds(40))
         {
-            logger.LogInformation("Sending keep-alive message to Z21.");
+            // "Sending keep-alive message to Z21."
+            logger.LogInformation(Messages.Text0038);
             _ = GetSystemStateAsync();
         }
     }
@@ -689,6 +762,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     private async Task GetNextRailComDataAsync()
     {
         await SendCommandAsync(Z21Commands.GetRailComDataNext);
+        // "Requesting RailCom data from next locomotive in ring buffer"
+        logger.LogInformation(Messages.Text0039);
     }
 
     private async void WatchdogCallback(object? state)
@@ -700,7 +775,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
         if (_failedPingCount >= 3)
         {
-            logger.LogError("Connection to Z21 lost. No response to multiple pings.");
+            // "Connection to Z21 lost. No response to multiple pings."
+            logger.LogError(Messages.Text0040);
             ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Lost));
             await DisconnectAsync();
             return;
@@ -708,47 +784,59 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
         try
         {
-            logger.LogWarning("No message received from Z21 for a while. Pinging to check connection...");
+            // "No message received from Z21 for a while. Pinging to check connection..."
+            logger.LogWarning(Messages.Text0041);
             if (await PingHostAsync(_remoteEndPoint!.Address.ToString()))
             {
-                logger.LogInformation("Ping successful, Z21 is still on the network. Waiting for data.");
+                // "Ping successful, Z21 is still on the network. Waiting for data."
+                logger.LogInformation(Messages.Text0042);
             }
             else
             {
                 _failedPingCount++;
-                logger.LogWarning("Ping failed. Failure count: {Count}", _failedPingCount);
+                // "Ping failed. Failure count: {Count}"
+                logger.LogWarning(Messages.Text0043, _failedPingCount);
             }
         }
         catch (Exception ex)
         {
             _failedPingCount++;
-            logger.LogError(ex, "An exception occurred during watchdog ping. Failure count: {Count}", _failedPingCount);
+            // "An exception occurred during watchdog ping. Failure count: {Count}"
+            logger.LogError(ex, Messages.Text0044, _failedPingCount);
         }
     }
 
     private async Task SendCommandAsync(byte[] command)
     {
+
         if (_udpClient is null || _remoteEndPoint is null)
         {
-            logger.LogWarning("Cannot send command. Client is not connected.");
+            // "Cannot send command. Client is not connected."
+            logger.LogWarning(Messages.Text0045);
             return;
         }
 
+        // As multiple threads may try to send commands simultaneously, we use a semaphore to ensure that we
+        // only send one command at the time.
+        await _sendToZ21Lock.WaitAsync();
         try
         {
             _ = await _udpClient.SendAsync(command, command.Length, _remoteEndPoint);
             _lastCommandSentTimestamp = DateTime.UtcNow;
-            logger.LogDebug("Command sent: {Command}", BitConverter.ToString(command));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send command to central station.");
+            // "Failed to send command to central station. Exception: {message}"
+            logger.LogError(ex, Messages.Text0046, ex.Message);
+        }
+        finally
+        {
+            _sendToZ21Lock.Release();
         }
     }
 
     private async Task ReceiveLoop(CancellationToken cancellationToken)
     {
-        logger.LogDebug("Receive loop started. Waiting for data...");
         while (!cancellationToken.IsCancellationRequested)
         {
             try
@@ -768,12 +856,16 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred in the receive loop.");
+                // "An error occurred in the receive loop. Exception: {message}"
+                logger.LogError(ex, Messages.Text0047, ex.Message);
             }
         }
-        logger.LogDebug("Receive loop stopped.");
     }
 
+    /// <summary>
+    /// Processes the data received from the Z21, handling multiple concatenated messages.
+    /// </summary>
+    /// <param name="buffer">The recived data.</param>
     private void ProcessReceivedData(byte[] buffer)
     {
         _lastMessageReceivedTimestamp = DateTime.UtcNow;
@@ -786,7 +878,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             if (offset + 2 > span.Length)
             {
-                logger.LogWarning("Received malformed data: not enough bytes to read message length. Remaining bytes: {Length}", span.Length - offset);
+                // "Received malformed data: not enough bytes to read message length. Remaining bytes: {Length}"
+                logger.LogWarning(Messages.Text0048, span.Length - offset);
                 break;
             }
 
@@ -794,13 +887,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
             if (messageLength == 0)
             {
-                logger.LogWarning("Encountered zero-length message in data stream. Stopping parse of this packet.");
+                // "Encountered zero-length message in data stream. Stopping parse of this packet."
+                logger.LogWarning(Messages.Text0049);
                 break;
             }
 
             if (offset + messageLength > span.Length)
             {
-                logger.LogWarning("Received malformed data: buffer is smaller than the indicated message length. Expected: {Expected}, Actual remaining: {Actual}", messageLength, span.Length - offset);
+                // "Received malformed data: buffer is smaller than the indicated message length. Expected: {Expected}, Actual remaining: {Actual}"
+                logger.LogWarning(Messages.Text0050, messageLength, span.Length - offset);
                 break;
             }
 
@@ -811,6 +906,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         }
     }
 
+    /// <summary>
+    /// Processes a single Z21 message based on its header.
+    /// </summary>
+    /// <param name="data"></param>
     private void ProcessSingleMessage(ReadOnlySpan<byte> data)
     {
         if (data.Length < 4) return;
@@ -853,7 +952,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
                 ParseXBus(data);
                 break;
             default:
-                logger.LogWarning("Received an unhandled or malformed packet. Header: 0x{Header:X4}, Length: {Length}", header, data.Length);
+                // "Received an unhandled or malformed packet. Header: 0x{Header:X4}, Length: {Length}"
+                logger.LogWarning(Messages.Text0051, header, data.Length);
                 break;
         }
     }
@@ -867,30 +967,62 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         if (LocoSlotInfoReceived is null) return;
         if (data.Length < 24)
         {
-            logger.LogWarning("Received Loco Slot Info packet is too short. Expected at least 24 bytes, got {Length}", data.Length);
+            // "Received Loco Slot Info packet is too short. Expected at least 24 bytes, got {Length}"
+            logger.LogWarning(Messages.Text0052, data.Length);
             return;
         }
 
         ushort address = BitConverter.ToUInt16(data[9..]);
         if (address is 0)
         {
+            // This indicates an empty slot, no need to process further.
+            // Please note, that the data bytes *can* be filled with old data.
             return;
         }
 
+        // Data received about the locomotive slot, is in another format/structure than from the documented events.
+        // Because of this, the data must be converted.
+
+        // No matter the speed steps reported the speed is a value between 0 and 127. In the documented LAN_X_LOCO_INFO
+        // the speed steps returned, are between 0 and 14, 28 and 128 depending on the speed steps used.
         byte slotNumber = data[7];
         var rawSpeed = (byte)(data[12] & 0b01111111);
         byte speedSteps = 0;
         byte speed = 0;
         switch (data[18])
         {
-            case 3: speedSteps = 0; speed = (byte)Math.Ceiling(rawSpeed / (double)8.2); speed = DccSpeedSteps.GetSpeedStep14Reverse(speed); break;
-            case 6: speedSteps = 2; speed = (byte)Math.Ceiling(rawSpeed / (double)4.6); speed = DccSpeedSteps.GetSpeedStep28Reverse(speed); break;
-            case 9: speedSteps = 4; speed = rawSpeed; break;
-            case 67: speedSteps = 0; speedSteps |= 0x10; speed = (byte)(rawSpeed / (double)8.2); break;
-            case 83: speedSteps = 2; speedSteps |= 0x10; speed = (byte)Math.Ceiling(rawSpeed / (double)4.1); break;
-            case 117: speedSteps = 4; speedSteps |= 0x10; speed = rawSpeed; break;
+            case 3:
+                speedSteps = 0;
+                speed = (byte)Math.Ceiling(rawSpeed / (double)8.2);
+                speed = DccSpeedSteps.GetSpeedStepReverse(speed, SpeedSteps.Steps14);
+                break;
+            case 6:
+                speedSteps = 2;
+                speed = (byte)Math.Ceiling(rawSpeed / (double)4.6);
+                speed = DccSpeedSteps.GetSpeedStepReverse(speed, SpeedSteps.Steps28);
+                break;
+            case 9:
+                speedSteps = 4;
+                speed = rawSpeed;
+                break;
+            case 67:
+                speedSteps = 0;
+                speedSteps |= 0x10;
+                speed = (byte)(rawSpeed / (double)8.2);
+                break;
+            case 83:
+                speedSteps = 2;
+                speedSteps |= 0x10;
+                speed = (byte)Math.Ceiling(rawSpeed / (double)4.1);
+                break;
+            case 117:
+                speedSteps = 4;
+                speedSteps |= 0x10;
+                speed = rawSpeed;
+                break;
         }
 
+        // Set the direction bit 
         if ((data[14] & 0x20) == 0)
         {
             speed |= 0b10000000;
@@ -901,16 +1033,22 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             ));
 
         LocoSlotInfoReceived.Invoke(this, locoSlotInfo);
-        logger.LogInformation("Loco Slot Info for slot {SlotNumber} received: Address={Address}, SpeedStep={SpeedStep}", slotNumber, address, speedSteps);
+        // "Loco Slot Info for slot {SlotNumber} received: Address={Address}"
+        logger.LogInformation(Messages.Text0053, slotNumber, address);
     }
 
+    /// <summary>
+    /// Handles parsing of X-Bus messages. These messages contain various types of information identified by the X-Header.
+    /// </summary>
+    /// <param name="data">Data recived.</param>
     private void ParseXBus(ReadOnlySpan<byte> data)
     {
         byte xHeader = data[4];
         ushort xHeaderDb0 = BitConverter.ToUInt16(data[5..]);
         if (xHeaderDb0 is Z21ProtocolConstants.XHeaderUnknownCommand)
         {
-            logger.LogInformation("Send an unknown X-Bus command to Z21");
+            // "Send an unknown X-Bus command to Z21"
+            logger.LogError(Messages.Text0054);
             return;
         }
 
@@ -931,7 +1069,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             case Z21ProtocolConstants.XHeaderTrackPower:
                 ParseTrackPowerState(data);
                 break;
-            default: logger.LogInformation("Received an unhandled X-Bus command with X-Header: 0x{XHeader:X2}", xHeader); break;
+            default:
+                // "Received an unhandled X-Bus command with X-Header: 0x{XHeader:X2}"
+                logger.LogError(Messages.Text0055, xHeader);
+                break;
         }
     }
 
@@ -948,7 +1089,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             }
         }
         _railComDataReceived.Invoke(this, railComData);
-        logger.LogInformation("RailCom data for loco {Address} received.", railComData.LocoAddress);
+        // "RailCom data for loco {Address} received."
+        logger.LogInformation(Messages.Text0056, railComData.LocoAddress);
     }
 
     private void ParseZ21Code(ReadOnlySpan<byte> data)
@@ -957,7 +1099,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var lockState = (Z21LockState)data[4];
         var z21Code = new Z21Code(lockState);
         Z21CodeReceived.Invoke(this, z21Code);
-        logger.LogInformation("Z21 Code received: {LockState}", lockState);
+        // "Z21 Code received: {LockState}"
+        logger.LogInformation(Messages.Text0057, lockState);
     }
 
     private void ParseRBusData(ReadOnlySpan<byte> data)
@@ -967,85 +1110,132 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var feedbackData = data.Slice(5, 10);
         var rbusData = new RBusData(groupIndex, feedbackData);
         _rBusDataReceived.Invoke(this, rbusData);
-        logger.LogInformation("R-Bus data for group {GroupIndex} received.", groupIndex);
+        // "R-Bus data for group {GroupIndex} received."
+        logger.LogInformation(Messages.Text0058, groupIndex);
     }
 
     private void ParseTurnoutMode(ReadOnlySpan<byte> data)
     {
-        if (TurnoutModeReceived is null) return;
+        if (TurnoutModeReceived is null)
+            return;
+
         ushort address = (ushort)((data[4] << 8) | data[5]);
         var mode = (TurnoutMode)data[6];
         var args = new TurnoutModeChangedEventArgs(address, mode);
         TurnoutModeReceived.Invoke(this, args);
-        logger.LogInformation("Turnout Mode for address {Address} received: {Mode}", address, mode);
+        // "Turnout Mode for address {Address} received: {Mode}"
+        logger.LogInformation(Messages.Text0059, address, mode);
     }
 
     private void ParseEmergencyStop(ReadOnlySpan<byte> data)
     {
-        if (EmergencyStopReceived is null) return;
-        if (data.Length < 7) { logger.LogWarning("Received Emergency stop packet is too short. Expected 7 bytes, got {Length}", data.Length); return; }
+        if (EmergencyStopReceived is null)
+            return;
+
+        if (data.Length < 7)
+        {
+            // "Received Emergency stop packet is too short. Expected 7 bytes, got {Length}"
+            logger.LogWarning(Messages.Text0060, data.Length);
+            return;
+        }
+
         byte receivedChecksum = data[6];
         byte calculatedChecksum = CalculateChecksum(data);
-        if (receivedChecksum != calculatedChecksum) { logger.LogWarning("Received Emergency stop packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.", receivedChecksum, calculatedChecksum); return; }
+        if (receivedChecksum != calculatedChecksum)
+        {
+            // "Received Emergency stop packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded."
+            logger.LogWarning(Messages.Text0061, receivedChecksum, calculatedChecksum);
+            return;
+        }
         EmergencyStopReceived.Invoke(this, EventArgs.Empty);
+
+        // Have found that SystemStateChanged is not triggered by emergency stop, so manually request an update
         if (_systemStateChanged is not null)
         {
-            _ = GetSystemStateAsync();
+            //_ = GetSystemStateAsync();
         }
-        logger.LogInformation("Emergency stop received");
+        // "Emergency stop received"
+        logger.LogInformation(Messages.Text0062);
     }
 
     private void ParseTurnoutInfo(ReadOnlySpan<byte> data)
     {
         if (TurnoutInfoReceived is null) return;
-        if (data.Length < 9) { logger.LogWarning("Received Turnout Info packet is too short. Expected 9 bytes, got {Length}", data.Length); return; }
+        if (data.Length < 9)
+        {
+            // "Received Turnout Info packet is too short. Expected 9 bytes, got {Length}"
+            logger.LogWarning(Messages.Text0063, data.Length);
+            return;
+        }
+
         byte receivedChecksum = data[8];
         byte calculatedChecksum = CalculateChecksum(data);
-        if (receivedChecksum != calculatedChecksum) { logger.LogWarning("Received Turnout Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.", receivedChecksum, calculatedChecksum); return; }
-        ushort address = (ushort)(((data[5] << 8) | data[6]));
+        if (receivedChecksum != calculatedChecksum)
+        {
+            // "Received Turnout Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded."
+            logger.LogWarning(Messages.Text0064, receivedChecksum, calculatedChecksum);
+            return;
+        }
+
+        ushort address = (ushort)((data[5] << 8) | data[6]);
         var state = (TurnoutState)(data[7] & 0b00000011);
         var turnoutInfo = new TurnoutInfo(address, state);
         TurnoutInfoReceived.Invoke(this, turnoutInfo);
-        logger.LogInformation("Turnout Info for address {Address} received: {State}", address, state);
+        // "Turnout Info for address {Address} received: {State}"
+        logger.LogInformation(Messages.Text0065, address, state);
     }
 
     private void ParseTrackPowerState(ReadOnlySpan<byte> data)
     {
-        if (TrackPowerInfoReceived is null) return;
+        if (TrackPowerInfoReceived is null)
+            return;
+
         if (data.Length < 7)
         {
-            logger.LogWarning("Received Track Power Info packet is too short. Expected 7 bytes, got {Length}", data.Length);
+            // "Received Track Power Info packet is too short. Expected 7 bytes, got {Length}"
+            logger.LogWarning(Messages.Text0066, data.Length);
             return;
         }
+
         byte receivedChecksum = data[6];
         byte calculatedChecksum = CalculateChecksum(data);
         if (receivedChecksum != calculatedChecksum)
         {
-            logger.LogWarning("Received Track Power Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.", receivedChecksum, calculatedChecksum);
+            // "Received Track Power Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded."
+            logger.LogWarning(Messages.Text0067, receivedChecksum, calculatedChecksum);
             return;
         }
-        var state = (TrackPowerState)(data[5]);
+
+        var state = (TrackPowerState)data[5];
         var trackPowerInfo = new TrackPowerInfo(state);
         TrackPowerInfoReceived.Invoke(this, trackPowerInfo);
-        logger.LogInformation("Track Power State received: {trackPowerInfo}", trackPowerInfo);
+        // "Track Power State received: {trackPowerInfo}"
+        logger.LogInformation(Messages.Text0068, trackPowerInfo);
+
+        // A change in track power does not generate a SystemStateChanged, so manually request an update
         if (_systemStateChanged is not null)
         {
-            _ = GetSystemStateAsync();
+            //_ = GetSystemStateAsync();
         }
     }
 
     private void ParseSerialNumber(ReadOnlySpan<byte> data)
     {
-        if (SerialNumberReceived is null) return;
+        if (SerialNumberReceived is null)
+            return;
+
         uint serial = BitConverter.ToUInt32(data[4..]);
         var serialNumber = new SerialNumber(serial);
         SerialNumberReceived.Invoke(this, serialNumber);
-        logger.LogInformation("Serial Number received: {SerialNumber}", serial);
+        // "Serial Number received: {SerialNumber}"
+        logger.LogInformation(Messages.Text0069, serial);
     }
 
     private void ParseHardwareInfo(ReadOnlySpan<byte> data)
     {
-        if (HardwareInfoReceived is null) return;
+        if (HardwareInfoReceived is null)
+            return;
+
         var hwType = (HardwareType)BitConverter.ToUInt32(data[4..]);
         uint fwValue = BitConverter.ToUInt32(data[8..]);
         string fwString = (fwValue >> 8).ToString("X") + "." + (fwValue & 0xFF).ToString("X2");
@@ -1053,11 +1243,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             _hardwareInfo = new HardwareInfo(hwType, new FirmwareVersion((byte)parsedVersion.Major, (byte)parsedVersion.Minor));
             HardwareInfoReceived.Invoke(this, _hardwareInfo);
-            logger.LogInformation("Hardware Info received: {HWType}, Firmware: {FWVersion}", hwType, fwString);
+            // "Hardware Info received: {HWType}, Firmware: {FWVersion}"
+            logger.LogInformation(Messages.Text0070, hwType, fwString);
         }
         else
         {
-            logger.LogError("Failed to parse firmware version from LAN_GET_HWINFO response.");
+            // "Failed to parse firmware version from LAN_GET_HWINFO response."
+            logger.LogError(Messages.Text0071);
         }
     }
 
@@ -1080,7 +1272,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
                 // Raise the final, correct event.
                 _locoInfoReceived?.Invoke(this, completedLocoInfo);
-                logger.LogInformation("Firmware bug workaround: Combined LocoInfo and LocoMode for address {Address} and raised event.", address);
+                // "Firmware bug workaround: Combined LocoInfo and LocoMode for address {Address} and raised event."
+                logger.LogInformation(Messages.Text0072, address);
 
                 // Clean up the pending request.
                 _pendingLocoInfoRequests.Remove(address);
@@ -1096,34 +1289,41 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             var args = new LocoModeChangedEventArgs(address, mode);
             LocoModeReceived.Invoke(this, args);
-            logger.LogInformation("Loco Mode for address {Address} received: {Mode}", address, mode);
+            // "Loco Mode for address {Address} received: {Mode}"
+            logger.LogInformation(Messages.Text0073, address, mode);
         }
     }
 
     private void ParseBroadcastFlags(ReadOnlySpan<byte> data)
     {
-        if (BroadcastFlagsReceived is null) return;
+        if (BroadcastFlagsReceived is null)
+            return;
+
         uint flags = BitConverter.ToUInt32(data[4..]);
         var args = new BroadcastFlagsChangedEventArgs(flags);
         BroadcastFlagsReceived.Invoke(this, args);
-        logger.LogInformation("Broadcast flags received and processed. Flags: 0x{Flags:X8}", flags);
+        // "Broadcast flags received and processed. Flags: 0x{Flags:X8}"
+        logger.LogInformation(Messages.Text0074, flags);
     }
 
     private void ParseLocoInfo(ReadOnlySpan<byte> data)
     {
-        logger.LogInformation("Loco Info start.");
-        if (_locoInfoReceived is null) return;
+        if (_locoInfoReceived is null)
+            return;
+
         int expectedMinLength = 14;
         if (data.Length < expectedMinLength)
         {
-            logger.LogWarning("Received Loco Info packet is too short. Expected at least {Length} bytes, got {ActualLength}", expectedMinLength, data.Length);
+            // "Received Loco Info packet is too short. Expected at least {Length} bytes, got {ActualLength}"
+            logger.LogWarning(Messages.Text0075, expectedMinLength, data.Length);
             return;
         }
         byte receivedChecksum = data[^1];
         byte calculatedChecksum = CalculateChecksum(data);
         if (receivedChecksum != calculatedChecksum)
         {
-            logger.LogWarning("Received Loco Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.", receivedChecksum, calculatedChecksum);
+            // "Received Loco Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded."
+            logger.LogWarning(Messages.Text0076, receivedChecksum, calculatedChecksum);
             return;
         }
         ushort address = (ushort)(((data[5] & 0x3F) << 8) | data[6]);
@@ -1133,21 +1333,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             db8 = data[13];
         }
         var locoInfo = new LocoInfo(address, data[7], data[8], data[9], data[10], data[11], data[12], db8, _hardwareInfo?.FwVersion);
-
-
-        /*
-        var rawSpeed = (byte)(data[8] & 0b01111111);
-        var nativeSpeedSteps = (data[7] & 0b00000111) switch
-        {
-            0 => NativeSpeedSteps.Steps14,
-            2 => NativeSpeedSteps.Steps28,
-            4 => NativeSpeedSteps.Steps128,
-            _ => NativeSpeedSteps.Unknown
-        };
-        var speed = DccSpeedSteps.GetSpeedStep(rawSpeed, (SpeedSteps)nativeSpeedSteps);
-        logger.LogError("Parsed LocoInfo: Address={Address}, rawSpeed={rawSpeed}, convSpeed={speed}, speedStep={speed}, ", address, rawSpeed, locoInfo.CurrentSpeed, speed);
-        */
-
 
         var speedSteps = (data[7] & 0b00000111) switch
         {
@@ -1165,41 +1350,53 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             // Instead of raising the event immediately (as the protocol info might be wrong),
             // we store this partial info and wait for the corresponding LocoMode response.
             _pendingLocoInfoRequests[address] = locoInfo;
-            logger.LogDebug("Firmware bug workaround: Stored partial LocoInfo for address {Address}, awaiting LocoMode.", address);
+            // "Firmware bug workaround: Stored partial LocoInfo for address {Address}, awaiting LocoMode."
+            logger.LogDebug(Messages.Text0077, address);
             return; // Stop processing here and wait for ParseLocoMode to complete the data.
         }
         // --- END: Firmware Bug Workaround ---
 
         _locoInfoReceived.Invoke(this, locoInfo);
-        logger.LogInformation("Loco Info for address {Address} received and processed.", address);
+        // "Loco Info for address {Address} received and processed."
+        logger.LogInformation(Messages.Text0078, address);
     }
 
     private void ParseFirmwareVersion(ReadOnlySpan<byte> data)
     {
-        if (FirmwareVersionReceived is null) return;
+        if (FirmwareVersionReceived is null)
+            return;
+
         string versionString = $"{data[6]:X}.{data[7]:X2}";
         if (Version.TryParse(versionString, out var parsedVersion))
         {
             var firmware = new FirmwareVersion((byte)parsedVersion.Major, (byte)parsedVersion.Minor);
             FirmwareVersionReceived.Invoke(this, firmware);
-            logger.LogInformation("Firmware version received and processed: {Version}", firmware);
+            // "Firmware version received and processed: {Version}"
+            logger.LogInformation(Messages.Text0079, firmware);
         }
         else
         {
-            logger.LogError("Failed to parse firmware version from received data.");
+            // "Failed to parse firmware version from received data."
+            logger.LogError(Messages.Text0080);
         }
     }
 
     private void ParseSystemState(ReadOnlySpan<byte> data)
     {
-        if (_systemStateChanged is null) return;
-        if (data.Length < 18)
+        if (_systemStateChanged is null)
         {
-            logger.LogWarning("System state packet is too short. Expected at least 18 bytes, got {Length}", data.Length);
             return;
         }
+
+        if (data.Length < 18)
+        {
+            // "System state packet is too short. Expected at least 18 bytes, got {Length}"
+            logger.LogWarning(Messages.Text0081, data.Length);
+            return;
+        }
+
         byte? capabilities = null;
-        if (_hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 19) 
+        if (_hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 19)
         {
             capabilities = data[19];
         }
@@ -1215,7 +1412,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             capabilities: capabilities
         );
         _systemStateChanged.Invoke(this, args);
-        logger.LogInformation("System state received and successfully processed.");
+        // "System state received and successfully processed."
+        logger.LogInformation(Messages.Text0082, args.VccVoltagemV);
     }
 
     private async Task SetBroadcastFlags(BroadcastFlags subscripedBroadcastFlags)
@@ -1225,7 +1423,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetBroadcastFlags).CopyTo(command, 2);
         BitConverter.GetBytes((uint)subscripedBroadcastFlags).CopyTo(command, 4);
         await SendCommandAsync(command);
-        logger.LogInformation("Setting broadcast flags to {subscripedBroadcastFlags}", subscripedBroadcastFlags);
+        // "Setting broadcast flags to {subscripedBroadcastFlags}"
+        logger.LogInformation(Messages.Text0083, subscripedBroadcastFlags);
     }
 
     private static byte CalculateChecksum(ReadOnlySpan<byte> data)

@@ -35,7 +35,7 @@ public static class Z21ProtocolName
         return protocolName;
     }
 
-    public static LocomotiveProtocol GetProtocol(LocoMode locoMode, NativeSpeedSteps speedSteps)
+    internal static LocomotiveProtocol GetProtocol(LocoMode locoMode, NativeSpeedSteps speedSteps)
     {
         LocomotiveProtocol protocol;
         if (locoMode is LocoMode.MM)
@@ -60,6 +60,5 @@ public static class Z21ProtocolName
         }
 
         return protocol;
-
     }
 }

@@ -5,8 +5,10 @@ namespace Z21Client.Helpers;
 /// <summary>
 /// Provides static lookup methods to convert Z21 speed values for DCC 14, 28, and 128-step modes
 /// into an integer representing the speed step.
+/// 
+/// The values for the sppeed steps are based on the Roco/Z21 protocol documentation.
 /// </summary>
-public static class DccSpeedSteps
+internal static class DccSpeedSteps
 {
     private static readonly Dictionary<int, int> Dcc14SpeedMap;
     private static readonly Dictionary<int, int> Dcc28SpeedMap;
@@ -48,7 +50,7 @@ public static class DccSpeedSteps
         }
     }
 
-    public static byte GetSpeedStep(byte rocoValue, SpeedSteps speedSteps)
+    internal static byte GetSpeedStep(byte rocoValue, SpeedSteps speedSteps)
     {
         return speedSteps switch
         {
@@ -59,7 +61,7 @@ public static class DccSpeedSteps
         };
     }
 
-    public static byte GetSpeedStepReverse(byte value, SpeedSteps speedSteps)
+    internal static byte GetSpeedStepReverse(byte value, SpeedSteps speedSteps)
     {
         return speedSteps switch
         {
@@ -75,7 +77,7 @@ public static class DccSpeedSteps
     /// </summary>
     /// <param name="rocoValue">The byte value received from the Z21.</param>
     /// <returns>The matching speed step (0-14), or -1 if the value is unknown.</returns>
-    public static byte GetSpeedStep14(byte rocoValue)
+    private static byte GetSpeedStep14(byte rocoValue)
     {
         // Use the lower 4 bits (VVVV) for the key.
         int key = rocoValue & 0x0F;
@@ -91,7 +93,7 @@ public static class DccSpeedSteps
     /// </summary>
     /// <param name="value">The value of the ´speed step</param>
     /// <returns></returns>
-    public static byte GetSpeedStep14Reverse(byte value)
+    private static byte GetSpeedStep14Reverse(byte value)
     {
         if (Dcc14SpeedMap.ContainsValue(value))
         {
@@ -106,7 +108,7 @@ public static class DccSpeedSteps
     /// </summary>
     /// <param name="rocoValue">The byte value received from the Z21.</param>
     /// <returns>The matching speed step (0-28), or -1 if the value is unknown.</returns>
-    public static byte GetSpeedStep28(byte rocoValue)
+    private static byte GetSpeedStep28(byte rocoValue)
     {
         // Use the lower 5 bits (V5 VVVV) for the key.
         int key = rocoValue & 0x1F;
@@ -122,7 +124,7 @@ public static class DccSpeedSteps
     /// </summary>
     /// <param name="value">The value of the ´speed step</param>
     /// <returns></returns>
-    public static byte GetSpeedStep28Reverse(byte value)
+    private static byte GetSpeedStep28Reverse(byte value)
     {
         if (Dcc28SpeedMap.ContainsValue(value))
         {
@@ -137,7 +139,7 @@ public static class DccSpeedSteps
     /// </summary>
     /// <param name="rocoValue">The byte value received from the Z21 (0-127).</param>
     /// <returns>The matching speed step (0-126).</returns>
-    public static byte GetSpeedStep128(byte rocoValue)
+    private static byte GetSpeedStep128(byte rocoValue)
     {
         // For 128 steps, the protocol is much simpler.
         // The value is sent as a 7-bit number (0-127).
@@ -158,7 +160,12 @@ public static class DccSpeedSteps
         return (byte)(key - 1);
     }
 
-    public static byte GetSpeedStep128Reverse(byte value)
+    /// <summary>
+    /// Looks up the Roco/Z21 value for a given speed step in DCC 128-step mode.
+    /// </summary>
+    /// <param name="value">The value of the ´speed step</param>
+    /// <returns></returns>
+    private static byte GetSpeedStep128Reverse(byte value)
     {
         if (value == 0)
         {

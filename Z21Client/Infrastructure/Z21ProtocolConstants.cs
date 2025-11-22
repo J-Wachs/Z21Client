@@ -74,7 +74,7 @@ internal static class Z21ProtocolConstants
     /// <summary>
     /// Header for requests related to LAN_RMBUS_GETDATA.
     /// </summary>
-    internal const ushort HeaderRBusGetData = 0x0081;
+    internal const ushort HeaderGetRBusData = 0x0081;
 
     /// <summary>
     /// Header for requests and responses related to LAN_GET_SYSTEM_STATE.
@@ -96,6 +96,11 @@ internal static class Z21ProtocolConstants
     /// </summary>
     internal const ushort HeaderGetRailComData = 0x0089;
 
+    /// <summary>
+    /// Represents the constant length value used for sending the Get RBus data command.
+    /// </summary>
+    internal const ushort LengthGetRBusData = 0x0005;
+
     internal const ushort LengthGetLocoInfo = 0x0009;
 
     internal const ushort LengthGetLocoSlotInfo = 0x0006;
@@ -107,9 +112,19 @@ internal static class Z21ProtocolConstants
     internal const ushort LengthSetLocoFunction = 0x000A;
 
     /// <summary>
+    /// Length of a LAN_SET_LOCO_DRIVE request packet.
+    /// </summary>
+    internal const ushort LengthSetLocoDrive = 0x000A;
+
+    /// <summary>
     /// Length of a LAN_SET_LOCOMODE request packet.
     /// </summary>
     internal const ushort LengthSetLocoMode = 0x0007;
+
+    /// <summary>
+    /// Length of a LAN_RAILCOM_GETDATA request packet.
+    /// </summary>
+    internal const ushort LengthGetRailComData = 0x0007;
 
     /// <summary>
     /// Length of a LAN_GET_TURNOUTMODE request packet.
@@ -134,6 +149,8 @@ internal static class Z21ProtocolConstants
     /// X-Header for a response that emergency stop was issued (LAN_BC_STOPPED).
     /// </summary>
     internal const byte XHeaderEmergencyStop = 0x81;
+
+    internal const byte XHeaderSetLocoDrive = 0xE4;
 
     internal const byte XHeaderGetLocoInfo = 0xE3;
 
@@ -167,4 +184,5 @@ internal static class Z21ProtocolConstants
     internal const byte XHeaderFirmwareVersion = 0xF3;
 
     internal const ushort HeaderGetLocoSlotInfo = 0x00AF;
+
 }
