@@ -1,4 +1,4 @@
-[Click here for English version](#z21-client-c#-client)
+[Click here for English version](#english)
 
 Danish version:
 # Z21Client C# klasse
@@ -176,7 +176,7 @@ Tag et kig på Z21Client — særligt Z21Dashboard-applikationen — for at se, hvorda
 for inspiration til, hvad du selv kan lave.
 <hr>
 
-# Z21Client C# class
+# Z21Client C# class {#english}
 
 A C# class to communicate with the z21, z21Start, Z21 and Z21 XL model railroad central station from Roco/Fleischmann.
 
