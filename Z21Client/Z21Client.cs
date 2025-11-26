@@ -49,6 +49,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     private EventHandler<RailComData>? _railComDataReceived;
     private EventHandler<SystemStateChangedEventArgs>? _systemStateChanged;
     private readonly SemaphoreSlim _sendToZ21Lock = new(1, 1);
+    private bool _isz21 = false;
 
     private Timer? _railComPollingTimer;
     private readonly HashSet<ushort> _receivedRailComAddresses = [];
@@ -267,6 +268,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             handshakeComplete.TrySetResult(true);
             _hardwareInfo = e;
+            _isz21 = _hardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
         }
         HardwareInfoReceived += handshakeHandler;
 
@@ -715,7 +717,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             convertedSpeedStep = speed;
         }
         // Fetch the Roco value for the speed step
-        var rocoSpeedStep = DccSpeedSteps.GetSpeedStep(convertedSpeedStep, (SpeedSteps)nativeSpeedStep);
+        var rocoSpeedStep = DccSpeedSteps.GetSpeedStepReverse(convertedSpeedStep, (SpeedSteps)nativeSpeedStep);
 
         // Message for deug at development time
         // logger.LogError("GetRocoSteedStep: Address {Address}: Speed={Speed}, rocoSpeedStep={rocoSpeedStep}, NativeSteps={NativeSpeedSteps}, Direction={Direction}, Mode={LocoMode}", address, speed, rocoSpeedStep, nativeSpeedStep, direction, locoMode);
@@ -1400,9 +1402,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             capabilities = data[19];
         }
+        // The z21s does not have a programming track. The value is forced to 0.
         var args = new SystemStateChangedEventArgs(
             mainCurrentmA: BitConverter.ToInt16(data[4..]),
-            progCurrentmA: BitConverter.ToInt16(data[6..]),
+            progCurrentmA: _isz21 ? 0 : BitConverter.ToInt16(data[6..]),
             mainCurrentFilteredmA: BitConverter.ToInt16(data[8..]),
             temperatureC: BitConverter.ToInt16(data[10..]),
             supplyVoltagemV: BitConverter.ToInt16(data[12..]),
@@ -1411,6 +1414,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             centralStateEx: data[17],
             capabilities: capabilities
         );
+
         _systemStateChanged.Invoke(this, args);
         // "System state received and successfully processed."
         logger.LogInformation(Messages.Text0082, args.VccVoltagemV);

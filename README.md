@@ -1,4 +1,4 @@
-[Click here for English version](#z21client-c-class)
+[For English version, click here](#z21client-c-class)
 
 Danish version:
 # Z21Client C# klasse
@@ -26,7 +26,9 @@ Hvis din z21 eller z21Start er låst, kan du stadig sende kommandoer til den med 
 kommandoerne blive ignoreret af z21/z21Start.
 
 Hvis z21/z21Start er låst, kan du stadig bruge Z21Client-klassen til at skrive et overvågningsprogram, der læser
-status for lokomotiver og sporskifter/points.
+status for lokomotiver og sporskifter/points. Du kan også kalde metoder i Z21Client til at skifte protokol på 
+lokomotiver og sporskifter/sporskiftedekodere. Du kan læse mere om hvilke metoder (der pakker z21 kommandoer ind) 
+der kan kaldes når z21/z21Start er låst, i den officielle Z21 LAN Protcol dokomentation, på Z21s hjemmeside.
 
 Bemærk, at da z21 (i hvidt kabinet) oprindeligt blev lanceret, var nogle låste og andre ulåste. For at låse
 din z21 eller z21Start op, kan du købe en oplåsningskode:
@@ -201,6 +203,10 @@ the commands will be ignored by the z21/z21Start.
 
 If the z21/z21Start is locked, you can still use the Z21Client class, to write a monitoring application that reads 
 status of locomotives and turnouts/points.
+
+It is aldo possible to call Z21Client methods, that will change the protocol for locomotives and turnout/points
+decoders. You can read more about which methods (that wraps the Z21 commands) you can call when the z21/z21Start is
+locked, in the documentation on the Z21 website.
 
 Please note, that when the z21 (in white case) initially was launched, some was locked, and some was unlocked. To
 unlock your z21 or z21Start, you can purchase a unlock code:

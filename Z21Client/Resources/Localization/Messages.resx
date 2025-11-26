@@ -368,11 +368,9 @@
   </data>
   <data name="Text0084" xml:space="preserve">
     <value>GetLocoSlotInfoAsync: Requested loco info for slot {slotNumber}</value>
-    <comment>..</comment>
   </data>
   <data name="Text0085" xml:space="preserve">
     <value>GetBroadcastFlagsAsync: Requested the broadcast flags</value>
-    <comment>-</comment>
   </data>
   <data name="Text0086" xml:space="preserve">
     <value>GetFirmwareVersionAsync: Requested the firmware version</value>
