@@ -7,6 +7,7 @@ En C#-klasse til kommunikation med z21, z21Start, Z21 og Z21 XL modelbanecentral
 
 Z21Client-klassen understøtter følgende funktioner:
 
+* Sprogversionering, dansk når sprog i Windows er sat til dansk eller engelsk
 * Forbindelse til Z21 via TCP/IP
 * Modtage information om lokomotiver (hastighed, retning, funktioner, protokol), når andre styreenheder bruges
 * Modtage information om sporskifter/points (position, protokol), når andre styreenheder bruges
@@ -183,6 +184,8 @@ for inspiration til, hvad du selv kan lave.
 A C# class to communicate with the z21, z21Start, Z21 and Z21 XL model railroad central station from Roco/Fleischmann.
 
 The Z21Client class supports the following features:
+
+* Multi language, Danish when language is set to Sanish in Windows, otherwise English
 * Connect to the Z21 via TCP/IP
 * Received information about locomotives (speed, direction, functions, protocol) when other driving controls are used
 * Received information about turnouts/points (position, protocol) when other controls are used
