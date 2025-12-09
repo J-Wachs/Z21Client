@@ -11,6 +11,9 @@ internal static class Z21Commands
     /// </summary>
     internal static readonly byte[] GetBroadcastFlags = { 0x04, 0x00, (byte)(Z21ProtocolConstants.HeaderGetBroadcastFlags & 0xFF), (byte)(Z21ProtocolConstants.HeaderGetBroadcastFlags >> 8) };
 
+    /// <summary>
+    /// Represents the protocol header bytes used to request the code from a Z21 device.
+    /// </summary>
     internal static readonly byte[] GetCode = { 0x04, 0x00, (byte)(Z21ProtocolConstants.HeaderGetCode & 0xFF), (byte)(Z21ProtocolConstants.HeaderGetCode >> 8) };
 
     /// <summary>

@@ -378,4 +378,7 @@
   <data name="Text0087" xml:space="preserve">
     <value>GetHardwareInfoAsync: Requested the hardware information</value>
   </data>
+  <data name="Text0088" xml:space="preserve">
+    <value>Cannot perform Z21 discovery while connected to a Z21 central station. Please disconnect first.</value>
+  </data>
 </root>

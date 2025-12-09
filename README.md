@@ -3,7 +3,7 @@
 Danish version:
 # Z21Client C# klasse
 
-En C#-klasse til kommunikation med z21, z21Start, Z21 og Z21 XL modelbanecentralerne fra Roco/Fleischmann.
+En C#-klasse til kommunikation med z21, z21Start, Z21 og Z21 XL centralstationerne til modeltogsbaner fra Roco/Fleischmann.
 
 Z21Client-klassen understøtter følgende funktioner:
 
@@ -21,6 +21,18 @@ Z21Client-klassen understøtter følgende funktioner:
 * Understøttelse af forskellige protokoller brugt af z21/Z21 (DCC, Märklin Motorola)
 * Logging-muligheder til fejlfinding og overvågning
 
+## Nyheder i denne version
+
+* Opdateret til .NET 10
+* Ændret så UDP client nu er i selvstændig klasse, for at muliggøre unit tests
+* Tilføjet unit test projekt
+* Rettet stavefejl i denne dokumentation og tilføjet tabel med implementerede Z21 LAN Protocol kommandoer
+* SerialNumber datastruktur er skildt ud i egen fil
+* Metode til at finde Z21 centralstationer på netværket tilføjet
+* Data returneret i event `LocoSlotInfoReceived` viste ikke F12, F20 og F28. Tasterne F29, F30 og F31 findes
+ikke i data fra Z21 i denne event (det er ej heller dokumenteret)
+* Interface IZ21Client er flyttet til roden af projektet
+
 ## z21 og z21Start låseinformation
 
 Hvis din z21 eller z21Start er låst, kan du stadig sende kommandoer til den med denne klasse. Dog vil
@@ -34,16 +46,16 @@ der kan kaldes når z21/z21Start er låst, i den officielle Z21 LAN Protcol dokome
 Bemærk, at da z21 (i hvidt kabinet) oprindeligt blev lanceret, var nogle låste og andre ulåste. For at låse
 din z21 eller z21Start op, kan du købe en oplåsningskode:
 
-* Roco vare 10818. Indeholder oplåsningskode til z21Start og z21 (hvidt kabinet).
-* Roco vare 10814. Indeholder et trådløst access-point samt oplåsningskode til z21Start og z21 (hvidt kabinet).
+* Roco varenummer 10814. Indeholder et trådløst access-point samt oplåsningskode til z21Start og z21 (hvidt kabinet).
+* Roco varenummer 10818. Indeholder oplåsningskode til z21Start og z21 (hvidt kabinet).
 
 Fra nu af vil betegnelsen Z21 blive brugt om alle fire versioner af Z21-familien af centralstationer. Hvis noget
 kun gælder én af versionerne, vil det blive angivet.
 
-Z21Client blev udviklet og testet ved brug af to z21Start: én låst og én ulåst. Dette er grunden til, at hverken
-LocoNet- eller CAN-bus-funktionalitet er implementeret i Z21Client-klassen.
+Z21Client blev udviklet og testet ved brug af to z21Start centralstationer: én låst og én ulåst. Dette er grunden
+til, at hverken LocoNet- eller CAN-bus-funktionalitet er implementeret i Z21Client-klassen.
 
-Implementeringen er baseret på Roco-dokumentet *"Z21 LAN protocol Specification"*, version 1.13 EN, dateret 6.
+Implementeringen er baseret på Roco-dokumentet *"Z21 LAN Protocol Specification"*, version 1.13 EN, dateret 6.
 november 2023. Dokumentet kan downloades fra Z21-websitet.
 
 ## Fuldt funktionelt eksempelprojekt
@@ -107,7 +119,7 @@ hastigheds-egenskaber:
 ### Disclaimer: Implementering af ikke-dokumenteret 'Locomotive Slot Information'
 
 Roco har i deres værktøj *Maintenance Tool* en mulighed for at se de 120 lokomotiv-slots, der findes i Z21. Men
-den officielle *Z21 LAN Protocol* dokumentation nævner ikke kommandoen og svaret til at læse disse slots.
+den officielle *"Z21 LAN Protocol Specification"* dokumentation nævner ikke kommandoen og svaret til at læse disse slots.
 Ved at overvåge dataudvekslingen mellem mine Z21 (to z21Start, én låst, én ulåst) kunne jeg se kommandoerne.
 På grund af dette har jeg implementeret udokumenteret funktionalitet. Den virker i firmware 1.43
 (en del af Maintenance Tool V1.18.3). Der gives ingen garanti for, at den vil virke i fremtidige firmwareudgaver.
@@ -140,7 +152,8 @@ du tilføje *Z21Client* til Program.cs eller MauiProgram.cs i dit projekt:
 ```csharp
 ...
 // Tilføjet for Z21Client
-builder.Services.AddSingleton<IZ21Cleint, Z21Client>();
+builder.Services.AddSingleton<IZ21UdpClient, Z21UdpClient>();
+builder.Services.AddSingleton<IZ21Client, Z21Client>();
 // Slut
 ...
 ```
@@ -177,6 +190,10 @@ skulle jeg dog oprette forbindelse mere end én gang.
 
 Tag et kig på Z21Client — særligt Z21Dashboard-applikationen — for at se, hvordan den er implementeret og
 for inspiration til, hvad du selv kan lave.
+
+## Liste over implementerede Z21 LAN Protocol-kommandoer
+For at se en oversigt over implementerede Z21 LAN Protocol-kommandoer, se tabellen ved at klikke [her](#implemented-z21-lan-protocol-commands).
+
 <hr>
 
 # Z21Client C# class
@@ -199,6 +216,19 @@ The Z21Client class supports the following features:
 * Support for various protocols used by the z21/Z21 (DCC, Märklin Motorola)
 * Logging capabilities for debugging and monitoring
 
+## What is new in this version
+
+* Updated to .NET 10
+* Changed so UDP client is now in it's own class, enabling unit tests
+* Added unit test project
+* Corrected spellingmistakes in this document and added a table showing implemented Z21 LAN Protocol commands
+* Serial Number datastructure is moved to it's own file
+* Method to find Z21 central stations on the network added
+* Data returned in event `LocoSlotInfoReceived` did not show F12, F20 and F28. The f-keys F29, F30 and F31 does
+not exist in the data send from the Z21 in this event (it is not documented)
+* The interface IZ21Client has been moved to the root of the project
+
+
 ## z21 and z21Start locking information
 
 In case of your z21 or z21Start is locked, you can still send the commands to it with this class. However, 
@@ -213,16 +243,17 @@ locked, in the documentation on the Z21 website.
 
 Please note, that when the z21 (in white case) initially was launched, some was locked, and some was unlocked. To
 unlock your z21 or z21Start, you can purchase a unlock code:
-* Roco item 10818. Contains unlock code for z21Start and z21 (white case).
+
 * Roco item 10814. Contains a wireless access point and unlock code for z21Start and z21 (white case).
+* Roco item 10818. Contains unlock code for z21Start and z21 (white case).
 
 Form here on, the term Z21 will be used to refer to all four versions of the Z21 family of central stations. If
 somthing apply to only one of the versions, it will be specified.
 
-The Z21Client was developed and tested using two z21Start; one locked and one unlocked. This is the reason why none
-of the LocoNet and CAN bus functionality is implemented in the Z21Client class.
+The Z21Client was developed and tested using two z21Start central stations; one locked and one unlocked. This is
+the reason why none of the LocoNet and CAN bus functionality is implemented in the Z21Client class.
 
-The is implemented according to the Roco document 'Z21 LAN protocol Specification', version 1.13 EN, dated 6th of 
+The is implemented according to the Roco document *'Z21 LAN Protocol Specification'*, version 1.13 EN, dated 6th of 
 November 2023. The document can be downloaded from the Z21 website.
 
 ## Fully functional example project
@@ -283,8 +314,8 @@ speed step properties:
 ### Disclaimer: Implementation of not documented 'Locomotive Slot Information'
 
 Roco have in their tool 'Maintenance Tool' an option to see the 120 locomotive slots that is in the Z21. However,
-the official 'Z21 LAN Protocol' documentation does not mention the command and reponse to read these slots.
-By monitoring the data send between my Z21 (two z21Start, one locked, one unlocked) I could see the commands.
+the official *'Z21 LAN Protocol Specification'* documentation does not mention the command and reponse to read these slots.
+By monitoring the data send between my z21 (two z21Start, one locked, one unlocked) I could see the commands.
 Because of this, I have implemented undocumented functionality. It works in firmware 1.43 (part of Maintenance Tool
 V1.18.3). There is no guarantee that this command and the repsonse will work in future releases of the firmware.
 
@@ -313,10 +344,11 @@ https://github.com/J-Wachs/Z21Dashboard
 To use the Z21Client class in your own projects, you must add the component project to your solution. Then you must
 add the 'Z21Client' to the Program.cs, or MauiProgram.cs, file of your project:
 
-
+```csharp
 ...
-// Added for Z21Cleint
-builder.Services.AddSingleton<IZ21Cleint, Z21Client>();
+// Added for Z21Client
+builder.Services.AddSingleton<IZ21UdpClient, Z21UdpClient>();
+builder.Services.AddSingleton<IZ21Client, Z21Client>();
 // End
 ...
 ```
@@ -353,3 +385,73 @@ to connect more than once.
 
 Take a look at the Z21Client especially the Z21Dashboard application, in order to see how it is implemented and 
 get inspired on what you can do with it.
+
+## Implemented Z21 LAN Protocol Commands
+
+| Z21 Protocol Command (v1.13) | Implementation Status (Public Method) |
+| :--- | :--- |
+| **System, Status & Version** | |
+| LAN_GET_SERIAL_NUMBER | GetSerialNumberAsync |
+| LAN_LOGOFF | DisconnectAsync |
+| LAN_X_GET_VERSION | [Not implemented] |
+| LAN_X_GET_STATUS | GetSystemStateAsync |
+| LAN_X_SET_TRACK_POWER_OFF | SetTrackPowerOffAsync |
+| LAN_X_SET_TRACK_POWER_ON | SetTrackPowerOnAsync |
+| LAN_X_SET_STOP | SetEmergencyStopAsync | 
+| LAN_GET_FIRMWARE_VERSION | GetFirmwareVersionAsync |
+| LAN_SET_BROADCASTFLAGS | SetBroadcastFlags (Private) |
+| LAN_GET_BROADCASTFLAGS | GetBroadcastFlagsAsync |
+| LAN_SYSTEMSTATE_GETDATA | GetSystemStateAsync |
+| LAN_GET_HWINFO | GetHardwareInfoAsync |
+| LAN_GET_CODE | GetZ21CodeAsync |
+| **Settings** | |
+| LAN_GET_LOCOMODE | GetLocoModeAsync |
+| LAN_SET_LOCOMODE | SetLocoModeAsync |
+| LAN_GET_TURNOUTMODE | GetTurnoutModeAsync |
+| LAN_SET_TURNOUTMODE | SetTurnoutModeAsync |
+| **Driving** | |
+| LAN_X_GET_LOCO_INFO | GetLocoInfoAsync |
+| LAN_X_SET_LOCO_DRIVE | SetLocoDriveAsync |
+| LAN_X_SET_LOCO_FUNCTION | SetLocoFunctionAsync |
+| LAN_X_SET_LOCO_FUNCTION_GROUP | [Not implemented] |
+| LAN_X_SET_LOCO_BINARY_STATE | [Not implemented] |
+| LAN_X_SET_LOCO_E_STOP | [Not implemented] |
+| LAN_X_PURGE_LOCO | [Not implemented] |
+| **Switching** | |
+| LAN_X_GET_TURNOUTINFO | [Not implemented] |
+| LAN_X_SET_TURNOUT | SetTurnoutPositionAsync |
+| LAN_X_GET_TURNOUT_MODE | GetTurnoutModeAsync |
+| LAN_X_SET_TURNOUT_MODE | SetTurnoutModeAsync |
+| LAN_X_SET_EXT_ACCESSORY | [Not implemented] |
+| LAN_X_GET_EXT_ACCESSORY_INFO | [Not implemented] |
+| **Reading and writeing decoder CVs** | |
+| LAN_X_CV_READ | [Not Implemented] |
+| LAN_X_CV_WRITE | [Not Implemented] |
+| LAN_X_CV_POM_WRITE_BYTE | [Not Implemented] |
+| LAN_X_CV_POM_WRITE_BIT | [Not Implemented] |
+| LAN_X_CV_POM_READ_BYTE | [Not Implemented] |
+| LAN_X_CV_POM_ACCESSORY_WRITE_BYTE | [Not Implemented] |
+| LAN_X_CV_POM_ACCESSORY_WRITE_BIT | [Not Implemented] |
+| LAN_X_CV_POM_ACCESSORY_READ_BYTE | [Not Implemented] |
+| LAN_X_MM_WRITE_BYTE | [Not Implemented] |
+| LAN_X_DCC_READ_REGISTER | [Not Implemented] |
+| LAN_X_DCC_WRITE_REGISTER | [Not Implemented] |
+| **Feedback (R-Bus)** | |
+| LAN_RMBUS_GETDATA | GetRBusDataAsync |
+| LAN_RMBUS_PROGRAMMODULE | [Not Implemented] |
+| **RailCom** | |
+| LAN_RAILCOM_GETDATA | GetRailComDataAsync / GetNextRailComDataAsync |
+| **LocoNet** | |
+| LAN_LOCONET_FROM_LAN | [Not Implemented] |
+| LAN_LOCONET_DISPATCH_ADDR | [Not Implemented] |
+| LAN_LOCONET_DETECTOR | [Not Implemented] |
+| **CAN** | |
+| LAN_CAN_DETECTOR | [Not Implemented] |
+| LAN_CAN_DEVICE_GET_DESCRIPTION | [Not Implemented] |
+| LAN_CAN_DEVICE_SET_DESCRIPTION | [Not Implemented] |
+| LAN_CAN_BOOSTER_SET_TRACKPOWER | [Not Implemented] |
+| **Fast Clock** | |
+| LAN_FAST_CLOCK_CONTROL | [Not implemented] |
+| LAN_FAST_CLOCK_DATA | [Not implemented] |
+| LAN_FAST_CLOCK_SETTINGS_GET | [Not implemented] |
+| LAN_FAST_CLOCK_SETTINGS_SET | [Not implemented] |

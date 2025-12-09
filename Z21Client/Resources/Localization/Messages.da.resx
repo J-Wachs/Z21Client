@@ -378,4 +378,7 @@
   <data name="Text0087" xml:space="preserve">
     <value>GetHardwareInfoAsync: Efterspurgte hardware information</value>
   </data>
+  <data name="Text0088" xml:space="preserve">
+    <value>Kan ikke søge efter Z21 når der allerede er etableret forbindelse til en Z21 centralstation. Venligst afbryd forbindelsen først.</value>
+  </data>
 </root>
