@@ -76,7 +76,7 @@ internal static class DccSpeedSteps
     /// Looks up the speed step for a given Roco/Z21 value in DCC 14-step mode.
     /// </summary>
     /// <param name="rocoValue">The byte value received from the Z21.</param>
-    /// <returns>The matching speed step (0-14), or -1 if the value is unknown.</returns>
+    /// <returns>The matching speed step (0-14).</returns>
     private static byte GetSpeedStep14(byte rocoValue)
     {
         // Use the lower 4 bits (VVVV) for the key.
@@ -91,8 +91,8 @@ internal static class DccSpeedSteps
     /// <summary>
     /// Looks up the Roco/Z21 value for a given speed step in DCC 14-step mode.
     /// </summary>
-    /// <param name="value">The value of the ´speed step</param>
-    /// <returns></returns>
+    /// <param name="value">The value of the speed step</param>
+    /// <returns>The matching Roco/Z21 value.</returns>
     private static byte GetSpeedStep14Reverse(byte value)
     {
         if (Dcc14SpeedMap.ContainsValue(value))
@@ -107,7 +107,7 @@ internal static class DccSpeedSteps
     /// Looks up the speed step for a given Roco/Z21 value in DCC 28-step mode.
     /// </summary>
     /// <param name="rocoValue">The byte value received from the Z21.</param>
-    /// <returns>The matching speed step (0-28), or -1 if the value is unknown.</returns>
+    /// <returns>The matching speed step (0-28).</returns>
     private static byte GetSpeedStep28(byte rocoValue)
     {
         // Use the lower 5 bits (V5 VVVV) for the key.
@@ -122,8 +122,8 @@ internal static class DccSpeedSteps
     /// <summary>
     /// Looks up the Roco/Z21 value for a given speed step in DCC 28-step mode.
     /// </summary>
-    /// <param name="value">The value of the ´speed step</param>
-    /// <returns></returns>
+    /// <param name="value">The value of the speed step</param>
+    /// <returns>The matching Roco/Z21 value.</returns>
     private static byte GetSpeedStep28Reverse(byte value)
     {
         if (Dcc28SpeedMap.ContainsValue(value))
@@ -163,8 +163,8 @@ internal static class DccSpeedSteps
     /// <summary>
     /// Looks up the Roco/Z21 value for a given speed step in DCC 128-step mode.
     /// </summary>
-    /// <param name="value">The value of the ´speed step</param>
-    /// <returns></returns>
+    /// <param name="value">The value of the speed step</param>
+    /// <returns>The matching Roco/Z21 value.</returns>
     private static byte GetSpeedStep128Reverse(byte value)
     {
         if (value == 0)

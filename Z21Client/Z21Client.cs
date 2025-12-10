@@ -417,8 +417,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
         command[4] = Z21ProtocolConstants.XHeaderGetLocoInfo;
         command[5] = 0xF0;
-        command[6] = (byte)(address >> 8);
-        command[7] = (byte)(address & 0xFF);
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
         command[8] = CalculateChecksum(command);
         await SendCommandAsync(command);
         // "GetLocoInfoAsync: Requested loco info for address {Address}"
@@ -436,6 +437,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         var command = new byte[Z21ProtocolConstants.LengthGetLocoMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetLocoMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
@@ -446,6 +448,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task GetLocoSlotInfoAsync(byte slotNumber)
     {
+        if (slotNumber < 1 || slotNumber > 120)
+        {
+            // "Slot number must be between 1 and 120. The value given is {slotNumber}."
+            logger.LogError(Messages.Text0089, slotNumber);
+            return;
+        }
+
         var command = new byte[Z21ProtocolConstants.LengthGetLocoSlotInfo];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoSlotInfo).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetLocoSlotInfo).CopyTo(command, 2);
@@ -462,6 +471,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRailComData).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRailComData).CopyTo(command, 2);
         command[4] = 0x01;
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[5] = (byte)(locoAddress & 0xFF);
         command[6] = (byte)(locoAddress >> 8);
         await SendCommandAsync(command);
@@ -471,12 +481,18 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
 
     /// <inheritdoc/>
-    public async Task GetRBusDataAsync(int groupIndex)
+    public async Task GetRBusDataAsync(byte groupIndex)
     {
+        if (groupIndex > 1)
+        {
+            // "Group index must be either 0 or 1. The value given is {groupIndex}."
+            logger.LogError(Messages.Text0090, groupIndex);
+            return;
+        }
         var command = new byte[Z21ProtocolConstants.LengthGetRBusData];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRBusData).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRBusData).CopyTo(command, 2);
-        command[4] = (byte)groupIndex;
+        command[4] = groupIndex;
         await SendCommandAsync(command);
         // "GetRBusDataAsync: Requested R-Bus data for group index {groupIndex}"
         logger.LogInformation(Messages.Text0024, groupIndex);
@@ -504,6 +520,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         var command = new byte[Z21ProtocolConstants.LengthGetTurnoutMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetTurnoutMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetTurnoutMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
@@ -532,20 +549,14 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         command[4] = Z21ProtocolConstants.XHeaderSetLocoDrive;
         // DB0: 0x1S (Speed steps)
         command[5] = (byte)(FixedValue | (byte)nativeSpeedStep);
+
         // DB1, DB2: Address
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
 
         // DB3: RVVVVVVV (Direction and Speed)
         // Ensure speed is within 7 bits (0-127)
-
         byte speedValue = (byte)(rocoSpeedStep & 0x7F);
         // Set the direction bit (bit 7)
         byte directionBit = (byte)((int)direction << 7);
@@ -567,15 +578,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoFunction).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
         BitConverter.GetBytes(Z21ProtocolConstants.XHeaderSetLocoFunction).CopyTo(command, 4);
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
+
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
 
         command[8] = (byte)(0x80 | (functionIndex & 0b00111111)); // 0x80= Toggle function
         command[9] = CalculateChecksum(command);
@@ -590,6 +596,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         var command = new byte[Z21ProtocolConstants.LengthSetLocoMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetLocoMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         command[6] = (byte)mode;
@@ -612,6 +619,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         command[6] = (byte)mode;
@@ -634,6 +642,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutPosition).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
         command[4] = Z21ProtocolConstants.XHeaderSetTurnoutPosition;
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[5] = (byte)(address >> 8);
         command[6] = (byte)(address & 0xFF);
         command[7] = (byte)turnoutPosition;
@@ -749,6 +758,29 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
 
     #endregion Exposed methods
+
+    /// <summary>
+    /// Converts a locomotive address to the X-Bus protocol format, returning the most significant and least significant
+    /// bytes required for X-Bus addressing.
+    /// </summary>
+    /// <remarks>For addresses greater than or equal to 128, the most significant byte is modified to set the
+    /// high bits as required by the X-Bus protocol. This method does not validate whether the address is within the
+    /// supported range for all X-Bus devices.</remarks>
+    /// <param name="address">The locomotive address to convert. Must be a valid X-Bus address in the range 0 to 10239.</param>
+    /// <returns>A tuple containing the most significant byte (AdrMsb) and least significant byte (AdrLsb) representing the X-Bus
+    /// formatted address.</returns>
+    private static (byte AdrMsb, byte AdrLsb) ConvertLocoAddressForXBus(ushort address)
+    {
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        byte adrMsb = (byte)(address >> 8);
+        byte adrLsb = (byte)(address & 0xFF);
+        // Set the high bits for X-Bus addressing
+        if (address >= 128)
+        {
+            adrMsb |= 0xC0;
+        }
+        return (adrMsb, adrLsb);
+    }
 
     /// <summary>
     /// Converts the given speed step to the Roco-specific speed step value based on the loco mode and native speed steps.

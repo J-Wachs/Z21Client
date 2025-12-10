@@ -851,5 +851,23 @@ namespace Z21Client.Resources.Localization {
                 return ResourceManager.GetString("Text0088", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Slot number must be between 1 and 120. The value given is {slotNumber}..
+        /// </summary>
+        internal static string Text0089 {
+            get {
+                return ResourceManager.GetString("Text0089", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Group index must be either 0 or 1. The value given is {groupIndex}..
+        /// </summary>
+        internal static string Text0090 {
+            get {
+                return ResourceManager.GetString("Text0090", resourceCulture);
+            }
+        }
     }
 }

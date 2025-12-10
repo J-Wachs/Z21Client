@@ -133,6 +133,12 @@ public interface IZ21Client : IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task GetLocoModeAsync(ushort address);
 
+    /// <summary>
+    /// Sends a request to get information about the locomotive assigned to the specified slot number.
+    /// </summary>
+    /// <param name="slotNumber">The slot number for which to retrieve locomotive information. Must be a valid slot identifier within the
+    /// supported range (1-120).</param>
+    /// <returns></returns>
     Task GetLocoSlotInfoAsync(byte slotNumber);
 
     /// <summary>
@@ -147,7 +153,7 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <param name="groupIndex">The group index to query (0 for modules 1-10, 1 for 11-20, etc.).</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task GetRBusDataAsync(int groupIndex);
+    Task GetRBusDataAsync(byte groupIndex);
 
     /// <summary>
     /// Sends a request to get the serial number from the Z21.
