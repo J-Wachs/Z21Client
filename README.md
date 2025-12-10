@@ -7,8 +7,8 @@ En C#-klasse til kommunikation med z21, z21Start, Z21 og Z21 XL centralstationer
 
 Z21Client-klassen understøtter følgende funktioner:
 
-* Sprogversionering, dansk når sprog i Windows er sat til dansk eller engelsk
-* Forbindelse til Z21 via TCP/IP
+* Sprogversionering, dansk når sprog i Windows er sat til dansk. For alle andre sprog vises tekster på engelsk
+* Forbindelse til Z21 via UDP
 * Modtage information om lokomotiver (hastighed, retning, funktioner, protokol), når andre styreenheder bruges
 * Modtage information om sporskifter/points (position, protokol), når andre styreenheder bruges
 * Sende kommandoer til styring af lokomotiver (hastighed, retning, funktioner, protokol)
@@ -18,7 +18,7 @@ Z21Client-klassen understøtter følgende funktioner:
 * Event-drevet arkitektur til håndtering af svar og opdateringer
 * Asynkrone operationer for ikke-blokerende kommunikation
 * Fejlhåndtering og genforbindelseslogik
-* Understøttelse af forskellige protokoller brugt af z21/Z21 (DCC, Märklin Motorola)
+* Understøttelse af protokoller brugt af z21/Z21 (DCC, Märklin Motorola)
 * Logging-muligheder til fejlfinding og overvågning
 
 ## Nyheder i denne version
@@ -202,8 +202,8 @@ A C# class to communicate with the z21, z21Start, Z21 and Z21 XL model railroad 
 
 The Z21Client class supports the following features:
 
-* Multi language, Danish when language is set to Sanish in Windows, otherwise English
-* Connect to the Z21 via TCP/IP
+* Multi language, Danish when language is set to Danish in Windows. For all other languages texts are in English
+* Connect to the Z21 via UDP
 * Received information about locomotives (speed, direction, functions, protocol) when other driving controls are used
 * Received information about turnouts/points (position, protocol) when other controls are used
 * Send commands to control locomotives (speed, direction, functions, protocol)
@@ -213,7 +213,7 @@ The Z21Client class supports the following features:
 * Event-driven architecture for handling responses and updates
 * Asynchronous operations for non-blocking communication
 * Error handling and reconnection logic
-* Support for various protocols used by the z21/Z21 (DCC, Märklin Motorola)
+* Support for the protocols used by the z21/Z21 (DCC, Märklin Motorola)
 * Logging capabilities for debugging and monitoring
 
 ## What is new in this version
