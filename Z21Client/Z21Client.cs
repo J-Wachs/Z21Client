@@ -772,7 +772,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// formatted address.</returns>
     private static (byte AdrMsb, byte AdrLsb) ConvertLocoAddressForXBus(ushort address)
     {
-        var convertedAddress = ConvertLocoAddressForXBus(address);
         byte adrMsb = (byte)(address >> 8);
         byte adrLsb = (byte)(address & 0xFF);
         // Set the high bits for X-Bus addressing
