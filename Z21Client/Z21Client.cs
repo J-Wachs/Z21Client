@@ -685,6 +685,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         if (_isConnected)
         {
             // "Cannot perform Z21 discovery while connected to a Z21 device. Please disconnect first."
+            logger.LogCritical(Messages.Text0088);
             throw new InvalidOperationException(Messages.Text0088);
         }
 
