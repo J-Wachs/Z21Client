@@ -4,7 +4,6 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using Z21Client.Helpers;
 using Z21Client.Infrastructure;
-using Z21Client.Interfaces;
 using Z21Client.Models;
 using Z21Client.Resources.Localization;
 
@@ -22,8 +21,11 @@ namespace Z21Client;
 /// Initializes a new instance of the <see cref="Z21Client"/> class.
 /// </remarks>
 /// <param name="logger">An ILogger instance for logging.</param>
-public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
+/// <param name="udpClient">The injected UDP client wrapper for network communication.</param>
+public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient) : IZ21Client
 {
+    private const int Z21_PORT = 21105;
+
     // --- START: Added for Firmware Bug Workaround ---
     // This dictionary acts as a temporary holding area for loco info requests.
     // It's used to solve a race condition caused by a firmware bug where a LAN_X_GET_LOCO_INFO 
@@ -33,7 +35,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     private readonly Dictionary<ushort, LocoInfo?> _pendingLocoInfoRequests = [];
     // --- END: Added for Firmware Bug Workaround ---
 
-    private UdpClient? _udpClient;
+    // Track connection state manually since _udpClient is never null (injected)
+    private bool _isConnected;
+
     private IPEndPoint? _remoteEndPoint;
     private Task? _receiveTask;
     private CancellationTokenSource? _cancellationTokenSource;
@@ -212,11 +216,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     #region Exposed methods
 
     /// <inheritdoc/>
-    public async Task<bool> ConnectAsync(string host, int port = 21105)
+    public async Task<bool> ConnectAsync(string host, int port = Z21_PORT)
     {
         // "Connecting to Z21 at {Host}:{Port}..."
         logger.LogInformation(Messages.Text0009, host, port);
-        if (_udpClient is not null)
+
+        // Check local connection flag instead of _udpClient null check
+        if (_isConnected)
         {
             // "Already connected. Please disconnect first."
             logger.LogWarning(Messages.Text0010);
@@ -243,11 +249,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
         try
         {
-            _udpClient = new UdpClient(port);
-            if (OperatingSystem.IsWindows())
-            {
-                _udpClient.AllowNatTraversal(true);
-            }
+            // Bind the injected client instead of creating a new UdpClient
+            udpClient.Bind(port);
+            _isConnected = true;
+
             // "UdpClient created and bound to listen on local port {Port}"
             logger.LogInformation(Messages.Text0013, port);
         }
@@ -327,7 +332,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _railComPollingTimer = null;
         }
 
-        if (_udpClient is not null)
+        // Check local flag
+        if (_isConnected)
         {
             await SendCommandAsync(Z21Commands.Logoff);
         }
@@ -360,12 +366,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             _cancellationTokenSource = null;
         }
 
-        if (_udpClient is not null)
+        // Close the injected client and reset connection flag
+        if (_isConnected)
         {
-            _udpClient.Close();
-            _udpClient.Dispose();
-            _udpClient = null;
+            udpClient.Close();
+            _isConnected = false;
         }
+
         _hardwareInfo = null;
         // "Disconnected."
         logger.LogInformation(Messages.Text0020);
@@ -410,8 +417,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
         command[4] = Z21ProtocolConstants.XHeaderGetLocoInfo;
         command[5] = 0xF0;
-        command[6] = (byte)(address >> 8);
-        command[7] = (byte)(address & 0xFF);
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
         command[8] = CalculateChecksum(command);
         await SendCommandAsync(command);
         // "GetLocoInfoAsync: Requested loco info for address {Address}"
@@ -429,6 +437,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var command = new byte[Z21ProtocolConstants.LengthGetLocoMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetLocoMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
@@ -439,6 +448,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
     /// <inheritdoc/>
     public async Task GetLocoSlotInfoAsync(byte slotNumber)
     {
+        if (slotNumber < 1 || slotNumber > 120)
+        {
+            // "Slot number must be between 1 and 120. The value given is {slotNumber}."
+            logger.LogError(Messages.Text0089, slotNumber);
+            return;
+        }
+
         var command = new byte[Z21ProtocolConstants.LengthGetLocoSlotInfo];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoSlotInfo).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetLocoSlotInfo).CopyTo(command, 2);
@@ -455,6 +471,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRailComData).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRailComData).CopyTo(command, 2);
         command[4] = 0x01;
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[5] = (byte)(locoAddress & 0xFF);
         command[6] = (byte)(locoAddress >> 8);
         await SendCommandAsync(command);
@@ -464,12 +481,18 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
 
     /// <inheritdoc/>
-    public async Task GetRBusDataAsync(int groupIndex)
+    public async Task GetRBusDataAsync(byte groupIndex)
     {
+        if (groupIndex > 1)
+        {
+            // "Group index must be either 0 or 1. The value given is {groupIndex}."
+            logger.LogError(Messages.Text0090, groupIndex);
+            return;
+        }
         var command = new byte[Z21ProtocolConstants.LengthGetRBusData];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetRBusData).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetRBusData).CopyTo(command, 2);
-        command[4] = (byte)groupIndex;
+        command[4] = groupIndex;
         await SendCommandAsync(command);
         // "GetRBusDataAsync: Requested R-Bus data for group index {groupIndex}"
         logger.LogInformation(Messages.Text0024, groupIndex);
@@ -497,6 +520,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var command = new byte[Z21ProtocolConstants.LengthGetTurnoutMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthGetTurnoutMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderGetTurnoutMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         await SendCommandAsync(command);
@@ -525,20 +549,14 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         command[4] = Z21ProtocolConstants.XHeaderSetLocoDrive;
         // DB0: 0x1S (Speed steps)
         command[5] = (byte)(FixedValue | (byte)nativeSpeedStep);
+
         // DB1, DB2: Address
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
 
         // DB3: RVVVVVVV (Direction and Speed)
         // Ensure speed is within 7 bits (0-127)
-
         byte speedValue = (byte)(rocoSpeedStep & 0x7F);
         // Set the direction bit (bit 7)
         byte directionBit = (byte)((int)direction << 7);
@@ -560,15 +578,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoFunction).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
         BitConverter.GetBytes(Z21ProtocolConstants.XHeaderSetLocoFunction).CopyTo(command, 4);
-        byte adrMsb = (byte)(address >> 8);
-        byte adrLsb = (byte)(address & 0xFF);
-        // Set the high bits for X-Bus addressing
-        command[6] = adrMsb;
-        if (address >= 128)
-        {
-            command[6] |= 0xC0;
-        }
-        command[7] = adrLsb;
+
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        command[6] = convertedAddress.AdrMsb;
+        command[7] = convertedAddress.AdrLsb;
 
         command[8] = (byte)(0x80 | (functionIndex & 0b00111111)); // 0x80= Toggle function
         command[9] = CalculateChecksum(command);
@@ -583,6 +596,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var command = new byte[Z21ProtocolConstants.LengthSetLocoMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetLocoMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         command[6] = (byte)mode;
@@ -605,6 +619,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[4] = (byte)(address >> 8);
         command[5] = (byte)(address & 0xFF);
         command[6] = (byte)mode;
@@ -627,6 +642,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutPosition).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
         command[4] = Z21ProtocolConstants.XHeaderSetTurnoutPosition;
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
         command[5] = (byte)(address >> 8);
         command[6] = (byte)(address & 0xFF);
         command[7] = (byte)turnoutPosition;
@@ -662,7 +678,110 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         logger.LogInformation(Messages.Text0036);
     }
 
+
+    /// <inheritdoc/>
+    public async Task<List<Z21Info>> QueryForZ21sAsync(int timeoutMilliseconds = 3000)
+    {
+        if (_isConnected)
+        {
+            // "Cannot perform Z21 discovery while connected to a Z21 device. Please disconnect first."
+            logger.LogCritical(Messages.Text0088);
+            throw new InvalidOperationException(Messages.Text0088);
+        }
+
+        List<Z21Info> foundDevices = [];
+        HashSet<string> uniqueIps = []; // Check for doublicates
+
+        // 1. Setup
+        udpClient.Bind();
+        udpClient.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+        udpClient.EnableBroadcast = true;
+
+        // 2. Send Broadcast package (LAN_GET_HARDWARE_INFO)
+        byte[] requestPacket = Z21Commands.GetHardwareInfo;
+        await udpClient.SendAsync(requestPacket, requestPacket.Length, new IPEndPoint(IPAddress.Broadcast, Z21_PORT));
+
+        // 3. Listen for response before timeout
+        var startTime = DateTime.Now;
+
+        while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMilliseconds)
+        {
+            // Hvor lang tid har vi tilbage?
+            var timeLeft = timeoutMilliseconds - (int)(DateTime.Now - startTime).TotalMilliseconds;
+            if (timeLeft <= 0) break;
+
+            // Start en lytte-opgave
+            var receiveTask = udpClient.ReceiveAsync();
+
+            // Vent på enten svar ELLER at tiden løber ud
+            var completedTask = await Task.WhenAny(receiveTask, Task.Delay(timeLeft));
+
+            if (completedTask == receiveTask)
+            {
+                // Vi fik et svar!
+                try
+                {
+                    var result = await receiveTask;
+                    byte[] data = result.Buffer;
+                    string ip = result.RemoteEndPoint.Address.ToString();
+
+                    // Tjek om det er en gyldig Z21 pakke (Header 0x10) og om vi allerede har set denne IP
+                    if (data.Length >= 8 && BitConverter.ToUInt16(data, 2) == 0x1a)
+                    {
+                        if (!uniqueIps.Contains(ip))
+                        {
+                            if (BuildHardwareInfoStructure(data, out var hardwareInfo))
+                            {
+                                foundDevices.Add(new Z21Info(ip, hardwareInfo));
+                            }
+
+                            uniqueIps.Add(ip); // Husk at vi har set den
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // Ignorer læsefejl og prøv igen i næste løkke
+                }
+            }
+            else
+            {
+                // Tiden løb ud mens vi ventede på svar
+                break;
+            }
+        }
+
+        // Closedown the UDP client
+        udpClient.Close();
+
+        return foundDevices;
+    }
+
+
     #endregion Exposed methods
+
+    /// <summary>
+    /// Converts a locomotive address to the X-Bus protocol format, returning the most significant and least significant
+    /// bytes required for X-Bus addressing.
+    /// </summary>
+    /// <remarks>For addresses greater than or equal to 128, the most significant byte is modified to set the
+    /// high bits as required by the X-Bus protocol. This method does not validate whether the address is within the
+    /// supported range for all X-Bus devices.</remarks>
+    /// <param name="address">The locomotive address to convert. Must be a valid X-Bus address in the range 0 to 10239.</param>
+    /// <returns>A tuple containing the most significant byte (AdrMsb) and least significant byte (AdrLsb) representing the X-Bus
+    /// formatted address.</returns>
+    private static (byte AdrMsb, byte AdrLsb) ConvertLocoAddressForXBus(ushort address)
+    {
+        var convertedAddress = ConvertLocoAddressForXBus(address);
+        byte adrMsb = (byte)(address >> 8);
+        byte adrLsb = (byte)(address & 0xFF);
+        // Set the high bits for X-Bus addressing
+        if (address >= 128)
+        {
+            adrMsb |= 0xC0;
+        }
+        return (adrMsb, adrLsb);
+    }
 
     /// <summary>
     /// Converts the given speed step to the Roco-specific speed step value based on the loco mode and native speed steps.
@@ -810,8 +929,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
 
     private async Task SendCommandAsync(byte[] command)
     {
-
-        if (_udpClient is null || _remoteEndPoint is null)
+        // Use the manual connection flag here
+        if (!_isConnected || _remoteEndPoint is null)
         {
             // "Cannot send command. Client is not connected."
             logger.LogWarning(Messages.Text0045);
@@ -823,7 +942,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         await _sendToZ21Lock.WaitAsync();
         try
         {
-            _ = await _udpClient.SendAsync(command, command.Length, _remoteEndPoint);
+            // Use the injected wrapper
+            _ = await udpClient.SendAsync(command, command.Length, _remoteEndPoint);
             _lastCommandSentTimestamp = DateTime.UtcNow;
         }
         catch (Exception ex)
@@ -843,9 +963,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         {
             try
             {
-                if (_udpClient is null) break;
+                if (!_isConnected) break;
 
-                UdpReceiveResult result = await _udpClient.ReceiveAsync(cancellationToken);
+                // Use the injected wrapper
+                UdpReceiveResult result = await udpClient.ReceiveAsync(cancellationToken);
 
                 if (_remoteEndPoint is not null && result.RemoteEndPoint.Address.Equals(_remoteEndPoint.Address))
                 {
@@ -1030,8 +1151,31 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
             speed |= 0b10000000;
         }
 
+        // Test for F12 active
+        byte db15 = data[15];
+        if ((data[13] & 0x10) != 0)
+        {
+            db15 |= 0x80;
+        }
+
+        // Test for F20 active
+        byte db16 = data[16];
+        if ((data[13] & 0x20) != 0)
+        {
+            db16 |= 0x80;
+        }
+
+        // Test for F28 active
+        byte db17 = data[17];
+        if ((data[13] & 0x40) != 0)
+        {
+            db17 |= 0x80;
+        }
+
+        // It seems that F29, F30 and F31 are not reported in this message.
+
         var locoSlotInfo = new LocoSlotInfo(slotNumber, new LocoInfo(
-            address, speedSteps, speed, data[14], data[15], data[16], data[17], null, _hardwareInfo?.FwVersion
+            address, speedSteps, speed, data[14], db15, db16, db17, null, _hardwareInfo?.FwVersion
             ));
 
         LocoSlotInfoReceived.Invoke(this, locoSlotInfo);
@@ -1238,20 +1382,48 @@ public sealed class Z21Client(ILogger<Z21Client> logger) : IZ21Client
         if (HardwareInfoReceived is null)
             return;
 
-        var hwType = (HardwareType)BitConverter.ToUInt32(data[4..]);
-        uint fwValue = BitConverter.ToUInt32(data[8..]);
-        string fwString = (fwValue >> 8).ToString("X") + "." + (fwValue & 0xFF).ToString("X2");
-        if (Version.TryParse(fwString, out var parsedVersion))
+
+        if (BuildHardwareInfoStructure(data, out var hardwareInfo))
         {
-            _hardwareInfo = new HardwareInfo(hwType, new FirmwareVersion((byte)parsedVersion.Major, (byte)parsedVersion.Minor));
+            _hardwareInfo = hardwareInfo;
             HardwareInfoReceived.Invoke(this, _hardwareInfo);
             // "Hardware Info received: {HWType}, Firmware: {FWVersion}"
-            logger.LogInformation(Messages.Text0070, hwType, fwString);
+            logger.LogInformation(Messages.Text0070, _hardwareInfo.HwType, _hardwareInfo.FwVersion);
         }
         else
         {
             // "Failed to parse firmware version from LAN_GET_HWINFO response."
             logger.LogError(Messages.Text0071);
+        }
+    }
+
+    /// <summary>
+    /// Attempts to parse hardware information from the specified data buffer and constructs a corresponding
+    /// HardwareInfo instance.
+    /// </summary>
+    /// <remarks>The method expects the data buffer to contain hardware type and firmware version information
+    /// at specific offsets. If the data is not in the expected format or the firmware version cannot be parsed, the
+    /// method returns false and sets hardwareInfo to null.</remarks>
+    /// <param name="data">A read-only span of bytes containing the raw hardware data to parse. The span must be at least 12 bytes in
+    /// length and formatted according to the expected hardware information structure.</param>
+    /// <param name="hardwareInfo">When this method returns, contains the HardwareInfo instance constructed from the parsed data if parsing
+    /// succeeds; otherwise, contains null.</param>
+    /// <returns>true if the hardware information was successfully parsed and the HardwareInfo instance was created; otherwise,
+    /// false.</returns>
+    private static bool BuildHardwareInfoStructure(ReadOnlySpan<byte> data, out HardwareInfo hardwareInfo)
+    {
+        var hwType = (HardwareType)BitConverter.ToUInt32(data[4..]);
+        var fwValue = BitConverter.ToUInt32(data[8..]);
+        var fwString = (fwValue >> 8).ToString("X") + "." + (fwValue & 0xFF).ToString("X2");
+        if (Version.TryParse(fwString, out var parsedVersion))
+        {
+            hardwareInfo = new HardwareInfo(hwType, new FirmwareVersion((byte)parsedVersion.Major, (byte)parsedVersion.Minor));
+            return true;
+        }
+        else
+        {
+            hardwareInfo = null!;
+            return false;
         }
     }
 

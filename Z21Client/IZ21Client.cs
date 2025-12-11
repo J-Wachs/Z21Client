@@ -1,6 +1,6 @@
 ﻿using Z21Client.Models;
 
-namespace Z21Client.Interfaces;
+namespace Z21Client;
 
 /// <summary>
 /// Defines the public contract for a Z21 client.
@@ -133,6 +133,12 @@ public interface IZ21Client : IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task GetLocoModeAsync(ushort address);
 
+    /// <summary>
+    /// Sends a request to get information about the locomotive assigned to the specified slot number.
+    /// </summary>
+    /// <param name="slotNumber">The slot number for which to retrieve locomotive information. Must be a valid slot identifier within the
+    /// supported range (1-120).</param>
+    /// <returns></returns>
     Task GetLocoSlotInfoAsync(byte slotNumber);
 
     /// <summary>
@@ -147,7 +153,7 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <param name="groupIndex">The group index to query (0 for modules 1-10, 1 for 11-20, etc.).</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task GetRBusDataAsync(int groupIndex);
+    Task GetRBusDataAsync(byte groupIndex);
 
     /// <summary>
     /// Sends a request to get the serial number from the Z21.
@@ -234,4 +240,14 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task SetTrackPowerOffAsync();
+
+    /// <summary>
+    /// Asynchronously discovers available Z21 devices on the local network within the specified timeout period.
+    /// </summary>
+    /// <param name="timeoutMilliseconds">The maximum time, in milliseconds, to wait for device discovery before the operation completes. Must be greater
+    /// than zero. The default is 3000 milliseconds.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of <see cref="Z21Info"/>
+    /// objects describing each discovered Z21 device. The list will be empty if no devices are found within the timeout
+    /// period.</returns>
+    Task<List<Z21Info>> QueryForZ21sAsync(int timeoutMilliseconds = 3000);
 }

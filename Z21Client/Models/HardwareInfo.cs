@@ -72,9 +72,3 @@ public enum HardwareType : uint
 /// <param name="HwType">The type of the hardware.</param>
 /// <param name="FwVersion">The firmware version.</param>
 public sealed record HardwareInfo(HardwareType HwType, FirmwareVersion FwVersion);
-
-/// <summary>
-/// Represents the serial number of a Z21 device.
-/// </summary>
-/// <param name="Value">The 32-bit serial number.</param>
-public sealed record SerialNumber(uint Value);

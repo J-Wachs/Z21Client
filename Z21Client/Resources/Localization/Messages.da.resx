@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Text0089" xml:space="preserve">
+    <value>Slotnummer skal være mellem 1 og 120. Værdien angivet er {slotNumber}.</value>
+  </data>
   <data name="Text0001" xml:space="preserve">
     <value>Tilmelder til AllLocoInfoReceived-hændelse. Tilføjer AllLocoInfo broadcast-flag.</value>
   </data>
@@ -377,5 +380,11 @@
   </data>
   <data name="Text0087" xml:space="preserve">
     <value>GetHardwareInfoAsync: Efterspurgte hardware information</value>
+  </data>
+  <data name="Text0088" xml:space="preserve">
+    <value>Kan ikke søge efter Z21 når der allerede er etableret forbindelse til en Z21 centralstation. Venligst afbryd forbindelsen først.</value>
+  </data>
+  <data name="Text0090" xml:space="preserve">
+    <value>Gruppeindex skal være enten 0 eller 1. Værdien angivet er {groupIndex}.</value>
   </data>
 </root>

@@ -19,7 +19,7 @@ namespace Z21Client.Resources.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Messages {
@@ -840,6 +840,33 @@ namespace Z21Client.Resources.Localization {
         internal static string Text0087 {
             get {
                 return ResourceManager.GetString("Text0087", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot perform Z21 discovery while connected to a Z21 central station. Please disconnect first..
+        /// </summary>
+        internal static string Text0088 {
+            get {
+                return ResourceManager.GetString("Text0088", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Slot number must be between 1 and 120. The value given is {slotNumber}..
+        /// </summary>
+        internal static string Text0089 {
+            get {
+                return ResourceManager.GetString("Text0089", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Group index must be either 0 or 1. The value given is {groupIndex}..
+        /// </summary>
+        internal static string Text0090 {
+            get {
+                return ResourceManager.GetString("Text0090", resourceCulture);
             }
         }
     }

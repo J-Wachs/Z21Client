@@ -1,10 +1,13 @@
-﻿using System.Text;
+﻿namespace Z21Client.Models;
 
-namespace Z21Client.Models;
-
-public sealed class BroadcastFlagsChangedEventArgs : EventArgs
+/// <summary>
+/// Provides data for the event that is raised when broadcast flags are read.
+/// </summary>
+/// <param name="flags">A bitwise combination of values from the BroadcastFlags enumeration representing the enabled broadcast features at
+/// the time of the event.</param>
+public sealed class BroadcastFlagsChangedEventArgs(uint flags) : EventArgs
 {
-    public uint Flags { get; }
+    public uint Flags { get; } = flags;
 
     public bool IsBasicInfoEnabled => (Flags & (uint)BroadcastFlags.Basic) != 0;
 
@@ -29,22 +32,4 @@ public sealed class BroadcastFlagsChangedEventArgs : EventArgs
     public bool IsLocoNetSwitchesEnabled => (Flags & (uint)BroadcastFlags.LocoNetSwitches) != 0;
 
     public bool IsLocoNetDetectorEnabled => (Flags & (uint)BroadcastFlags.LocoNetDetector) != 0;
-
-
-    public BroadcastFlagsChangedEventArgs(uint flags)
-    {
-        Flags = flags;
-    }
-
-    public override string ToString()
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine($"Basic info:          {(IsBasicInfoEnabled ? "On" : "Off")}");
-        sb.AppendLine($"R-Bus:               {(IsRBusEnabled ? "On" : "Off")}");
-        sb.AppendLine($"RailCom subscribed:  {(IsRailComSubscribedEnabled ? "On" : "Off")}");
-        sb.AppendLine($"System State:        {(IsSystemStateEnabled ? "On" : "Off")}");
-        sb.AppendLine($"All loco info:       {(IsAllLocoInfoEnabled ? "On" : "Off")}");
-        sb.AppendLine($"RailCom all:         {(IsAllRailComEnabled ? "On" : "Off")}");
-        return sb.ToString();
-    }
 }
