@@ -20,6 +20,7 @@ Z21Client-klassen understøtter følgende funktioner:
 * Fejlhåndtering og genforbindelseslogik
 * Understøttelse af protokoller brugt af z21/Z21 (DCC, Märklin Motorola)
 * Logging-muligheder til fejlfinding og overvågning
+* Z21Client er udviklet efter "AI Pair Programming" metoden
 
 ## Nyheder i denne version
 
@@ -215,6 +216,7 @@ The Z21Client class supports the following features:
 * Error handling and reconnection logic
 * Support for the protocols used by the z21/Z21 (DCC, Märklin Motorola)
 * Logging capabilities for debugging and monitoring
+* Z21Client has been developed using the 'AI Pair Programming' method
 
 ## What is new in this version
 
