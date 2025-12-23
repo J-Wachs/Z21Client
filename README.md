@@ -33,6 +33,10 @@ Z21Client-klassen understøtter følgende funktioner:
 * Data returneret i event `LocoSlotInfoReceived` viste ikke F12, F20 og F28. Tasterne F29, F30 og F31 findes
 ikke i data fra Z21 i denne event (det er ej heller dokumenteret)
 * Interface IZ21Client er flyttet til roden af projektet
+* Nogle records/klasser er omdøbt for bedre at afspejle deres indhold
+* I SystemState er Capabilities ændret fra byte til en record for at beskrive flag bedre
+* En metode til at søge efter Z21'ere på netværket er tilføjet
+* Egenskaber HardwareInfo, Isz21, Z21Code, Capabilities og SerialNumber er tilføjet til klassen
 
 ## z21 og z21Start låseinformation
 
@@ -229,7 +233,10 @@ The Z21Client class supports the following features:
 * Data returned in event `LocoSlotInfoReceived` did not show F12, F20 and F28. The f-keys F29, F30 and F31 does
 not exist in the data send from the Z21 in this event (it is not documented)
 * The interface IZ21Client has been moved to the root of the project
-
+* Some records/classes have been renamed to better reflect their content
+* In SystemState, Capabilities has been changed from a byte to a record to better describe the flags
+* A method for discovering Z21 devices on the network has been added
+* The properties HardwareInfo, IsZ21, Z21Code, Capabilities, and SerialNumber have been added to the class
 
 ## z21 and z21Start locking information
 

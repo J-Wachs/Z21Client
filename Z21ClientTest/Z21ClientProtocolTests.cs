@@ -55,7 +55,7 @@ public class Z21ClientProtocolTests : IDisposable
     public async Task Receive_SystemState_ShouldRaiseEvent_WithCorrectVoltages()
     {
         // Arrange
-        var tcs = new TaskCompletionSource<SystemStateChangedEventArgs>();
+        var tcs = new TaskCompletionSource<SystemState>();
         _z21Client.SystemStateChanged += (sender, args) => tcs.SetResult(args);
 
         var packet = new byte[20];
