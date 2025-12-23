@@ -29,7 +29,7 @@ public enum ConnectionState
 /// <summary>
 /// Provides data for the <see cref="Application.Interfaces.IZ21Client.ConnectionStateChanged"/> event.
 /// </summary>
-public class ConnectionStateChangedEventArgs : EventArgs
+public sealed record ConnectionStatus
 {
     /// <summary>
     /// Gets the new connection state.
@@ -40,7 +40,7 @@ public class ConnectionStateChangedEventArgs : EventArgs
     /// Initializes a new instance of the <see cref="ConnectionStateChangedEventArgs"/> class.
     /// </summary>
     /// <param name="state">The new connection state.</param>
-    public ConnectionStateChangedEventArgs(ConnectionState state)
+    public ConnectionStatus(ConnectionState state)
     {
         State = state;
     }

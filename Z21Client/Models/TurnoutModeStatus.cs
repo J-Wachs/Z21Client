@@ -9,7 +9,7 @@ public enum TurnoutMode
 /// <summary>
 /// Represents event data for a received turnout mode.
 /// </summary>
-public sealed class TurnoutModeChangedEventArgs : EventArgs
+public sealed record TurnoutModeStatus
 {
     /// <summary>
     /// The address of the turnout.
@@ -22,11 +22,11 @@ public sealed class TurnoutModeChangedEventArgs : EventArgs
     public TurnoutMode Mode { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TurnoutModeChangedEventArgs"/> class.
+    /// Initializes a new instance of the <see cref="TurnoutModeStatus"/> class.
     /// </summary>
     /// <param name="address">The address of the turnout.</param>
     /// <param name="mode">The protocol mode of the turnout.</param>
-    public TurnoutModeChangedEventArgs(ushort address, TurnoutMode mode)
+    public TurnoutModeStatus(ushort address, TurnoutMode mode)
     {
         Address = address;
         Mode = mode;

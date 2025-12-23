@@ -5,7 +5,7 @@
 /// </summary>
 /// <param name="flags">A bitwise combination of values from the BroadcastFlags enumeration representing the enabled broadcast features at
 /// the time of the event.</param>
-public sealed class BroadcastFlagsChangedEventArgs(uint flags) : EventArgs
+public sealed record BroadcastFlagsStatus(uint flags)
 {
     public uint Flags { get; } = flags;
 

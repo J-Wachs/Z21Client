@@ -10,12 +10,12 @@ public interface IZ21Client : IAsyncDisposable
     /// <summary>
     /// Occurs when the currently set broadcast flags are received from the Z21.
     /// </summary>
-    event EventHandler<BroadcastFlagsChangedEventArgs> BroadcastFlagsReceived;
+    event EventHandler<BroadcastFlagsStatus> BroadcastFlagsReceived;
 
     /// <summary>
     /// Occurs when the client's connection state to the Z21 changes (e.g., connection is lost).
     /// </summary>
-    event EventHandler<ConnectionStateChangedEventArgs> ConnectionStateChanged;
+    event EventHandler<ConnectionStatus> ConnectionStateChanged;
 
     /// <summary>
     /// Occurs when an emergency stop command is received from the Z21.
@@ -40,7 +40,7 @@ public interface IZ21Client : IAsyncDisposable
     /// <summary>
     /// Occurs when a locomotive's protocol mode is received from the Z21.
     /// </summary>
-    event EventHandler<LocoModeChangedEventArgs> LocoModeReceived;
+    event EventHandler<LocoModeStatus> LocoModeReceived;
 
     /// <summary>
     /// Occurs when a locomotive slot information is received from the Z21.
@@ -65,7 +65,7 @@ public interface IZ21Client : IAsyncDisposable
     /// <summary>
     /// Occurs when the system state is received from the Z21.
     /// </summary>
-    event EventHandler<SystemStateChangedEventArgs> SystemStateChanged;
+    event EventHandler<SystemState> SystemStateChanged;
 
     /// <summary>
     /// Occurs when trackk power information is received from the Z21.
@@ -80,12 +80,37 @@ public interface IZ21Client : IAsyncDisposable
     /// <summary>
     /// Occurs when a turnout's protocol mode is received from the Z21.
     /// </summary>
-    event EventHandler<TurnoutModeChangedEventArgs> TurnoutModeReceived;
+    event EventHandler<TurnoutModeStatus> TurnoutModeReceived;
 
     /// <summary>
     /// Occurs when the Z21's feature scope code is received.
     /// </summary>
     event EventHandler<Z21Code> Z21CodeReceived;
+
+    /// <summary>
+    /// Capabilities of the connected Z21 command station. Valid from FW version 1.42.
+    /// </summary>
+    SystemState.Caps? Capabilities { get; }
+
+    /// <summary>
+    /// Hardware information of the connected Z21 command station.
+    /// </summary>
+    HardwareInfo? HardwareInfo { get; }
+
+    /// <summary>
+    /// Serial number of the connected Z21 command station.
+    /// </summary>
+    SerialNumber? SerialNumber { get; }
+
+    /// <summary>
+    /// The lock state of the z21/Z21.
+    /// </summary>
+    Z21Code? Z21Code { get; }
+
+    /// <summary>
+    /// True if the connected command station is a z21 (white cabinets), false if it is a Z21 (black cabinets).
+    /// </summary>
+    bool? Isz21 { get; }
 
     /// <summary>
     /// Connects to the Z21 command station.

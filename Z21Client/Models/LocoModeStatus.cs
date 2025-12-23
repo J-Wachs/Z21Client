@@ -6,7 +6,7 @@ public enum LocoMode
     MM = 1
 }
 
-public sealed class LocoModeChangedEventArgs(ushort address, LocoMode mode) : EventArgs
+public sealed record LocoModeStatus(ushort address, LocoMode mode)
 {
     public ushort Address { get; } = address;
     public LocoMode Mode { get; } = mode;

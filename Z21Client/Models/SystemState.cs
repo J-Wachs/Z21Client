@@ -3,7 +3,7 @@
 /// <summary>
 /// Provides data for the <see cref="Application.Interfaces.IZ21Client.SystemStateChanged"/> event.
 /// </summary>
-public class SystemStateChangedEventArgs : EventArgs
+public sealed record SystemState
 {
     // CentralState Flags
     public const byte CentralStateEmergencyStop = 0b00000001;
@@ -35,9 +35,9 @@ public class SystemStateChangedEventArgs : EventArgs
     public int VccVoltagemV { get; }
     public byte CentralState { get; }
     public byte CentralStateEx { get; }
-    public byte? Capabilities { get; }
+    public Caps? Capabilities { get; }
 
-    public SystemStateChangedEventArgs(
+    public SystemState(
         int mainCurrentmA,
         int progCurrentmA,
         int mainCurrentFilteredmA,
@@ -46,7 +46,7 @@ public class SystemStateChangedEventArgs : EventArgs
         int vccVoltagemV,
         byte centralState,
         byte centralStateEx,
-        byte? capabilities = null)
+        Caps? capabilities = null)
     {
         MainCurrentmA = mainCurrentmA;
         ProgCurrentmA = progCurrentmA;
@@ -57,5 +57,35 @@ public class SystemStateChangedEventArgs : EventArgs
         CentralState = centralState;
         CentralStateEx = centralStateEx;
         Capabilities = capabilities;
+    }
+
+    /// <summary>
+    /// The capabilities of the Z21 system, parsed from the capabilities byte.
+    /// </summary>
+    public sealed record Caps
+    {
+        public Protocols Protocols { get; }
+        public bool RailComEnabled { get; }
+        public bool AcceptLANLocoCmds { get; }
+        public bool AcceptLANAccCmds { get; }
+        public bool AcceptLANDetCmds { get; }
+        public bool NeedsUnlockCode { get; }
+
+        public Caps(byte capabilities)
+        {
+            Protocols = (capabilities & (CapabilitiesDcc + CapabilitiesMM)) switch
+            {
+                CapabilitiesDcc + CapabilitiesMM => Protocols.DCC_MM,
+                CapabilitiesDcc => Protocols.DCC,
+                CapabilitiesMM => Protocols.MM,
+                _ => Protocols.DCC
+            };
+
+            RailComEnabled = (capabilities & CapabilitiesRailCom) > 0;
+            AcceptLANLocoCmds = (capabilities & CapabilitiesLocoCmds) > 0;
+            AcceptLANAccCmds = (capabilities & CapabilitiesAccessoryCmds) > 0;
+            AcceptLANDetCmds = (capabilities & CapabilitiesDetectorCmds) > 0;
+            NeedsUnlockCode = (capabilities & CapabilitiesNeedsUnlockCode) > 0;
+        }
     }
 }

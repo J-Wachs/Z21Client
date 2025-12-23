@@ -24,6 +24,21 @@ namespace Z21Client;
 /// <param name="udpClient">The injected UDP client wrapper for network communication.</param>
 public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient) : IZ21Client
 {
+    /// <inheritdoc/>
+    public HardwareInfo? HardwareInfo { get; private set; }
+
+    /// <inheritdoc/>
+    public bool? Isz21 { get; private set; }
+
+    /// <inheritdoc/>
+    public Z21Code? Z21Code { get; private set; }
+
+    /// <inheritdoc/>
+    public SystemState.Caps? Capabilities { get; private set; }
+
+    /// <inheritdoc/>
+    public SerialNumber? SerialNumber { get; private set; }
+
     private const int Z21_PORT = 21105;
 
     // --- START: Added for Firmware Bug Workaround ---
@@ -46,14 +61,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private DateTime _lastCommandSentTimestamp;
     private DateTime _lastMessageReceivedTimestamp;
     private int _failedPingCount;
-    private HardwareInfo? _hardwareInfo;
     private BroadcastFlags _subscripedBroadcastFlags = BroadcastFlags.None;
     private EventHandler<LocoInfo>? _locoInfoReceived;
     private EventHandler<RBusData>? _rBusDataReceived;
     private EventHandler<RailComData>? _railComDataReceived;
-    private EventHandler<SystemStateChangedEventArgs>? _systemStateChanged;
+    private EventHandler<SystemState>? _systemStateChanged;
     private readonly SemaphoreSlim _sendToZ21Lock = new(1, 1);
-    private bool _isz21 = false;
 
     private Timer? _railComPollingTimer;
     private readonly HashSet<ushort> _receivedRailComAddresses = [];
@@ -61,7 +74,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     #region Exposed events
 
     /// <inheritdoc/>
-    public event EventHandler<BroadcastFlagsChangedEventArgs>? BroadcastFlagsReceived;
+    public event EventHandler<BroadcastFlagsStatus>? BroadcastFlagsReceived;
 
     /// <inheritdoc/>
     public event EventHandler? EmergencyStopReceived;
@@ -77,7 +90,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     {
         add
         {
-            if (_locoInfoReceived is null && _hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
+            if (_locoInfoReceived is null && HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
             {
                 // "Subscribing to AllLocoInfoReceived event. Adding AllLocoInfo broadcast flag."
                 logger.LogInformation(Messages.Text0001);
@@ -89,7 +102,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         remove
         {
             _locoInfoReceived -= value;
-            if (_locoInfoReceived is null && _hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
+            if (_locoInfoReceived is null && HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
             {
                 // "Unsubscribing from AllLocoInfoReceived event. Removing AllLocoInfo broadcast flag."
                 logger.LogInformation(Messages.Text0002);
@@ -102,7 +115,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<LocoSlotInfo>? LocoSlotInfoReceived;
 
     /// <inheritdoc/>
-    public event EventHandler<LocoModeChangedEventArgs>? LocoModeReceived;
+    public event EventHandler<LocoModeStatus>? LocoModeReceived;
 
     /// <inheritdoc/>
     public event EventHandler<RailComData>? RailComDataReceived
@@ -170,7 +183,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<SerialNumber>? SerialNumberReceived;
 
     /// <inheritdoc/>
-    public event EventHandler<SystemStateChangedEventArgs>? SystemStateChanged
+    public event EventHandler<SystemState>? SystemStateChanged
     {
         add
         {
@@ -203,10 +216,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<TrackPowerInfo>? TrackPowerInfoReceived;
 
     /// <inheritdoc/>
-    public event EventHandler<TurnoutModeChangedEventArgs>? TurnoutModeReceived;
+    public event EventHandler<TurnoutModeStatus>? TurnoutModeReceived;
 
     /// <inheritdoc/>
-    public event EventHandler<ConnectionStateChangedEventArgs>? ConnectionStateChanged;
+    public event EventHandler<ConnectionStatus>? ConnectionStateChanged;
 
     /// <inheritdoc/>
     public event EventHandler<Z21Code>? Z21CodeReceived;
@@ -266,31 +279,32 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         _cancellationTokenSource = new CancellationTokenSource();
         _receiveTask = Task.Run(() => ReceiveLoop(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
 
-        var handshakeComplete = new TaskCompletionSource<bool>();
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-
-        void handshakeHandler(object? s, HardwareInfo e)
+        if (await MakeCallToHardwareInfoAsync() is false)
         {
-            handshakeComplete.TrySetResult(true);
-            _hardwareInfo = e;
-            _isz21 = _hardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
+            return false;
         }
-        HardwareInfoReceived += handshakeHandler;
 
-        await GetHardwareInfoAsync();
-
-        using (timeoutCts.Token.Register(() => handshakeComplete.TrySetResult(false)))
+        if (HardwareInfo is not null && HardwareInfo.FwVersion.Version >= Z21FirmwareVersions.V1_42)
         {
-            var result = await handshakeComplete.Task;
-            HardwareInfoReceived -= handshakeHandler;
-
-            if (!result)
+            if (await MakeCallToSystemStateAsync() is false)
             {
-                // "Connection failed: Host responded to ping, but did not respond to Z21 command (handshake failed)."
-                logger.LogError(Messages.Text0015);
-                await DisconnectAsync();
                 return false;
             }
+        }
+        else
+        {
+            Capabilities = null;
+        }
+
+        if (await MakeCallToZ21CodeAsync() is false)
+        {
+            return false;
+
+        }
+
+        if (await MakeCallToSerialNumberAsync() is false)
+        {
+            return false;
         }
 
         _lastCommandSentTimestamp = DateTime.UtcNow;
@@ -373,7 +387,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             _isConnected = false;
         }
 
-        _hardwareInfo = null;
+        HardwareInfo = null;
+        Z21Code = null;
+        Isz21 = null;
+        Capabilities = null;
+        SerialNumber = null;
+
         // "Disconnected."
         logger.LogInformation(Messages.Text0020);
     }
@@ -678,7 +697,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0036);
     }
 
-
     /// <inheritdoc/>
     public async Task<List<Z21Info>> QueryForZ21sAsync(int timeoutMilliseconds = 3000)
     {
@@ -706,26 +724,26 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
         while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMilliseconds)
         {
-            // Hvor lang tid har vi tilbage?
+            // How long time do we have left?
             var timeLeft = timeoutMilliseconds - (int)(DateTime.Now - startTime).TotalMilliseconds;
             if (timeLeft <= 0) break;
 
-            // Start en lytte-opgave
+            // Start a listener
             var receiveTask = udpClient.ReceiveAsync();
 
-            // Vent på enten svar ELLER at tiden løber ud
+            // Wait for reply for time-out
             var completedTask = await Task.WhenAny(receiveTask, Task.Delay(timeLeft));
 
             if (completedTask == receiveTask)
             {
-                // Vi fik et svar!
+                // We got a reply!
                 try
                 {
                     var result = await receiveTask;
                     byte[] data = result.Buffer;
                     string ip = result.RemoteEndPoint.Address.ToString();
 
-                    // Tjek om det er en gyldig Z21 pakke (Header 0x10) og om vi allerede har set denne IP
+                    // Check if this is a valid Z21 package, and if we already have the IP
                     if (data.Length >= 8 && BitConverter.ToUInt16(data, 2) == 0x1a)
                     {
                         if (!uniqueIps.Contains(ip))
@@ -735,18 +753,18 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
                                 foundDevices.Add(new Z21Info(ip, hardwareInfo));
                             }
 
-                            uniqueIps.Add(ip); // Husk at vi har set den
+                            uniqueIps.Add(ip); // Remember we have seen this IP
                         }
                     }
                 }
                 catch (Exception)
                 {
-                    // Ignorer læsefejl og prøv igen i næste løkke
+                    // Ignore read error and loop again
                 }
             }
             else
             {
-                // Tiden løb ud mens vi ventede på svar
+                // Time expired while we waited
                 break;
             }
         }
@@ -863,6 +881,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Performs a keep-alive operation by checking the time since the last command was sent.
+    /// </summary>
+    /// <param name="state"></param>
     private void KeepAliveCallback(object? state)
     {
         if (DateTime.UtcNow - _lastCommandSentTimestamp > TimeSpan.FromSeconds(40))
@@ -873,12 +895,166 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Make call to get hardware info and set properties accordingly.
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> MakeCallToHardwareInfoAsync()
+    {
+        // Get Hardware info
+        var resultHardwareInfo = await MakeCallAndGetResultAsync<HardwareInfo>(
+            eventMethod => HardwareInfoReceived += eventMethod,
+            eventMethod => HardwareInfoReceived -= eventMethod,
+            GetHardwareInfoAsync
+            );
+
+        if (resultHardwareInfo.IsSuccess)
+        {
+            HardwareInfo = resultHardwareInfo.RetrievedData;
+            Isz21 = HardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// MAke call to get serial number of Z21.
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> MakeCallToSerialNumberAsync()
+    {
+        // Get Serial number
+        var resultSerialNumber = await MakeCallAndGetResultAsync<SerialNumber>(
+            eventMethod => SerialNumberReceived += eventMethod,
+            eventMethod => SerialNumberReceived -= eventMethod,
+            GetSerialNumberAsync
+            );
+        if (resultSerialNumber.IsSuccess)
+        {
+            // Expose the protocol etc.
+            SerialNumber = resultSerialNumber.RetrievedData;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Make call to get system state.
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> MakeCallToSystemStateAsync()
+    {
+        // Get System state
+        var resultSystemChanged = await MakeCallAndGetResultAsync<SystemState>(
+            eventMethod => SystemStateChanged += eventMethod,
+            eventMethod => SystemStateChanged -= eventMethod,
+            GetSystemStateAsync
+            );
+
+        if (resultSystemChanged.IsSuccess && resultSystemChanged.RetrievedData is not null)
+        {
+            // Expose the protocol etc.
+            Capabilities = resultSystemChanged.RetrievedData.Capabilities;
+            return true;
+        }
+        else
+        {
+            Capabilities = null;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Make call to get Z21 code (lock information).
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> MakeCallToZ21CodeAsync()
+    {
+        // Get Z21code
+        var resultZ21Code = await MakeCallAndGetResultAsync<Z21Code>(
+            eventMethod => Z21CodeReceived += eventMethod,
+            eventMethod => Z21CodeReceived -= eventMethod,
+            GetZ21CodeAsync
+            );
+
+        if (resultZ21Code.IsSuccess)
+        {
+            // Expose the protocol etc.
+            Z21Code = resultZ21Code.RetrievedData;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Generic method to make a call to the Z21 and wait for the corresponding event to retrieve the result.
+    /// </summary>
+    /// <typeparam name="TEventArgs">The type of data returned</typeparam>
+    /// <param name="subscribe">Action to execute for subscribe of receiving data</param>
+    /// <param name="unsubscribe">Action to execute for unsubscribe of receiving data</param>
+    /// <param name="methodToCall">Method to call for sending command to Z21</param>
+    /// <returns></returns>
+    private async Task<(bool IsSuccess, TEventArgs? RetrievedData)> MakeCallAndGetResultAsync<TEventArgs>(
+        Action<EventHandler<TEventArgs>> subscribe,
+        Action<EventHandler<TEventArgs>> unsubscribe,
+        Func<Task> methodToCall
+        )
+    {
+        TaskCompletionSource<bool> handshake1Complete = new();
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
+        var resultData = default(TEventArgs);
+
+        void handshakeHandler(object? s, TEventArgs e)
+        {
+            handshake1Complete.TrySetResult(true);
+            resultData = e;
+        }
+
+        subscribe(handshakeHandler);
+
+        await methodToCall();
+
+        using (timeoutCts.Token.Register(() => handshake1Complete.TrySetResult(false)))
+        {
+            var result = await handshake1Complete.Task;
+            unsubscribe(handshakeHandler);
+
+            if (!result)
+            {
+                // "Connection failed: Host responded to ping, but did not respond to Z21 command (handshake failed)."
+                logger.LogError(Messages.Text0015);
+                await DisconnectAsync();
+                return (false, default);
+            }
+        }
+
+        return (true, resultData);
+    }
+
+    /// <summary>
+    /// Start the poll for RailCom data by requesting info from the next locomotive in the internal buffer in Z21 periodically.
+    /// </summary>
+    /// <param name="state"></param>
     private void RailComPollingCallback(object? state)
     {
         _receivedRailComAddresses.Clear();
         _ = GetNextRailComDataAsync();
     }
 
+    /// <summary>
+    /// Call Z21 command GetNextRailComData to request data for the next locomotive in the internal buffer.
+    /// </summary>
+    /// <returns></returns>
     private async Task GetNextRailComDataAsync()
     {
         await SendCommandAsync(Z21Commands.GetRailComDataNext);
@@ -886,6 +1062,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0039);
     }
 
+    /// <summary>
+    /// Keep track of connection by checking if messages are being received.
+    /// </summary>
+    /// <param name="state"></param>
     private async void WatchdogCallback(object? state)
     {
         if (DateTime.UtcNow - _lastMessageReceivedTimestamp < TimeSpan.FromSeconds(15))
@@ -897,7 +1077,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         {
             // "Connection to Z21 lost. No response to multiple pings."
             logger.LogError(Messages.Text0040);
-            ConnectionStateChanged?.Invoke(this, new ConnectionStateChangedEventArgs(ConnectionState.Lost));
+            ConnectionStateChanged?.Invoke(this, new ConnectionStatus(ConnectionState.Lost));
             await DisconnectAsync();
             return;
         }
@@ -926,6 +1106,11 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Send a command to the Z21 central station, locking to ensure thread safety.
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
     private async Task SendCommandAsync(byte[] command)
     {
         // Use the manual connection flag here
@@ -956,6 +1141,11 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Receive loop that continuously listens for incoming UDP packets from the Z21.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     private async Task ReceiveLoop(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
@@ -1174,7 +1364,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         // It seems that F29, F30 and F31 are not reported in this message.
 
         var locoSlotInfo = new LocoSlotInfo(slotNumber, new LocoInfo(
-            address, speedSteps, speed, data[14], db15, db16, db17, null, _hardwareInfo?.FwVersion
+            address, speedSteps, speed, data[14], db15, db16, db17, null, HardwareInfo?.FwVersion
             ));
 
         LocoSlotInfoReceived.Invoke(this, locoSlotInfo);
@@ -1221,6 +1411,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Parse RailCom data received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseRailComData(ReadOnlySpan<byte> data)
     {
         if (_railComDataReceived is null || data.Length < 17) return;
@@ -1238,6 +1432,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0056, railComData.LocoAddress);
     }
 
+    /// <summary>
+    /// Parse Z21 code (lock information) received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseZ21Code(ReadOnlySpan<byte> data)
     {
         if (Z21CodeReceived is null) return;
@@ -1248,6 +1446,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0057, lockState);
     }
 
+    /// <summary>
+    /// Parse R-Bus data received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseRBusData(ReadOnlySpan<byte> data)
     {
         if (_rBusDataReceived is null) return;
@@ -1259,6 +1461,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0058, groupIndex);
     }
 
+    /// <summary>
+    /// Parse turnout mode received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseTurnoutMode(ReadOnlySpan<byte> data)
     {
         if (TurnoutModeReceived is null)
@@ -1266,12 +1472,16 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
         ushort address = (ushort)((data[4] << 8) | data[5]);
         var mode = (TurnoutMode)data[6];
-        var args = new TurnoutModeChangedEventArgs(address, mode);
+        var args = new TurnoutModeStatus(address, mode);
         TurnoutModeReceived.Invoke(this, args);
         // "Turnout Mode for address {Address} received: {Mode}"
         logger.LogInformation(Messages.Text0059, address, mode);
     }
 
+    /// <summary>
+    /// Parse emergency stop received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseEmergencyStop(ReadOnlySpan<byte> data)
     {
         if (EmergencyStopReceived is null)
@@ -1303,6 +1513,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0062);
     }
 
+    /// <summary>
+    /// Parse turnout info received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseTurnoutInfo(ReadOnlySpan<byte> data)
     {
         if (TurnoutInfoReceived is null) return;
@@ -1330,6 +1544,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0065, address, state);
     }
 
+    /// <summary>
+    /// Parse the track power state received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseTrackPowerState(ReadOnlySpan<byte> data)
     {
         if (TrackPowerInfoReceived is null)
@@ -1356,14 +1574,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         TrackPowerInfoReceived.Invoke(this, trackPowerInfo);
         // "Track Power State received: {trackPowerInfo}"
         logger.LogInformation(Messages.Text0068, trackPowerInfo);
-
-        // A change in track power does not generate a SystemStateChanged, so manually request an update
-        if (_systemStateChanged is not null)
-        {
-            //_ = GetSystemStateAsync();
-        }
     }
 
+    /// <summary>
+    /// Parse the serial number received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseSerialNumber(ReadOnlySpan<byte> data)
     {
         if (SerialNumberReceived is null)
@@ -1376,18 +1592,21 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0069, serial);
     }
 
+    /// <summary>
+    /// Parse hardware info received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseHardwareInfo(ReadOnlySpan<byte> data)
     {
         if (HardwareInfoReceived is null)
             return;
 
-
         if (BuildHardwareInfoStructure(data, out var hardwareInfo))
         {
-            _hardwareInfo = hardwareInfo;
-            HardwareInfoReceived.Invoke(this, _hardwareInfo);
+            HardwareInfo = hardwareInfo;
+            HardwareInfoReceived.Invoke(this, HardwareInfo);
             // "Hardware Info received: {HWType}, Firmware: {FWVersion}"
-            logger.LogInformation(Messages.Text0070, _hardwareInfo.HwType, _hardwareInfo.FwVersion);
+            logger.LogInformation(Messages.Text0070, HardwareInfo.HwType, HardwareInfo.FwVersion);
         }
         else
         {
@@ -1426,6 +1645,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Parse locomotive mode received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseLocoMode(ReadOnlySpan<byte> data)
     {
         ushort address = (ushort)((data[4] << 8) | data[5]);
@@ -1460,25 +1683,33 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         // If not part of a pending request, raise the event as usual.
         if (LocoModeReceived is not null)
         {
-            var args = new LocoModeChangedEventArgs(address, mode);
+            var args = new LocoModeStatus(address, mode);
             LocoModeReceived.Invoke(this, args);
             // "Loco Mode for address {Address} received: {Mode}"
             logger.LogInformation(Messages.Text0073, address, mode);
         }
     }
 
+    /// <summary>
+    /// Parse broadcast flags received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseBroadcastFlags(ReadOnlySpan<byte> data)
     {
         if (BroadcastFlagsReceived is null)
             return;
 
         uint flags = BitConverter.ToUInt32(data[4..]);
-        var args = new BroadcastFlagsChangedEventArgs(flags);
+        var args = new BroadcastFlagsStatus(flags);
         BroadcastFlagsReceived.Invoke(this, args);
         // "Broadcast flags received and processed. Flags: 0x{Flags:X8}"
         logger.LogInformation(Messages.Text0074, flags);
     }
 
+    /// <summary>
+    /// Parse locomotive info received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseLocoInfo(ReadOnlySpan<byte> data)
     {
         if (_locoInfoReceived is null)
@@ -1501,19 +1732,11 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
         ushort address = (ushort)(((data[5] & 0x3F) << 8) | data[6]);
         byte? db8 = null;
-        if (_hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 15)
+        if (HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 15)
         {
             db8 = data[13];
         }
-        var locoInfo = new LocoInfo(address, data[7], data[8], data[9], data[10], data[11], data[12], db8, _hardwareInfo?.FwVersion);
-
-        var speedSteps = (data[7] & 0b00000111) switch
-        {
-            0 => NativeSpeedSteps.Steps14,
-            2 => NativeSpeedSteps.Steps28,
-            4 => NativeSpeedSteps.Steps128,
-            _ => NativeSpeedSteps.Unknown
-        };
+        var locoInfo = new LocoInfo(address, data[7], data[8], data[9], data[10], data[11], data[12], db8, HardwareInfo?.FwVersion);
 
         // --- START: Firmware Bug Workaround ---
         // Check if this LocoInfo is part of a pending request we initiated.
@@ -1534,6 +1757,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0078, address);
     }
 
+    /// <summary>
+    /// Parse the firmware version received from Z21. Please note that firmware version is also part of the hardware info.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseFirmwareVersion(ReadOnlySpan<byte> data)
     {
         if (FirmwareVersionReceived is null)
@@ -1554,6 +1781,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Parse system state received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseSystemState(ReadOnlySpan<byte> data)
     {
         if (_systemStateChanged is null)
@@ -1568,15 +1799,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             return;
         }
 
-        byte? capabilities = null;
-        if (_hardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 19)
+        SystemState.Caps? capabilities = null;
+        if (HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_42 && data.Length >= 19)
         {
-            capabilities = data[19];
+            capabilities = new(data[19]);
         }
         // The z21s does not have a programming track. The value is forced to 0.
-        var args = new SystemStateChangedEventArgs(
+        var args = new SystemState(
             mainCurrentmA: BitConverter.ToInt16(data[4..]),
-            progCurrentmA: _isz21 ? 0 : BitConverter.ToInt16(data[6..]),
+            progCurrentmA: Isz21 is true ? 0 : BitConverter.ToInt16(data[6..]),
             mainCurrentFilteredmA: BitConverter.ToInt16(data[8..]),
             temperatureC: BitConverter.ToInt16(data[10..]),
             supplyVoltagemV: BitConverter.ToInt16(data[12..]),
@@ -1587,10 +1818,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         );
 
         _systemStateChanged.Invoke(this, args);
-        // "System state received and successfully processed."
+        // "System state received and successfully processed. Voltage: {VccVoltagemV}"
         logger.LogInformation(Messages.Text0082, args.VccVoltagemV);
     }
 
+    /// <summary>
+    /// Set the broadcast flags on the Z21 central station.
+    /// </summary>
+    /// <param name="subscripedBroadcastFlags"></param>
+    /// <returns></returns>
     private async Task SetBroadcastFlags(BroadcastFlags subscripedBroadcastFlags)
     {
         var command = new byte[Z21ProtocolConstants.LengthSetBroadcastFlags];
@@ -1602,6 +1838,11 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0083, subscripedBroadcastFlags);
     }
 
+    /// <summary>
+    /// Calculate checksum for a given data span.
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     private static byte CalculateChecksum(ReadOnlySpan<byte> data)
     {
         byte calculatedChecksum = 0;
