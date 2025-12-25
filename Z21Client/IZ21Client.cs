@@ -193,6 +193,13 @@ public interface IZ21Client : IAsyncDisposable
     Task GetSystemStateAsync();
 
     /// <summary>
+    /// Sends a request to get turnout (switch) information for a specific address.
+    /// </summary>
+    /// <param name="address"></param>
+    /// <returns></returns>
+    Task GetTurnoutInfoAsync(ushort address);
+
+    /// <summary>
     /// Sends a request to get the protocol mode (DCC or MM) for a specific turnout address.
     /// </summary>
     /// <param name="address">The turnout address to query.</param>

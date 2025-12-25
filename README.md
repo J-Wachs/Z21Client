@@ -37,6 +37,7 @@ ikke i data fra Z21 i denne event (det er ej heller dokumenteret)
 * I SystemState er Capabilities ændret fra byte til en record for at beskrive flag bedre
 * En metode til at søge efter Z21'ere på netværket er tilføjet
 * Egenskaber HardwareInfo, Isz21, Z21Code, Capabilities og SerialNumber er tilføjet til klassen
+* Tilføjet metode GetTurnoutInfoAsync i IZ21Client og Z1Client
 
 ## z21 og z21Start låseinformation
 
@@ -237,6 +238,8 @@ not exist in the data send from the Z21 in this event (it is not documented)
 * In SystemState, Capabilities has been changed from a byte to a record to better describe the flags
 * A method for discovering Z21 devices on the network has been added
 * The properties HardwareInfo, IsZ21, Z21Code, Capabilities, and SerialNumber have been added to the class
+* Added methode GetTurnoutInfoAsync in IZ21Client and Z1Client
+
 
 ## z21 and z21Start locking information
 

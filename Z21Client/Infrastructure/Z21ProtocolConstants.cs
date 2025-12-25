@@ -136,6 +136,12 @@ public static class Z21ProtocolConstants
     /// </summary>
     public const ushort LengthGetRailComData = 0x0007;
 
+
+    /// <summary>
+    /// Length of a LAN_X_GET_TURNOUTINFO request packet.
+    /// </summary>
+    public const ushort LengthGetTurnoutInfo = 0x0008;
+
     /// <summary>
     /// Length of a LAN_GET_TURNOUTMODE request packet.
     /// </summary>
@@ -175,6 +181,11 @@ public static class Z21ProtocolConstants
     /// Represents the protocol header value used to request locomotive information in XHeader-based communications.
     /// </summary>
     public const byte XHeaderGetLocoInfo = 0xE3;
+
+    /// <summary>
+    /// X-Header for a request to get turnout information (LAN_X_GET_TURNOUTINFO).
+    /// </summary>
+    public const byte XHeaderGetTurnoutInfo = 0x43;
 
     /// <summary>
     /// Represents the protocol header value used to identify a locomotive function set command in XHeader

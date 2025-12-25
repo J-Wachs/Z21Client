@@ -534,6 +534,22 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     }
 
     /// <inheritdoc/>
+    public async Task GetTurnoutInfoAsync(ushort address)
+    {
+        var command = new byte[Z21ProtocolConstants.LengthGetTurnoutInfo];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetTurnoutInfo).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderGetTurnoutInfo;
+        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
+        command[5] = (byte)(address >> 8);
+        command[6] = (byte)(address & 0xFF);
+        command[7] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+        // "GetTurnoutInfoAsync: Requested turnout information for address {address}"
+        logger.LogInformation(Messages.Text0027, address);
+    }
+
+    /// <inheritdoc/>
     public async Task GetTurnoutModeAsync(ushort address)
     {
         var command = new byte[Z21ProtocolConstants.LengthGetTurnoutMode];
