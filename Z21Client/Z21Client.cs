@@ -299,7 +299,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         if (await MakeCallToZ21CodeAsync() is false)
         {
             return false;
-
         }
 
         if (await MakeCallToSerialNumberAsync() is false)
@@ -926,8 +925,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
         if (resultHardwareInfo.IsSuccess)
         {
-            HardwareInfo = resultHardwareInfo.RetrievedData;
-            Isz21 = HardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
+            // The result data property is not used, as we have set the HardwareInfo property in the event handler.
             return true;
         }
         else
@@ -1620,9 +1618,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         if (BuildHardwareInfoStructure(data, out var hardwareInfo))
         {
             HardwareInfo = hardwareInfo;
-            HardwareInfoReceived.Invoke(this, HardwareInfo);
+            Isz21 = HardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
+            if (HardwareInfo is not null)
+            {
+                HardwareInfoReceived.Invoke(this, HardwareInfo);
+            }
             // "Hardware Info received: {HWType}, Firmware: {FWVersion}"
-            logger.LogInformation(Messages.Text0070, HardwareInfo.HwType, HardwareInfo.FwVersion);
+            logger.LogInformation(Messages.Text0070, HardwareInfo?.HwType, HardwareInfo?.FwVersion);
         }
         else
         {
