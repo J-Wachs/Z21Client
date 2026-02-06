@@ -24,20 +24,10 @@ Z21Client-klassen understøtter følgende funktioner:
 
 ## Nyheder i denne version
 
-* Opdateret til .NET 10
-* Ændret så UDP client nu er i selvstændig klasse, for at muliggøre unit tests
-* Tilføjet unit test projekt
-* Rettet stavefejl i denne dokumentation og tilføjet tabel med implementerede Z21 LAN Protocol kommandoer
-* SerialNumber datastruktur er skildt ud i egen fil
-* Metode til at finde Z21 centralstationer på netværket tilføjet
-* Data returneret i event `LocoSlotInfoReceived` viste ikke F12, F20 og F28. Tasterne F29, F30 og F31 findes
-ikke i data fra Z21 i denne event (det er ej heller dokumenteret)
-* Interface IZ21Client er flyttet til roden af projektet
-* Nogle records/klasser er omdøbt for bedre at afspejle deres indhold
-* I SystemState er Capabilities ændret fra byte til en record for at beskrive flag bedre
-* En metode til at søge efter Z21'ere på netværket er tilføjet
-* Egenskaber HardwareInfo, Isz21, Z21Code, Capabilities og SerialNumber er tilføjet til klassen
-* Tilføjet metode GetTurnoutInfoAsync i IZ21Client og Z21Client
+* Refactor af tildeling af lokomotivadresser i forskellige metoder
+* Tilføjet Versions.txt med beskrivelse af ændringer i hver version
+* Ændringer til README.md
+* Udstiller nu flaget "IsConnected" i IZ21Client og Z21Client
 
 ## z21 og z21Start låseinformation
 
@@ -225,21 +215,10 @@ The Z21Client class supports the following features:
 
 ## What is new in this version
 
-* Updated to .NET 10
-* Changed so UDP client is now in it's own class, enabling unit tests
-* Added unit test project
-* Corrected spellingmistakes in this document and added a table showing implemented Z21 LAN Protocol commands
-* Serial Number datastructure is moved to it's own file
-* Method to find Z21 central stations on the network added
-* Data returned in event `LocoSlotInfoReceived` did not show F12, F20 and F28. The f-keys F29, F30 and F31 does
-not exist in the data send from the Z21 in this event (it is not documented)
-* The interface IZ21Client has been moved to the root of the project
-* Some records/classes have been renamed to better reflect their content
-* In SystemState, Capabilities has been changed from a byte to a record to better describe the flags
-* A method for discovering Z21 devices on the network has been added
-* The properties HardwareInfo, IsZ21, Z21Code, Capabilities, and SerialNumber have been added to the class
-* Added method GetTurnoutInfoAsync in IZ21Client and Z21Client
-
+* Refactoring of locomotive address assignment across different methods
+* Added Versions.txt with a description of changes in each version
+* Changes to README.md
+* Now exposes the "IsConnected" flag in IZ21Client and Z21Client
 
 ## z21 and z21Start locking information
 

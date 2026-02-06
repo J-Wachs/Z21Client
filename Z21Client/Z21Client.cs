@@ -28,6 +28,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public HardwareInfo? HardwareInfo { get; private set; }
 
     /// <inheritdoc/>
+    public bool IsConnected { get; private set; }
+
+    /// <inheritdoc/>
     public bool? Isz21 { get; private set; }
 
     /// <inheritdoc/>
@@ -49,9 +52,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     // before raising the final, correct LocoInfoReceived event.
     private readonly Dictionary<ushort, LocoInfo?> _pendingLocoInfoRequests = [];
     // --- END: Added for Firmware Bug Workaround ---
-
-    // Track connection state manually since _udpClient is never null (injected)
-    private bool _isConnected;
 
     private IPEndPoint? _remoteEndPoint;
     private Task? _receiveTask;
@@ -235,7 +235,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0009, host, port);
 
         // Check local connection flag instead of _udpClient null check
-        if (_isConnected)
+        if (IsConnected)
         {
             // "Already connected. Please disconnect first."
             logger.LogWarning(Messages.Text0010);
@@ -264,7 +264,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         {
             // Bind the injected client instead of creating a new UdpClient
             udpClient.Bind(port);
-            _isConnected = true;
+            IsConnected = true;
 
             // "UdpClient created and bound to listen on local port {Port}"
             logger.LogInformation(Messages.Text0013, port);
@@ -346,7 +346,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
 
         // Check local flag
-        if (_isConnected)
+        if (IsConnected)
         {
             await SendCommandAsync(Z21Commands.Logoff);
         }
@@ -380,10 +380,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
 
         // Close the injected client and reset connection flag
-        if (_isConnected)
+        if (IsConnected)
         {
             udpClient.Close();
-            _isConnected = false;
+            IsConnected = false;
         }
 
         HardwareInfo = null;
@@ -435,9 +435,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
         command[4] = Z21ProtocolConstants.XHeaderGetLocoInfo;
         command[5] = 0xF0;
-        var convertedAddress = ConvertLocoAddressForXBus(address);
-        command[6] = convertedAddress.AdrMsb;
-        command[7] = convertedAddress.AdrLsb;
+        var (adrMsb, adrLsb) = ConvertLocoAddressForXBus(address);
+        command[6] = adrMsb;
+        command[7] = adrLsb;
         command[8] = CalculateChecksum(command);
         await SendCommandAsync(command);
         // "GetLocoInfoAsync: Requested loco info for address {Address}"
@@ -585,9 +585,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         command[5] = (byte)(FixedValue | (byte)nativeSpeedStep);
 
         // DB1, DB2: Address
-        var convertedAddress = ConvertLocoAddressForXBus(address);
-        command[6] = convertedAddress.AdrMsb;
-        command[7] = convertedAddress.AdrLsb;
+        var (adrMsb, adrLsb) = ConvertLocoAddressForXBus(address);
+        command[6] = adrMsb;
+        command[7] = adrLsb;
 
         // DB3: RVVVVVVV (Direction and Speed)
         // Ensure speed is within 7 bits (0-127)
@@ -613,9 +613,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
         BitConverter.GetBytes(Z21ProtocolConstants.XHeaderSetLocoFunction).CopyTo(command, 4);
 
-        var convertedAddress = ConvertLocoAddressForXBus(address);
-        command[6] = convertedAddress.AdrMsb;
-        command[7] = convertedAddress.AdrLsb;
+        var (adrMsb, adrLsb) = ConvertLocoAddressForXBus(address);
+        command[6] = adrMsb;
+        command[7] = adrLsb;
 
         command[8] = (byte)(0x80 | (functionIndex & 0b00111111)); // 0x80= Toggle function
         command[9] = CalculateChecksum(command);
@@ -715,7 +715,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task<List<Z21Info>> QueryForZ21sAsync(int timeoutMilliseconds = 3000)
     {
-        if (_isConnected)
+        if (IsConnected)
         {
             // "Cannot perform Z21 discovery while connected to a Z21 device. Please disconnect first."
             logger.LogCritical(Messages.Text0088);
@@ -917,13 +917,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToHardwareInfoAsync()
     {
         // Get Hardware info
-        var resultHardwareInfo = await MakeCallAndGetResultAsync<HardwareInfo>(
+        var (isSuccess, receivedData) = await MakeCallAndGetResultAsync<HardwareInfo>(
             eventMethod => HardwareInfoReceived += eventMethod,
             eventMethod => HardwareInfoReceived -= eventMethod,
             GetHardwareInfoAsync
             );
 
-        if (resultHardwareInfo.IsSuccess)
+        if (isSuccess)
         {
             // The result data property is not used, as we have set the HardwareInfo property in the event handler.
             return true;
@@ -941,15 +941,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToSerialNumberAsync()
     {
         // Get Serial number
-        var resultSerialNumber = await MakeCallAndGetResultAsync<SerialNumber>(
+        var (isSuccess, retrievedData) = await MakeCallAndGetResultAsync<SerialNumber>(
             eventMethod => SerialNumberReceived += eventMethod,
             eventMethod => SerialNumberReceived -= eventMethod,
             GetSerialNumberAsync
             );
-        if (resultSerialNumber.IsSuccess)
+        if (isSuccess)
         {
             // Expose the protocol etc.
-            SerialNumber = resultSerialNumber.RetrievedData;
+            SerialNumber = retrievedData;
             return true;
         }
         else
@@ -965,16 +965,16 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToSystemStateAsync()
     {
         // Get System state
-        var resultSystemChanged = await MakeCallAndGetResultAsync<SystemState>(
+        var (isSuccess, retrievedData) = await MakeCallAndGetResultAsync<SystemState>(
             eventMethod => SystemStateChanged += eventMethod,
             eventMethod => SystemStateChanged -= eventMethod,
             GetSystemStateAsync
             );
 
-        if (resultSystemChanged.IsSuccess && resultSystemChanged.RetrievedData is not null)
+        if (isSuccess && retrievedData is not null)
         {
             // Expose the protocol etc.
-            Capabilities = resultSystemChanged.RetrievedData.Capabilities;
+            Capabilities = retrievedData.Capabilities;
             return true;
         }
         else
@@ -991,16 +991,16 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToZ21CodeAsync()
     {
         // Get Z21code
-        var resultZ21Code = await MakeCallAndGetResultAsync<Z21Code>(
+        var (isSuccess, retrievedData) = await MakeCallAndGetResultAsync<Z21Code>(
             eventMethod => Z21CodeReceived += eventMethod,
             eventMethod => Z21CodeReceived -= eventMethod,
             GetZ21CodeAsync
             );
 
-        if (resultZ21Code.IsSuccess)
+        if (isSuccess)
         {
             // Expose the protocol etc.
-            Z21Code = resultZ21Code.RetrievedData;
+            Z21Code = retrievedData;
             return true;
         }
         else
@@ -1128,7 +1128,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task SendCommandAsync(byte[] command)
     {
         // Use the manual connection flag here
-        if (!_isConnected || _remoteEndPoint is null)
+        if (IsConnected is false || _remoteEndPoint is null)
         {
             // "Cannot send command. Client is not connected."
             logger.LogWarning(Messages.Text0045);
@@ -1166,7 +1166,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         {
             try
             {
-                if (!_isConnected) break;
+                if (IsConnected is false)
+                    break;
 
                 // Use the injected wrapper
                 UdpReceiveResult result = await udpClient.ReceiveAsync(cancellationToken);

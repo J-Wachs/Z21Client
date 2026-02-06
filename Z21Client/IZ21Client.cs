@@ -108,6 +108,11 @@ public interface IZ21Client : IAsyncDisposable
     Z21Code? Z21Code { get; }
 
     /// <summary>
+    /// True if connected to a Z21 command station, false otherwise.
+    /// </summary>
+    bool IsConnected { get; }
+
+    /// <summary>
     /// True if the connected command station is a z21 (white cabinets), false if it is a Z21 (black cabinets).
     /// </summary>
     bool? Isz21 { get; }

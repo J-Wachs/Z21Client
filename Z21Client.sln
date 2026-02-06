@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
+		Versions.txt = Versions.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z21ClientTest", "Z21ClientTest\Z21ClientTest.csproj", "{DBA4C155-86DF-4DF7-AAFD-AC9A8846E9BD}"
