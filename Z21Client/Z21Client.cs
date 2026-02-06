@@ -77,6 +77,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<BroadcastFlagsStatus>? BroadcastFlagsReceived;
 
     /// <inheritdoc/>
+    public event EventHandler<bool>? CVNAckReceived;
+
+    /// <inheritdoc/>
+    public event EventHandler<CVValue>? CVValueReceived;
+
+    /// <inheritdoc/>
     public event EventHandler? EmergencyStopReceived;
 
     /// <inheritdoc/>
@@ -112,6 +118,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <inheritdoc/>
     public event EventHandler<LocoSlotInfo>? LocoSlotInfoReceived;
 
     /// <inheritdoc/>
@@ -404,6 +411,47 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         logger.LogInformation(Messages.Text0085);
     }
 
+    /// <inheritdoc />
+    public async Task GetCVValueFromProgTrackAsync(ushort cvAddress)
+    {
+        cvAddress--;
+        var command = new byte[Z21ProtocolConstants.LengthGetCVValueFromProgTrack];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetCVValueFromProgTrack).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderGetCVFromProgTrack;
+        command[5] = Z21ProtocolConstants.GetCVFromProgTrackDB0;
+        command[6] = (byte)(cvAddress >> 8);
+        command[7] = (byte)(cvAddress & 0xFF);
+        command[8] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        // "Requested CV {cvAddress} on programming track"
+        logger.LogInformation(Messages.Text0093, cvAddress + 1);
+    }
+
+
+    /// <inheritdoc/>
+    public async Task GetCVValueFromPOMAsync(ushort address, ushort cvAddress)
+    {
+        cvAddress--;
+        var command = new byte[Z21ProtocolConstants.LengthGetCVValueFromPOM];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetCVValueFromPOM).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderCVOnPOM;
+        command[5] = Z21ProtocolConstants.TargetLocomotiveDecoder;
+        command[6] = (byte)(address >> 8);
+        command[7] = (byte)(address & 0xFF);
+        command[8] = (byte)(0xE4 | (cvAddress >> 8));
+        command[9] = (byte)(cvAddress & 0xFF);
+        command[10] = 0;
+        command[11] = CalculateChecksum(command);
+
+        await SendCommandAsync(command);
+
+        // "Requested CV {cvAddress} from loco {address} on main track"
+        logger.LogInformation(Messages.Text0091, cvAddress + 1, address);
+    }
+
     /// <inheritdoc/>
     public async Task GetFirmwareVersionAsync()
     {
@@ -568,6 +616,67 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         await SendCommandAsync(Z21Commands.GetCode);
         // "GetZ21CodeAsync: Requested z21/Z21 (feature) code"
         logger.LogInformation(Messages.Text0028);
+    }
+
+    /// <inheritdoc />
+    public async Task SetCVBitOnPOMAsync(ushort address, ushort cvAddress, Bits bit, bool bitValue)
+    {
+        cvAddress--;
+        var command = new byte[Z21ProtocolConstants.LengthSetCVValueToPOM];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetCVValueToPOM).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderCVOnPOM;
+        command[5] = Z21ProtocolConstants.TargetLocomotiveDecoder;
+        command[6] = (byte)(0x3F & (address >> 8));
+        command[7] = (byte)(address & 0xFF);
+        command[8] = (byte)(0xE8 | cvAddress >> 8);
+        command[9] = (byte)(cvAddress & 0xFF);
+        command[10] = (byte)((bitValue ? 0b1000 : 0) + (byte)bit);
+        command[11] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        // "Wrote to address {adress}, CV {cvAddress}, value '{cvValue}' on the main track"
+        logger.LogInformation(Messages.Text0099, address, cvAddress + 1, bit, bitValue ? "1" : "0");
+    }
+
+    /// <inheritdoc />
+    public async Task SetCVValueOnPOMAsync(ushort address, ushort cvAddress, byte cvValue)
+    {
+        cvAddress--;
+        var command = new byte[Z21ProtocolConstants.LengthSetCVValueToPOM];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetCVValueToPOM).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderCVOnPOM;
+        command[5] = Z21ProtocolConstants.TargetLocomotiveDecoder;
+        command[6] = (byte)(0x3F & (address >> 8));
+        command[7] = (byte)(address & 0xFF);
+        command[8] = (byte)(0xEC | cvAddress >> 8);
+        command[9] = (byte)(cvAddress & 0xFF);
+        command[10] = cvValue;
+        command[11] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        // "Wrote to address {adress}, CV {cvAddress}, value '{cvValue}' on the main track"
+        logger.LogInformation(Messages.Text0098, address, cvAddress + 1, cvValue);
+    }
+
+    /// <inheritdoc />
+    public async Task SetCVValueOnProgTrackAsync( ushort cvAddress, byte cvValue)
+    {
+        cvAddress--;
+        var command = new byte[Z21ProtocolConstants.LengthSetCVValueFromProgTrack];
+        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetCVValueFromProgTrack).CopyTo(command, 0);
+        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+        command[4] = Z21ProtocolConstants.XHeaderSetCVOnProgTrack;
+        command[5] = Z21ProtocolConstants.SetCVOnProgTrackDB0;
+        command[6] = (byte)(cvAddress >> 8);
+        command[7] = (byte)(cvAddress & 0xFF);
+        command[8] = cvValue;
+        command[9] = CalculateChecksum(command);
+        await SendCommandAsync(command);
+
+        // "Requested CV {cvAddress} on programming track"
+        logger.LogInformation(Messages.Text0100, cvAddress + 1, cvValue);
     }
 
     /// <inheritdoc/>
@@ -790,7 +899,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         return foundDevices;
     }
 
-
     #endregion Exposed methods
 
     /// <summary>
@@ -917,13 +1025,14 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToHardwareInfoAsync()
     {
         // Get Hardware info
-        var resultHardwareInfo = await MakeCallAndGetResultAsync<HardwareInfo>(
-            eventMethod => HardwareInfoReceived += eventMethod,
-            eventMethod => HardwareInfoReceived -= eventMethod,
-            GetHardwareInfoAsync
+        var (isSuccess, harwareInfoRetrieved) = await AsyncEventHelper.ExecuteAndWaitAsync<HardwareInfo>(
+            triggerAction: async () => await GetHardwareInfoAsync(),
+            subscribe: h => HardwareInfoReceived += h,
+            unsubscribe: h => HardwareInfoReceived -= h,
+            timeoutMs: 3000
             );
 
-        if (resultHardwareInfo.IsSuccess)
+        if (isSuccess)
         {
             // The result data property is not used, as we have set the HardwareInfo property in the event handler.
             return true;
@@ -941,15 +1050,17 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToSerialNumberAsync()
     {
         // Get Serial number
-        var resultSerialNumber = await MakeCallAndGetResultAsync<SerialNumber>(
-            eventMethod => SerialNumberReceived += eventMethod,
-            eventMethod => SerialNumberReceived -= eventMethod,
-            GetSerialNumberAsync
+        var (isSuccess, serialNumberRetrieved) = await AsyncEventHelper.ExecuteAndWaitAsync<SerialNumber>(
+            triggerAction: async () => await GetSerialNumberAsync(),
+            subscribe: h => SerialNumberReceived += h,
+            unsubscribe: h => SerialNumberReceived -= h,
+            timeoutMs: 3000
             );
-        if (resultSerialNumber.IsSuccess)
+
+        if (isSuccess)
         {
-            // Expose the protocol etc.
-            SerialNumber = resultSerialNumber.RetrievedData;
+            // Expose the serial number.
+            SerialNumber = serialNumberRetrieved;
             return true;
         }
         else
@@ -965,16 +1076,17 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToSystemStateAsync()
     {
         // Get System state
-        var resultSystemChanged = await MakeCallAndGetResultAsync<SystemState>(
-            eventMethod => SystemStateChanged += eventMethod,
-            eventMethod => SystemStateChanged -= eventMethod,
-            GetSystemStateAsync
+        var (isSuccess, systemStateRetrieved) = await AsyncEventHelper.ExecuteAndWaitAsync<SystemState>(
+            triggerAction: async () => await GetSystemStateAsync(),
+            subscribe: h => SystemStateChanged += h,
+            unsubscribe: h => SystemStateChanged -= h,
+            timeoutMs: 3000
             );
 
-        if (resultSystemChanged.IsSuccess && resultSystemChanged.RetrievedData is not null)
+        if (isSuccess && systemStateRetrieved is not null)
         {
-            // Expose the protocol etc.
-            Capabilities = resultSystemChanged.RetrievedData.Capabilities;
+            // Expose the capabilities of the connected Z21.
+            Capabilities = systemStateRetrieved.Capabilities;
             return true;
         }
         else
@@ -991,68 +1103,23 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private async Task<bool> MakeCallToZ21CodeAsync()
     {
         // Get Z21code
-        var resultZ21Code = await MakeCallAndGetResultAsync<Z21Code>(
-            eventMethod => Z21CodeReceived += eventMethod,
-            eventMethod => Z21CodeReceived -= eventMethod,
-            GetZ21CodeAsync
+        var (isSuccess, z21CodeRetrieved) = await AsyncEventHelper.ExecuteAndWaitAsync<Z21Code>(
+            triggerAction: async () => await GetZ21CodeAsync(),
+            subscribe: h => Z21CodeReceived += h,
+            unsubscribe: h => Z21CodeReceived -= h,
+            timeoutMs: 3000
             );
 
-        if (resultZ21Code.IsSuccess)
+        if (isSuccess)
         {
-            // Expose the protocol etc.
-            Z21Code = resultZ21Code.RetrievedData;
+            // Expose the Z21 Code.
+            Z21Code = z21CodeRetrieved;
             return true;
         }
         else
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Generic method to make a call to the Z21 and wait for the corresponding event to retrieve the result.
-    /// </summary>
-    /// <typeparam name="TEventArgs">The type of data returned</typeparam>
-    /// <param name="subscribe">Action to execute for subscribe of receiving data</param>
-    /// <param name="unsubscribe">Action to execute for unsubscribe of receiving data</param>
-    /// <param name="methodToCall">Method to call for sending command to Z21</param>
-    /// <returns></returns>
-    private async Task<(bool IsSuccess, TEventArgs? RetrievedData)> MakeCallAndGetResultAsync<TEventArgs>(
-        Action<EventHandler<TEventArgs>> subscribe,
-        Action<EventHandler<TEventArgs>> unsubscribe,
-        Func<Task> methodToCall
-        )
-    {
-        TaskCompletionSource<bool> handshake1Complete = new();
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
-
-        var resultData = default(TEventArgs);
-
-        void handshakeHandler(object? s, TEventArgs e)
-        {
-            handshake1Complete.TrySetResult(true);
-            resultData = e;
-        }
-
-        subscribe(handshakeHandler);
-
-        await methodToCall();
-
-        using (timeoutCts.Token.Register(() => handshake1Complete.TrySetResult(false)))
-        {
-            var result = await handshake1Complete.Task;
-            unsubscribe(handshakeHandler);
-
-            if (!result)
-            {
-                // "Connection failed: Host responded to ping, but did not respond to Z21 command (handshake failed)."
-                logger.LogError(Messages.Text0015);
-                await DisconnectAsync();
-                return (false, default);
-            }
-        }
-
-        return (true, resultData);
     }
 
     /// <summary>
@@ -1418,11 +1485,43 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             case Z21ProtocolConstants.XHeaderTrackPower:
                 ParseTrackPowerState(data);
                 break;
+            case Z21ProtocolConstants.XHeaderCVData:
+                ParseCVValue(data);
+                break;
             default:
                 // "Received an unhandled X-Bus command with X-Header: 0x{XHeader:X2}"
                 logger.LogError(Messages.Text0055, xHeader);
                 break;
         }
+    }
+
+    private void ParseCVValue(ReadOnlySpan<byte> data)
+    {
+        if (CVValueReceived is null)
+            return;
+
+        if (data[5] != 0x14) // Check digit
+        {
+            // "When received CV value, the DB0 byte is not 0x14. Data ignored"
+            logger.LogError(Messages.Text0096);
+            return;
+        }
+
+        var checkSum = CalculateChecksum(data);
+
+        if (checkSum != data[9])
+        {
+            // "CV value packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded"
+            logger.LogError(Messages.Text0097, data[9], checkSum);
+            return;
+        }
+
+        var cvAddress = (ushort)((data[6] << 8) + data[7] + 1);
+
+        CVValueReceived.Invoke(this, new CVValue(cvAddress, data[8]));
+
+        // "CV {cv} contains value '{cvValue}'."
+        logger.LogInformation(Messages.Text0092, cvAddress, data[8]);
     }
 
     /// <summary>
@@ -1564,9 +1663,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <param name="data"></param>
     private void ParseTrackPowerState(ReadOnlySpan<byte> data)
     {
-        if (TrackPowerInfoReceived is null)
-            return;
-
         if (data.Length < 7)
         {
             // "Received Track Power Info packet is too short. Expected 7 bytes, got {Length}"
@@ -1583,11 +1679,32 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             return;
         }
 
-        var state = (TrackPowerState)data[5];
-        var trackPowerInfo = new TrackPowerInfo(state);
-        TrackPowerInfoReceived.Invoke(this, trackPowerInfo);
-        // "Track Power State received: {trackPowerInfo}"
-        logger.LogInformation(Messages.Text0068, trackPowerInfo);
+        // According to the manual, the values used to tracking the power to the track,
+        // has a value of max 8. Therefore this. the 0x82 (Unknown command) is handled
+        // by the caller.
+        if (data[5] <= 0x08)
+        {
+            if (TrackPowerInfoReceived is null)
+                return;
+
+            var state = (TrackPowerState)data[5];
+            var trackPowerInfo = new TrackPowerInfo(state);
+            TrackPowerInfoReceived.Invoke(this, trackPowerInfo);
+            // "Track Power State received: {trackPowerInfo}"
+            logger.LogInformation(Messages.Text0068, trackPowerInfo);
+        }
+        else
+        {
+            // Here we handle 0x12 (LAN_X_CV_NACK_SC) and 0x13 (LAN_CV_NACK).
+            if (CVNAckReceived is null)
+                return;
+
+            // Send signal if it was a short circuit
+            CVNAckReceived.Invoke(this, data[5] is 0x12);
+
+            // "CV programming: Short circuit occur" / "CV programming: Successfull"
+            logger.LogInformation(data[5] is 0x12 ? Messages.Text0093 : Messages.Text0094);
+        }
     }
 
     /// <summary>

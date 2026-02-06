@@ -441,7 +441,7 @@ get inspired on what you can do with it.
 | LAN_X_CV_WRITE | [Not Implemented] |
 | LAN_X_CV_POM_WRITE_BYTE | [Not Implemented] |
 | LAN_X_CV_POM_WRITE_BIT | [Not Implemented] |
-| LAN_X_CV_POM_READ_BYTE | [Not Implemented] |
+| LAN_X_CV_POM_READ_BYTE | GetCVValueOnPOM |
 | LAN_X_CV_POM_ACCESSORY_WRITE_BYTE | [Not Implemented] |
 | LAN_X_CV_POM_ACCESSORY_WRITE_BIT | [Not Implemented] |
 | LAN_X_CV_POM_ACCESSORY_READ_BYTE | [Not Implemented] |

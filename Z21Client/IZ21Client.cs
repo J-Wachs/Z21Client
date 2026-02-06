@@ -12,6 +12,10 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     event EventHandler<BroadcastFlagsStatus> BroadcastFlagsReceived;
 
+    event EventHandler<bool>? CVNAckReceived;
+
+    event EventHandler<CVValue>? CVValueReceived;
+
     /// <summary>
     /// Occurs when the client's connection state to the Z21 changes (e.g., connection is lost).
     /// </summary>
@@ -131,6 +135,10 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task GetBroadcastFlagsAsync();
+
+    Task GetCVValueFromProgTrackAsync(ushort cvAddress);
+
+    Task GetCVValueFromPOMAsync(ushort address, ushort cvAddress);
 
     /// <summary>
     /// Sends a request to get the firmware version from the Z21.
@@ -272,6 +280,16 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task SetTrackPowerOffAsync();
+
+
+
+    Task SetCVBitOnPOMAsync(ushort address, ushort cvAddress, Bits cvBit, bool bitValue);
+
+    Task SetCVValueOnPOMAsync(ushort address, ushort cvAddress, byte cvValue);
+
+    Task SetCVValueOnProgTrackAsync(ushort cvAddress, byte cvValue);
+
+
 
     /// <summary>
     /// Asynchronously discovers available Z21 devices on the local network within the specified timeout period.
