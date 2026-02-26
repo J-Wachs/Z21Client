@@ -1,0 +1,44 @@
+Version of 2026-02-??
+* Added methods to read and write CV settings on locomotive decoders. Also added events for NACK and CV value read
+* Added class AsyncEventHelper to allow for callers to wait for answer from a command sent to the Z21
+* All events are renamed to have 'On' prefix
+* Updated README.md to reflect changes
+
+Version of 2026-02-06:
+* Refactored split of locomotive address in certain methods
+* Updated LICENSE.txt
+* Added Versions.txt
+* Exposed the flag 'IsConnected' as a property
+* Changed README.md to reflect changes
+
+Version of 2025-12-30:
+* 'HardwareInfo' and 'Isz21' flags were not updated correctly
+* Fixed spelings mistakes in README.md. Added GetTurnoutInfopAsync to the mapping table in README.md
+
+Version of 2025-12-25:
+* Added method GetTurnoutInfoAsync to get detailed information about a turnout
+
+Version of 2025-12-23:
+* Update of README.md. Update of test project to reflect name change of certain classes/records.
+* Change to and rename of several classes to records. SystemState: Changed Capabilities from byte
+  to record. Z21Client: Exposed HardwareInfo, Isz21, Z21Code, Capabilities and SerialNumber as properties
+
+Version of 2025-12-14:
+* Added to README.md that Z21Client is developed using the 'AI Pair Programming' method.
+* Bug in Z21Client.ConvertLocoAddressForXBus fixed.
+* Upgraded NuPkgs.
+* QueryForZ21sAsync added write to log before throwing an exception.
+* Fixed addres fields for certain Z21 commands, as the two highest bits of address Msb was not set. Added validation of parameters for certain Z21 commands.
+* README.md: Spelling mistakes corrected, and text about protocol used to communicate with Z21 is corrected.
+* Updated projects to .NET 10. UDP client moved to it's own class. Added test project. Added method to query for Z21s on the network. And more, see README.md.
+* Added info about multilangugage
+* Updated README.md with information about where to find info about which z21 commands can be called on a locked z21/z21Start. Fixed that current usage on programming track is set to 0 for z21/z21Sta…
+* Anchor link fixed
+* Updated achor for english version.
+* Completed README.md in Danish and English
+* Added translation of messages returned from the client. Supports Danish and English. Refactor here-and-there
+* Remaining files moved from Z21Dashboard to Z21Client
+* Moved IZ21Client and BroadcastFlagsChangedEvent from Z21Dashboard to Z21Client
+
+Version 2025-11-20:
+* First version of various files

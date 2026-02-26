@@ -10,86 +10,93 @@ public interface IZ21Client : IAsyncDisposable
     /// <summary>
     /// Occurs when the currently set broadcast flags are received from the Z21.
     /// </summary>
-    event EventHandler<BroadcastFlagsStatus> BroadcastFlagsReceived;
+    event EventHandler<BroadcastFlagsStatus> OnBroadcastFlagsReceived;
 
-    event EventHandler<bool>? CVNAckReceived;
+    /// <summary>
+    /// Occurs when the Z21 did not receive an acknowledgment (ACK) for a CV write command within the expected time frame.
+    /// The boolean parameter indicates whether the ACK was received (true) or not (false).
+    /// </summary>
+    event EventHandler<bool>? OnCVNAckReceived;
 
-    event EventHandler<CVValue>? CVValueReceived;
+    /// <summary>
+    /// Occurs when a new CV value is received.
+    /// </summary>
+    event EventHandler<CVValue>? OnCVValueReceived;
 
     /// <summary>
     /// Occurs when the client's connection state to the Z21 changes (e.g., connection is lost).
     /// </summary>
-    event EventHandler<ConnectionStatus> ConnectionStateChanged;
+    event EventHandler<ConnectionStatus> OnConnectionStateChanged;
 
     /// <summary>
     /// Occurs when an emergency stop command is received from the Z21.
     /// </summary>
-    event EventHandler? EmergencyStopReceived;
+    event EventHandler? OnEmergencyStopReceived;
 
     /// <summary>
     /// Occurs when the firmware version is received from the Z21.
     /// </summary>
-    event EventHandler<FirmwareVersion> FirmwareVersionReceived;
+    event EventHandler<FirmwareVersion> OnFirmwareVersionReceived;
 
     /// <summary>
     /// Occurs when hardware information is received from the Z21.
     /// </summary>
-    event EventHandler<HardwareInfo> HardwareInfoReceived;
+    event EventHandler<HardwareInfo> OnHardwareInfoReceived;
 
     /// <summary>
     /// Occurs when locomotive information is received as a broadcast from the Z21.
     /// </summary>
-    event EventHandler<LocoInfo> LocoInfoReceived;
+    event EventHandler<LocoInfo> OnLocoInfoReceived;
 
     /// <summary>
     /// Occurs when a locomotive's protocol mode is received from the Z21.
     /// </summary>
-    event EventHandler<LocoModeStatus> LocoModeReceived;
+    event EventHandler<LocoModeStatus> OnLocoModeReceived;
 
     /// <summary>
     /// Occurs when a locomotive slot information is received from the Z21.
     /// </summary>
-    public event EventHandler<LocoSlotInfo>? LocoSlotInfoReceived;
+    public event EventHandler<LocoSlotInfo>? OnLocoSlotInfoReceived;
 
     /// <summary>
     /// Occurs when RailCom data for a locomotive is received from the Z21.
     /// </summary>
-    event EventHandler<RailComData> RailComDataReceived;
+    event EventHandler<RailComData> OnRailComDataReceived;
 
     /// <summary>
     /// Occurs when R-Bus feedback data is received from the Z21.
     /// </summary>
-    event EventHandler<RBusData> RBusDataReceived;
+    event EventHandler<RBusData> OnRBusDataReceived;
 
     /// <summary>
     /// Occurs when the serial number is received from the Z21.
     /// </summary>
-    event EventHandler<SerialNumber> SerialNumberReceived;
+    event EventHandler<SerialNumber> OnSerialNumberReceived;
 
     /// <summary>
     /// Occurs when the system state is received from the Z21.
     /// </summary>
-    event EventHandler<SystemState> SystemStateChanged;
+    event EventHandler<SystemState> OnSystemStateChanged;
 
     /// <summary>
-    /// Occurs when trackk power information is received from the Z21.
+    /// Occurs when track power information is received from the Z21.
     /// </summary>
-    event EventHandler<TrackPowerInfo>? TrackPowerInfoReceived;
+    event EventHandler<TrackPowerInfo>? OnTrackPowerInfoReceived;
 
     /// <summary>
     /// Occurs when turnout (switch) information is received as a broadcast from the Z21.
     /// </summary>
-    event EventHandler<TurnoutInfo> TurnoutInfoReceived;
+    event EventHandler<TurnoutInfo> OnTurnoutInfoReceived;
 
     /// <summary>
     /// Occurs when a turnout's protocol mode is received from the Z21.
     /// </summary>
-    event EventHandler<TurnoutModeStatus> TurnoutModeReceived;
+    event EventHandler<TurnoutModeStatus> OnTurnoutModeReceived;
 
     /// <summary>
     /// Occurs when the Z21's feature scope code is received.
     /// </summary>
-    event EventHandler<Z21Code> Z21CodeReceived;
+    event EventHandler<Z21Code> OnZ21CodeReceived;
 
     /// <summary>
     /// Capabilities of the connected Z21 command station. Valid from FW version 1.42.
@@ -110,6 +117,11 @@ public interface IZ21Client : IAsyncDisposable
     /// The lock state of the z21/Z21.
     /// </summary>
     Z21Code? Z21Code { get; }
+
+    /// <summary>
+    /// True if connected to a Z21 command station, false otherwise.
+    /// </summary>
+    bool IsConnected { get; }
 
     /// <summary>
     /// True if the connected command station is a z21 (white cabinets), false if it is a Z21 (black cabinets).
@@ -136,8 +148,18 @@ public interface IZ21Client : IAsyncDisposable
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task GetBroadcastFlagsAsync();
 
+    /// <summary>
+    /// Gets the value of a specific CV from a locomotive decoder on the programming track.
+    /// </summary>
+    /// <param name="cvAddress"></param>
+    /// <returns></returns>
     Task GetCVValueFromProgTrackAsync(ushort cvAddress);
 
+    /// <summary>
+    /// Gets the value of a specific CV from a locomotive decoder on the main track.
+    /// </summary>
+    /// <param name="cvAddress"></param>
+    /// <returns></returns>
     Task GetCVValueFromPOMAsync(ushort address, ushort cvAddress);
 
     /// <summary>
@@ -221,6 +243,33 @@ public interface IZ21Client : IAsyncDisposable
     Task GetZ21CodeAsync();
 
     /// <summary>
+    /// Sets a specific bit of a CV to a value on a locomotive decoder on the main track using Programming on the Main (POM).
+    /// </summary>
+    /// <param name="address"></param>
+    /// <param name="cvAddress"></param>
+    /// <param name="cvBit"></param>
+    /// <param name="bitValue"></param>
+    /// <returns></returns>
+    Task SetCVBitOnPOMAsync(ushort address, ushort cvAddress, Bits cvBit, bool bitValue);
+
+    /// <summary>
+    /// Sets the value of a CV in a locomotive decoder on the main track using Programming on the Main (POM).
+    /// </summary>
+    /// <param name="address"></param>
+    /// <param name="cvAddress"></param>
+    /// <param name="cvValue"></param>
+    /// <returns></returns>
+    Task SetCVValueOnPOMAsync(ushort address, ushort cvAddress, byte cvValue);
+
+    /// <summary>
+    /// Sets the value of a CV in a locomotive decoder on the programming track.
+    /// </summary>
+    /// <param name="cvAddress"></param>
+    /// <param name="cvValue"></param>
+    /// <returns></returns>
+    Task SetCVValueOnProgTrackAsync(ushort cvAddress, byte cvValue);
+
+    /// <summary>
     /// Set a finction for a specific locomotive.
     /// </summary>
     /// <param name="address"></param>
@@ -280,16 +329,6 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task SetTrackPowerOffAsync();
-
-
-
-    Task SetCVBitOnPOMAsync(ushort address, ushort cvAddress, Bits cvBit, bool bitValue);
-
-    Task SetCVValueOnPOMAsync(ushort address, ushort cvAddress, byte cvValue);
-
-    Task SetCVValueOnProgTrackAsync(ushort cvAddress, byte cvValue);
-
-
 
     /// <summary>
     /// Asynchronously discovers available Z21 devices on the local network within the specified timeout period.
