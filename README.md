@@ -29,7 +29,6 @@ Z21Client-klassen understøtter følgende funktioner:
 * Alle events er omdøbt til at have prefiks "On"
 * Opdateret README.md til at afspejle ænderingerne
 
-
 ## z21 og z21Start låseinformation
 
 Hvis din z21 eller z21Start er låst, kan du stadig sende kommandoer til den med denne klasse. Dog vil
@@ -171,6 +170,23 @@ Opret venligst et issue i repo’et.
 Ingen på nuværende tidspunkt.
 
 ## FAQ
+
+### Når jeg kalder metoden QueryForZ21s vises min Z21 ikke
+
+Listen som metoden returnerer er tom, og du får ingen fejl. Du kan forbinde med Z21Client til din Z21 centralstation (alle
+modeller), og sende kommandoer og modtage data. At metoden returnerer en tom liste, sker typisk når pc'en er koblet på
+netværket trådløst.
+
+For at finde Z21'ere på netværket udsender QueryForZ21s en UDP-broadcast som Z21 centralstationerne skal svare på. Mange
+access points og routere blokerer for UDP-broadcasts, og det er derfor muligt, at din Z21 ikke modtager broadcastet og
+derfor ikke svarer på det. Det er også muligt, at din pc ikke modtager svaret fra Z21.
+
+Kik i opsætningen af dit access point eller router og se, om der er en indstilling for at blokere for UDP-broadcasts.
+Hvis det er tilfældet, skal du slå denne indstilling fra. Visse routere og access points har også en indstilling for
+at blokere for UDP-broadcasts på det trådløse net alene. Andre access points og routere har ikke en indstilling, men blokerer
+for UDP-broadcasts på det trådløse net som standard. I dette tilfælde kan du prøve at forbinde din pc til netværket med kabel
+for at se, om det løser problemet. Hvis det gør det, er det sandsynligt, at dit access point eller router blokerer for
+UDP-broadcasts på det trådløse net.
 
 ### Vil du implementere LocoNet- og CAN-bus-funktionalitet?
 
@@ -361,6 +377,29 @@ Please create an issue in the repo.
 None at this time.
 
 ## FAQ
+
+### When I call the QueryForZ21s method, my Z21 is not shown
+
+The list returned by the method is empty, and no error is raised. You can still
+connect with Z21Client to your Z21 central station (all models), send commands,
+and receive data. The method typically returns an empty list when the PC is
+connected to the network wirelessly.
+
+To discover Z21 devices on the network, QueryForZ21s sends a UDP broadcast that
+the Z21 central stations must respond to. Many access points and routers block
+UDP broadcasts, which may prevent your Z21 from receiving the broadcast and
+responding. It is also possible that your PC does not receive the response
+from the Z21.
+
+Check the configuration of your access point or router to see if there is a
+setting that blocks UDP broadcasts. If so, disable this setting. Some routers
+and access points also have a setting to block UDP broadcasts on the wireless
+network only. Other routers and access points do not expose such a setting but
+block UDP broadcasts on the wireless network by default.
+
+In that case, try connecting your PC to the network using a cable to see if
+that resolves the problem. If it does, it is likely that your access point or
+router blocks UDP broadcasts on the wireless network.
 
 ### Will you implement LocoNet and CAN bus functionality?
 
