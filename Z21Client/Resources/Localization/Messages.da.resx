@@ -387,4 +387,34 @@
   <data name="Text0090" xml:space="preserve">
     <value>Gruppeindex skal være enten 0 eller 1. Værdien angivet er {groupIndex}.</value>
   </data>
+  <data name="Text0091" xml:space="preserve">
+    <value>Anmodede om CV {cvAddress} fra lokomotiv {address} på hovedsporet</value>
+  </data>
+  <data name="Text0092" xml:space="preserve">
+    <value>Modtog CV {cv}. Det indeholder værdien '{cvValue}'</value>
+  </data>
+  <data name="Text0093" xml:space="preserve">
+    <value>Anmodede om CV {cvAddresss} fra programmingssporet</value>
+  </data>
+  <data name="Text0095" xml:space="preserve">
+    <value>CV programmering: Modtog ikke ACK fra dekoder</value>
+  </data>
+  <data name="Text0094" xml:space="preserve">
+    <value>CV programmering: Kortslutning opstod</value>
+  </data>
+  <data name="Text0096" xml:space="preserve">
+    <value>Ved modtagelse af CV værdi, er DB0 bytes ikke 0x14. Data ignoreret</value>
+  </data>
+  <data name="Text0097" xml:space="preserve">
+    <value>CV værdi pakke modtaget med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret</value>
+  </data>
+  <data name="Text0098" xml:space="preserve">
+    <value>Skrev til adresse address {address}, CV {cvAddress}, værdi '{cvValue}' på hovedsporet</value>
+  </data>
+  <data name="Text0099" xml:space="preserve">
+    <value>Wrote to address {address}, CV {cvAddress}, bit {bit}, value '{bitValue}'</value>
+  </data>
+  <data name="Text0100" xml:space="preserve">
+    <value>Skrev CV {cvAddress}, value '{cvValue'} på programmeringssporet</value>
+  </data>
 </root>

@@ -387,4 +387,34 @@
   <data name="Text0090" xml:space="preserve">
     <value>Group index must be either 0 or 1. The value given is {groupIndex}.</value>
   </data>
+  <data name="Text0091" xml:space="preserve">
+    <value>Requested CV {cvAddress} from loco {address} on main track</value>
+  </data>
+  <data name="Text0092" xml:space="preserve">
+    <value>Received CV {cv}. It contains value '{cvValue}'</value>
+  </data>
+  <data name="Text0093" xml:space="preserve">
+    <value>Requested CV {cvAddress} on programming track</value>
+  </data>
+  <data name="Text0095" xml:space="preserve">
+    <value>CV programming: Did not receive ACK from decoder</value>
+  </data>
+  <data name="Text0094" xml:space="preserve">
+    <value>CV programming: Short circuit occured</value>
+  </data>
+  <data name="Text0096" xml:space="preserve">
+    <value>When received CV value, the DB0 byte is not 0x14. Data ignored</value>
+  </data>
+  <data name="Text0097" xml:space="preserve">
+    <value>CV value packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded</value>
+  </data>
+  <data name="Text0098" xml:space="preserve">
+    <value>Wrote to address {address}, CV {cvAddress}, value '{cvValue}' on the main track</value>
+  </data>
+  <data name="Text0099" xml:space="preserve">
+    <value>Wrote to address {address}, CV {cvAddress}, bit {bit}, value '{bitValue}'</value>
+  </data>
+  <data name="Text0100" xml:space="preserve">
+    <value>Wrote CV {cvAddress}, value '{cvValue}' on programming track</value>
+  </data>
 </root>

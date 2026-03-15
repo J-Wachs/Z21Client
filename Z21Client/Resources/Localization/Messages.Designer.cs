@@ -869,5 +869,95 @@ namespace Z21Client.Resources.Localization {
                 return ResourceManager.GetString("Text0090", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requested CV {cvAddress} from loco {address} on main track.
+        /// </summary>
+        internal static string Text0091 {
+            get {
+                return ResourceManager.GetString("Text0091", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received CV {cv}. It contains value &apos;{cvValue}&apos;.
+        /// </summary>
+        internal static string Text0092 {
+            get {
+                return ResourceManager.GetString("Text0092", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requested CV {cvAddress} on programming track.
+        /// </summary>
+        internal static string Text0093 {
+            get {
+                return ResourceManager.GetString("Text0093", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CV programming: Short circuit occured.
+        /// </summary>
+        internal static string Text0094 {
+            get {
+                return ResourceManager.GetString("Text0094", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CV programming: Did not receive ACK from decoder.
+        /// </summary>
+        internal static string Text0095 {
+            get {
+                return ResourceManager.GetString("Text0095", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When received CV value, the DB0 byte is not 0x14. Data ignored.
+        /// </summary>
+        internal static string Text0096 {
+            get {
+                return ResourceManager.GetString("Text0096", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CV value packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.
+        /// </summary>
+        internal static string Text0097 {
+            get {
+                return ResourceManager.GetString("Text0097", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrote to address {address}, CV {cvAddress}, value &apos;{cvValue}&apos; on the main track.
+        /// </summary>
+        internal static string Text0098 {
+            get {
+                return ResourceManager.GetString("Text0098", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrote to address {address}, CV {cvAddress}, bit {bit}, value &apos;{bitValue}&apos;.
+        /// </summary>
+        internal static string Text0099 {
+            get {
+                return ResourceManager.GetString("Text0099", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrote CV {cvAddress}, value &apos;{cvValue}&apos; on programming track.
+        /// </summary>
+        internal static string Text0100 {
+            get {
+                return ResourceManager.GetString("Text0100", resourceCulture);
+            }
+        }
     }
 }

@@ -1,8 +1,14 @@
+Version of 2026-03-15
+* Added methods to read and write CV settings on locomotive decoders. Also added events for NACK and CV value read
+* Added class AsyncEventHelper to allow for callers to wait for answer from a command sent to the Z21
+* All events are renamed to have 'On' prefix
+* Updated README.md to reflect changes
+
 Version of 2026-02-06:
 * Refactored split of locomotive address in certain methods
 * Updated LICENSE.txt
 * Added Versions.txt
-* Z21Client: Exposed the flag 'IsConnected' as a property
+* Exposed the flag 'IsConnected' as a property
 * Changed README.md to reflect changes
 
 Version of 2025-12-30:

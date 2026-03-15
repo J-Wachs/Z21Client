@@ -148,6 +148,16 @@ public static class Z21ProtocolConstants
     public const ushort LengthGetTurnoutMode = 0x0006;
 
     /// <summary>
+    /// Length of header for the LAN_X_CV_POM_READ_BYTE command.
+    /// </summary>
+    public const ushort LengthGetCVValueFromPOM = 12;
+
+    /// <summary>
+    /// Length of header for the LAN_X_CV_READ_BYTE command.
+    /// </summary>
+    public const ushort LengthGetCVValueFromProgTrack = 9;
+
+    /// <summary>
     /// Length of a LAN_SET_TURNOUTMODE request packet.
     /// </summary>
     public const ushort LengthSetTurnoutMode = 0x0007;
@@ -162,11 +172,15 @@ public static class Z21ProtocolConstants
     /// </summary>
     public const ushort LengthSetBroadcastFlags = 0x0008;
 
+
+    public const byte TargetLocomotiveDecoder = 0x30;
+
     /// <summary>
     /// Represents the value of the X header field as defined by the protocol specification.
     /// </summary>
     public const ushort XHeader = 0x0040;
 
+    public const byte XHeaderCVData = 0x64;
     /// <summary>
     /// X-Header for a response that emergency stop was issued (LAN_BC_STOPPED).
     /// </summary>
@@ -227,4 +241,24 @@ public static class Z21ProtocolConstants
     /// Represents the protocol header value used to request locomotive slot information.
     /// </summary>
     public const ushort HeaderGetLocoSlotInfo = 0x00AF;
+
+
+
+    public const byte XHeaderCVOnPOM = 0xE6;
+
+    public const byte XHeaderGetCVFromProgTrack = 0x23;
+
+    public const byte XHeaderSetCVOnProgTrack = 0x24;
+
+    public const byte GetCVFromProgTrackDB0 = 0x11;
+
+    public const byte SetCVOnProgTrackDB0 = 0x12;
+
+    public const ushort LengthSetCVValueToPOM = 0x0C;
+
+    public const ushort LengthSetCVValueFromProgTrack = 0x0A;
+
+
+
+
 }
