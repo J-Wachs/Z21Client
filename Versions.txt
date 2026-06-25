@@ -1,3 +1,6 @@
+Version of 2026-06-25
+* A spelling mistage in enum HardwareInfo has been fixed (Z21Xl => Z21XL)
+
 Version of 2026-03-15
 * Added methods to read and write CV settings on locomotive decoders. Also added events for NACK and CV value read
 * Added class AsyncEventHelper to allow for callers to wait for answer from a command sent to the Z21

@@ -48,7 +48,7 @@ public enum HardwareType : uint
     /// <summary>
     /// 10870 Z21 XL Series (from 2020).
     /// </summary>
-    Z21Xl = 0x00000211,
+    Z21XL = 0x00000211,
 
     /// <summary>
     /// 10869 Z21 XL Booster (from 2021, zLink).

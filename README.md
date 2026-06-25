@@ -24,10 +24,7 @@ Z21Client-klassen understøtter følgende funktioner:
 
 ## Nyheder i denne version
 
-* Tilføjet metoder til at læse og skrive CV indstillinger på lokomotivdekodere. Der er også tilføjet events for NACK og CV værdi læst
-* Tilføjet klassen AsyncEventHelper for at tillade kaldende metoder at venter på svar fra en kommando sendt til Z21
-* Alle events er omdøbt til at have prefiks "On"
-* Opdateret README.md til at afspejle ænderingerne
+* Rettet en stavefejl i enum HardwareInfo (Z21Xl rettet til Z21XL)
 
 ## z21 og z21Start låseinformation
 
@@ -232,10 +229,7 @@ The Z21Client class supports the following features:
 
 ## What is new in this version
 
-* Added methods to read and write CV settings on locomotive decoders. Also added events for NACK and CV value read
-* Added class AsyncEventHelper to allow for callers to wait for answer from a command sent to the Z21
-* All events are renamed to have the prefix 'On'
-* Updated README.md to reflect changes
+* A spelling mistage in enum HardwareInfo has been corrected (Z21Xl corrected to Z21XL)
 
 ## z21 and z21Start locking information
 
