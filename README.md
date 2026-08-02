@@ -1,75 +1,78 @@
-[For English version, click here](#z21client-c-class)
+Ôªø[For English version, click here](#z21client-c-class)<br />
+[F√ºr die deutsche Version hier klicken](#z21client-c-klasse-deutch)
 
 Danish version:
 # Z21Client C# klasse
 
 En C#-klasse til kommunikation med z21, z21Start, Z21 og Z21 XL centralstationerne til modeltogsbaner fra Roco/Fleischmann.
 
-Z21Client-klassen underst¯tter f¯lgende funktioner:
+Z21Client-klassen underst√∏tter f√∏lgende funktioner:
 
-* Sprogversionering, dansk nÂr sprog i Windows er sat til dansk. For alle andre sprog vises tekster pÂ engelsk
+* Sprogversionering, dansk/tysk n√•r sprog i Windows er sat til dansk/tysk. For alle andre sprog vises tekster p√• engelsk
 * Forbindelse til Z21 via UDP
-* Modtage information om lokomotiver (hastighed, retning, funktioner, protokol), nÂr andre styreenheder bruges
-* Modtage information om sporskifter/points (position, protokol), nÂr andre styreenheder bruges
+* Modtage information om lokomotiver (hastighed, retning, funktioner, protokol), n√•r andre styreenheder bruges
+* Modtage information om sporskifter/points (position, protokol), n√•r andre styreenheder bruges
 * Sende kommandoer til styring af lokomotiver (hastighed, retning, funktioner, protokol)
 * Sende kommandoer til styring af sporskifter/points (position, protokol)
-* LÊse feedback fra Z21 (f.eks. lokomotivstatus)
-* Underst¯ttelse af flere lokomotiver
-* Event-drevet arkitektur til hÂndtering af svar og opdateringer
+* L√¶se feedback fra Z21 (f.eks. lokomotivstatus)
+* Underst√∏ttelse af flere lokomotiver
+* Event-drevet arkitektur til h√•ndtering af svar og opdateringer
 * Asynkrone operationer for ikke-blokerende kommunikation
-* FejlhÂndtering og genforbindelseslogik
-* Underst¯ttelse af protokoller brugt af z21/Z21 (DCC, M‰rklin Motorola)
-* Logging-muligheder til fejlfinding og overvÂgning
+* Fejlh√•ndtering og genforbindelseslogik
+* Underst√∏ttelse af protokoller brugt af z21/Z21 (DCC, M√§rklin Motorola)
+* Logging-muligheder til fejlfinding og overv√•gning
 * Z21Client er udviklet efter "AI Pair Programming" metoden
 
 ## Nyheder i denne version
 
-* Rettet en stavefejl i enum HardwareInfo (Z21Xl rettet til Z21XL)
+* Tilf√∏jet meddelelser p√• tysk. Bem√¶rk venligst, at de tyske meddelelser er oversat af en AI, og derfor kan v√¶re
+  mindre korrekte end de danske og engelske meddelelser.
+* Tilf√∏jet mange nye tests til testprojektet
 
-## z21 og z21Start lÂseinformation
+## z21 og z21Start l√•seinformation
 
-Hvis din z21 eller z21Start er lÂst, kan du stadig sende kommandoer til den med denne klasse. Dog vil
+Hvis din z21 eller z21Start er l√•st, kan du stadig sende kommandoer til den med denne klasse. Dog vil
 kommandoerne blive ignoreret af z21/z21Start.
 
-Hvis z21/z21Start er lÂst, kan du stadig bruge Z21Client-klassen til at skrive et overvÂgningsprogram, der lÊser
-status for lokomotiver og sporskifter/points. Du kan ogsÂ kalde metoder i Z21Client til at skifte protokol pÂ 
-lokomotiver og sporskifter/sporskiftedekodere. Du kan lÊse mere om hvilke metoder (der pakker z21 kommandoer ind) 
-der kan kaldes nÂr z21/z21Start er lÂst, i den officielle Z21 LAN Protcol dokomentation, pÂ Z21s hjemmeside.
+Hvis z21/z21Start er l√•st, kan du stadig bruge Z21Client-klassen til at skrive et overv√•gningsprogram, der l√¶ser
+status for lokomotiver og sporskifter/points. Du kan ogs√• kalde metoder i Z21Client til at skifte protokol p√• 
+lokomotiver og sporskifter/sporskiftedekodere. Du kan l√¶se mere om hvilke metoder (der pakker z21 kommandoer ind) 
+der kan kaldes n√•r z21/z21Start er l√•st, i den officielle Z21 LAN Protcol dokomentation, p√• Z21s hjemmeside.
 
-BemÊrk, at da z21 (i hvidt kabinet) oprindeligt blev lanceret, var nogle lÂste og andre ulÂste. For at lÂse
-din z21 eller z21Start op, kan du k¯be en oplÂsningskode:
+Bem√¶rk, at da z21 (i hvidt kabinet) oprindeligt blev lanceret, var nogle l√•ste og andre ul√•ste. For at l√•se
+din z21 eller z21Start op, kan du k√∏be en opl√•sningskode:
 
-* Roco varenummer 10814. Indeholder et trÂdl¯st access-point samt oplÂsningskode til z21Start og z21 (hvidt kabinet).
-* Roco varenummer 10818. Indeholder oplÂsningskode til z21Start og z21 (hvidt kabinet).
+* Roco varenummer 10814. Indeholder et tr√•dl√∏st access-point samt opl√•sningskode til z21Start og z21 (hvidt kabinet).
+* Roco varenummer 10818. Indeholder opl√•sningskode til z21Start og z21 (hvidt kabinet).
 
 Fra nu af vil betegnelsen Z21 blive brugt om alle fire versioner af Z21-familien af centralstationer. Hvis noget
-kun gÊlder Èn af versionerne, vil det blive angivet.
+kun g√¶lder √©n af versionerne, vil det blive angivet.
 
-Z21Client blev udviklet og testet ved brug af to z21Start centralstationer: Èn lÂst og Èn ulÂst. Dette er grunden
+Z21Client blev udviklet og testet ved brug af to z21Start centralstationer: √©n l√•st og √©n ul√•st. Dette er grunden
 til, at hverken LocoNet- eller CAN-bus-funktionalitet er implementeret i Z21Client-klassen.
 
-Implementeringen er baseret pÂ Roco-dokumentet *"Z21 LAN Protocol Specification"*, version 1.13 EN, dateret 6.
+Implementeringen er baseret p√• Roco-dokumentet *"Z21 LAN Protocol Specification"*, version 1.13 EN, dateret 6.
 november 2023. Dokumentet kan downloades fra Z21-websitet.
 
 ## Fuldt funktionelt eksempelprojekt
 
-For at se et eksempel pÂ brugen af Z21Client, bes¯g venligst mit projekt *Z21Dashboard* pÂ Github:
+For at se et eksempel p√• brugen af Z21Client, bes√∏g venligst mit projekt *Z21Dashboard* p√• Github:
 
 [https://github.com/J-Wachs/Z21Dashboard](https://github.com/J-Wachs/Z21Dashboard)
 
 ## Hvordan virker det?
 
-Z21Client-klassen bruger UDP til at kommunikere med Z21-centralen. I din applikation skal du f¯rst
+Z21Client-klassen bruger UDP til at kommunikere med Z21-centralen. I din applikation skal du f√∏rst
 oprette forbindelse til Z21.
 
-Da arkitekturen i Z21Client-klassen er event-drevet, skal du abonnere pÂ de events, du ¯nsker at hÂndtere
-i din applikation. For eksempel skal du abonnere pÂ eventet *ëLocoStatusReceivedí* for at hÂndtere
+Da arkitekturen i Z21Client-klassen er event-drevet, skal du abonnere p√• de events, du √∏nsker at h√•ndtere
+i din applikation. For eksempel skal du abonnere p√• eventet *ÔøΩLocoStatusReceivedÔøΩ* for at h√•ndtere
 opdateringer af lokomotivstatus.
 
-De n¯dvendige Êndringer af broadcast-flagene pÂ Z21 bliver automatisk hÂndteret af Z21Client-klassen, nÂr du
-tilf¯jer din metode til Z21Client-eventet.
+De n√∏dvendige √¶ndringer af broadcast-flagene p√• Z21 bliver automatisk h√•ndteret af Z21Client-klassen, n√•r du
+tilf√∏jer din metode til Z21Client-eventet.
 
-Eksempel pÂ abonnement pÂ LocoStatusReceived-eventet:
+Eksempel p√• abonnement p√• LocoStatusReceived-eventet:
 
 ```csharp
 ...
@@ -82,69 +85,69 @@ Z21Client.LocoInfoReceived += OnLocoInfoReceived;
 
 private async void OnLocoInfoReceived(object? sender, LocoInfo e)
 {
-	// HÂndter modtaget lokomotivinfo
+	// H√•ndter modtaget lokomotivinfo
 	Console.WriteLine($"Loco Info Received: Address={e.Address}, Speed={e.CurrentSpeed}, Direction={e.Direction}");
 }
 ```
 
-### Implementering af M‰rklin Motorola-protokol i Z21Client vs i Z21
+### Implementering af M√§rklin Motorola-protokol i Z21Client vs i Z21
 
-Z21 underst¯tter bÂde DCC og M‰rklin Motorola protokoller til styring af lokomotiver. F¯lgende versioner af
-protokollerne er implementeret som f¯lger:
+Z21 underst√∏tter b√•de DCC og M√§rklin Motorola protokoller til styring af lokomotiver. F√∏lgende versioner af
+protokollerne er implementeret som f√∏lger:
 
 * DCC, 14 trin: Protokol = DCC, hastighedstrin = 14
 * DCC, 28 trin: Protokol = DCC, hastighedstrin = 28
 * DCC, 128 trin: Protokol = DCC, hastighedstrin = 128
-* M‰rklin Motorola 1, 14 trin: Protokol = M‰rklin Motorola, hastighedstrin = 14
-* M‰rklin Motorola 2, 14 trin: Protokol = M‰rklin Motorola, hastighedstrin = 28
-* M‰rklin Motorola 2, 28 trin: Protokol = M‰rklin Motorola, hastighedstrin = 128
+* M√§rklin Motorola 1, 14 trin: Protokol = M√§rklin Motorola, hastighedstrin = 14
+* M√§rklin Motorola 2, 14 trin: Protokol = M√§rklin Motorola, hastighedstrin = 28
+* M√§rklin Motorola 2, 28 trin: Protokol = M√§rklin Motorola, hastighedstrin = 128
 
-PÂ grund af dette rapporterer Z21 hastighedstrinene som 14, 28 eller 128, ogsÂ nÂr M‰rklin Motorola
+P√• grund af dette rapporterer Z21 hastighedstrinene som 14, 28 eller 128, ogs√• n√•r M√§rklin Motorola
 benyttes. Z21Client er udviklet til at afspejle protokollen og hastighedstrinene, som man normalt ville forvente.
-Derfor vil hastighedstrinene ved M‰rklin Motorola vÊre hhv. 14, 14 eller 28.
+Derfor vil hastighedstrinene ved M√§rklin Motorola v√¶re hhv. 14, 14 eller 28.
 
 Klassen *LocoInfo*, som bruges i Z21Client, afspejler denne implementering og indeholder to
 hastigheds-egenskaber:
 
 * **SpeedSteps:** Hastighedstrin som implementeret i Z21Client (DCC: 14, 28, 128; MM: 14, 14, 28)
-* **NativeSpeedSteps:** Hastighedstrin som implementeret i Z21. Altid 14, 28 eller 128 ó ogsÂ for MM-protokollen.
+* **NativeSpeedSteps:** Hastighedstrin som implementeret i Z21. Altid 14, 28 eller 128 ‚Äì ogs√• for MM-protokollen.
 
-### Disclaimer: Implementering af ikke-dokumenteret 'Locomotive Slot Information'
+### Ansvarsfraskrivelse: Implementering af ikke-dokumenteret 'Locomotive Slot Information'
 
-Roco har i deres vÊrkt¯j *Maintenance Tool* en mulighed for at se de 120 lokomotiv-slots, der findes i Z21. Men
-den officielle *"Z21 LAN Protocol Specification"* dokumentation nÊvner ikke kommandoen og svaret til at lÊse disse slots.
-Ved at overvÂge dataudvekslingen mellem mine Z21 (to z21Start, Èn lÂst, Èn ulÂst) kunne jeg se kommandoerne.
-PÂ grund af dette har jeg implementeret udokumenteret funktionalitet. Den virker i firmware 1.43
+Roco har i deres v√¶rkt√∏j *Maintenance Tool* en mulighed for at se de 120 lokomotiv-slots, der findes i Z21. Men
+den officielle *"Z21 LAN Protocol Specification"* dokumentation n√¶vner ikke kommandoen og svaret til at l√¶se disse slots.
+Ved at overv√•ge dataudvekslingen mellem mine Z21 (to z21Start, √©n l√•st, √©n ul√•st) kunne jeg se kommandoerne.
+P√• grund af dette har jeg implementeret udokumenteret funktionalitet. Den virker i firmware 1.43
 (en del af Maintenance Tool V1.18.3). Der gives ingen garanti for, at den vil virke i fremtidige firmwareudgaver.
 
 ## Workaround for Z21 firmware-fejl
 
-I den seneste firmwareversion (1.43) for Z21-familien er der efter min vurdering en fejl. NÂr man eksplicit
-foresp¯rger lokomotivinformation (dvs. kalder Z21-kommandoen LAN_X_GET_LOCO_INFO, indkapslet i
+I den seneste firmwareversion (1.43) for Z21-familien er der efter min vurdering en fejl. N√•r man eksplicit
+foresp√∏rger lokomotivinformation (dvs. kalder Z21-kommandoen LAN_X_GET_LOCO_INFO, indkapslet i
 Z21Client.GetLocoInfoAsync()), vil protokol-bitten i byte DB2 i svaret ikke blive sat for lokomotiver, der er
-konfigureret til M‰rklin Motorola. Dog er protokol-bitten korrekt sat i events, der skyldes Êndringer af lokomotivet
+konfigureret til M√§rklin Motorola. Dog er protokol-bitten korrekt sat i events, der skyldes √¶ndringer af lokomotivet
 (f.eks. hastighed, retning, funktionstaster).
 
-For at omgÂ denne fejl foresp¯rger Z21Client protokollen for lokomotivet separat og leverer derefter korrekt
+For at omg√• denne fejl foresp√∏rger Z21Client protokollen for lokomotivet separat og leverer derefter korrekt
 protokol i LocoInfoReceived-eventet.
 
 ## Installationsvejledning
 
-### Hentning og afpr¯vning af Z21Client-klassen
+### Hentning og afpr√∏vning af Z21Client-klassen
 
-Download repoíet og opret et projekt, hvor du vil bruge Z21Client. Hvis du mangler inspiration, kan du se mit projekt
-*Z21Dashboard* pÂ Github:
+Download repoet og opret et projekt, hvor du vil bruge Z21Client. Hvis du mangler inspiration, kan du se mit projekt
+*Z21Dashboard* p√• Github:
 
 [https://github.com/J-Wachs/Z21Dashboard](https://github.com/J-Wachs/Z21Dashboard)
 
-### OpsÊtning af dit eget projekt til at bruge Z21Client-klassen
+### Ops√¶tning af dit eget projekt til at bruge Z21Client-klassen
 
-For at bruge Z21Client-klassen i dine egne projekter skal du tilf¯je komponentprojektet til din l¯sning. Derefter skal
-du tilf¯je *Z21Client* til Program.cs eller MauiProgram.cs i dit projekt:
+For at bruge Z21Client-klassen i dine egne projekter skal du tilf√∏je komponentprojektet til din l√∏sning. Derefter skal
+du tilf√∏je *Z21Client* til Program.cs eller MauiProgram.cs i dit projekt:
 
 ```csharp
 ...
-// Tilf¯jet for Z21Client
+// Tilf√∏jet for Z21Client
 builder.Services.AddSingleton<IZ21UdpClient, Z21UdpClient>();
 builder.Services.AddSingleton<IZ21Client, Z21Client>();
 // Slut
@@ -153,52 +156,52 @@ builder.Services.AddSingleton<IZ21Client, Z21Client>();
 
 ## Tilpasning af Z21Client til eget brug
 
-MÂske har du brug for flere oplysninger. MÂske skal du bruge en konfigurationsvÊrdi til nogle af de data, der returneres.
-MÂske har du brug for Èn af LocoNet- eller CAN-bus-kommandoerne/events.
+M√•ske har du brug for flere oplysninger. M√•ske skal du bruge en konfigurationsv√¶rdi til nogle af de data, der returneres.
+M√•ske har du brug for √©n af LocoNet- eller CAN-bus-kommandoerne/events.
 
 Du er meget velkommen til at tilpasse en lokal version til dine behov.
 
 ## Fundet en fejl?
 
-Opret venligst et issue i repoíet.
+Opret venligst et issue i repoet.
 
-## Kendte problemer (pÂgÂr)
+## Kendte problemer (p√•g√∏r)
 
-Ingen pÂ nuvÊrende tidspunkt.
+Ingen p√• nuv√¶rende tidspunkt.
 
 ## FAQ
 
-### NÂr jeg kalder metoden QueryForZ21s vises min Z21 ikke
+### N√•r jeg kalder metoden QueryForZ21s vises min Z21 ikke
 
-Listen som metoden returnerer er tom, og du fÂr ingen fejl. Du kan forbinde med Z21Client til din Z21 centralstation (alle
-modeller), og sende kommandoer og modtage data. At metoden returnerer en tom liste, sker typisk nÂr pc'en er koblet pÂ
-netvÊrket trÂdl¯st.
+Listen som metoden returnerer er tom, og du f√•r ingen fejl. Du kan forbinde med Z21Client til din Z21 centralstation (alle
+modeller), og sende kommandoer og modtage data. At metoden returnerer en tom liste, sker typisk n√•r pc'en er koblet p√•
+netv√¶rket tr√•dl√∏st.
 
-For at finde Z21'ere pÂ netvÊrket udsender QueryForZ21s en UDP-broadcast som Z21 centralstationerne skal svare pÂ. Mange
+For at finde Z21'ere p√• netv√¶rket udsender QueryForZ21s en UDP-broadcast som Z21 centralstationerne skal svare p√•. Mange
 access points og routere blokerer for UDP-broadcasts, og det er derfor muligt, at din Z21 ikke modtager broadcastet og
-derfor ikke svarer pÂ det. Det er ogsÂ muligt, at din pc ikke modtager svaret fra Z21.
+derfor ikke svarer p√• det. Det er ogs√• muligt, at din pc ikke modtager svaret fra Z21.
 
-Kik i opsÊtningen af dit access point eller router og se, om der er en indstilling for at blokere for UDP-broadcasts.
-Hvis det er tilfÊldet, skal du slÂ denne indstilling fra. Visse routere og access points har ogsÂ en indstilling for
-at blokere for UDP-broadcasts pÂ det trÂdl¯se net alene. Andre access points og routere har ikke en indstilling, men blokerer
-for UDP-broadcasts pÂ det trÂdl¯se net som standard. I dette tilfÊlde kan du pr¯ve at forbinde din pc til netvÊrket med kabel
-for at se, om det l¯ser problemet. Hvis det g¯r det, er det sandsynligt, at dit access point eller router blokerer for
-UDP-broadcasts pÂ det trÂdl¯se net.
+Kik i ops√¶tningen af dit access point eller router og se, om der er en indstilling for at blokere for UDP-broadcasts.
+Hvis det er tilf√¶ldet, skal du sl√• denne indstilling fra. Visse routere og access points har ogs√• en indstilling for
+at blokere for UDP-broadcasts p√• det tr√•dl√∏se net alene. Andre access points og routere har ikke en indstilling, men blokerer
+for UDP-broadcasts p√• det tr√•dl√∏se net som standard. I dette tilf√¶lde kan du pr√∏ve at forbinde din pc til netv√¶rket med kabel
+for at se, om det l√∏ser problemet. Hvis det g√∏r det, er det sandsynligt, at dit access point eller router blokerer for
+UDP-broadcasts p√• det tr√•dl√∏se net.
 
 ### Vil du implementere LocoNet- og CAN-bus-funktionalitet?
 
 Det korte svar er nej. Det lange svar er, at jeg ikke ejer en Z21 eller Z21 XL, derfor har jeg ikke behovet og kan
 ikke teste funktionaliteten.
 
-### Vil du implementere underst¯ttelse af trÂdl¯s forbindelse til Z21?
+### Vil du implementere underst√∏ttelse af tr√•dl√∏s forbindelse til Z21?
 
-Faktisk ó hvis dit netvÊrk er konfigureret korrekt, og du har Roco 10814 eller bruger dit eget access-point, kan du
-fÂ trÂdl¯s adgang til Z21. Mit projekt Z21Dashboard er testet over trÂdl¯st LAN, og det virker fint. Nogle gange
-skulle jeg dog oprette forbindelse mere end Èn gang.
+Faktisk ‚Äì hvis dit netv√¶rk er konfigureret korrekt, og du har Roco 10814 eller bruger dit eget access-point, kan du
+f√• tr√•dl√∏s adgang til Z21. Mit projekt Z21Dashboard er testet over tr√•dl√∏st LAN, og det virker fint. Nogle gange
+skulle jeg dog oprette forbindelse mere end √©n gang.
 
 ### Hvordan kommer jeg i gang med at skrive min egen applikation?
 
-Tag et kig pÂ Z21Client ó sÊrligt Z21Dashboard-applikationen ó for at se, hvordan den er implementeret og
+Tag et kig p√• Z21Client ‚Äì s√¶rligt Z21Dashboard-applikationen ‚Äì for at se, hvordan den er implementeret og
 for inspiration til, hvad du selv kan lave.
 
 ## Liste over implementerede Z21 LAN Protocol-kommandoer
@@ -212,7 +215,7 @@ A C# class to communicate with the z21, z21Start, Z21 and Z21 XL model railroad 
 
 The Z21Client class supports the following features:
 
-* Multi language, Danish when language is set to Danish in Windows. For all other languages texts are in English
+* Multi language. Danish/German when language is set to Danish/German in Windows. For all other languages texts are in English
 * Connect to the Z21 via UDP
 * Received information about locomotives (speed, direction, functions, protocol) when other driving controls are used
 * Received information about turnouts/points (position, protocol) when other controls are used
@@ -223,13 +226,15 @@ The Z21Client class supports the following features:
 * Event-driven architecture for handling responses and updates
 * Asynchronous operations for non-blocking communication
 * Error handling and reconnection logic
-* Support for the protocols used by the z21/Z21 (DCC, M‰rklin Motorola)
+* Support for the protocols used by the z21/Z21 (DCC, M√§rklin Motorola)
 * Logging capabilities for debugging and monitoring
 * Z21Client has been developed using the 'AI Pair Programming' method
 
 ## What is new in this version
 
-* A spelling mistage in enum HardwareInfo has been corrected (Z21Xl corrected to Z21XL)
+* Added messages in German. Please note that the German messages are translated by an AI, and therefore may
+  be less accurate than the Danish and English messages.
+* Added many tests to the test project
 
 ## z21 and z21Start locking information
 
@@ -237,25 +242,23 @@ In case of your z21 or z21Start is locked, you can still send the commands to it
 the commands will be ignored by the z21/z21Start.
 
 If the z21/z21Start is locked, you can still use the Z21Client class, to write a monitoring application that reads 
-status of locomotives and turnouts/points.
-
-It is aldo possible to call Z21Client methods, that will change the protocol for locomotives and turnout/points
-decoders. You can read more about which methods (that wraps the Z21 commands) you can call when the z21/z21Start is
-locked, in the documentation on the Z21 website.
+status of locomotives and turnouts/points. You can also call methods in Z21Client to change the protocol of
+locomotives and turnouts/points decoders. You can read more about which methods (that wraps the Z21 commands) you can
+call when the z21/z21Start is locked, in the official Z21 LAN Protocol documentation on the Z21 website.
 
 Please note, that when the z21 (in white case) initially was launched, some was locked, and some was unlocked. To
-unlock your z21 or z21Start, you can purchase a unlock code:
+unlock your z21 or z21Start, you can purchase an unlock code:
 
 * Roco item 10814. Contains a wireless access point and unlock code for z21Start and z21 (white case).
 * Roco item 10818. Contains unlock code for z21Start and z21 (white case).
 
-Form here on, the term Z21 will be used to refer to all four versions of the Z21 family of central stations. If
-somthing apply to only one of the versions, it will be specified.
+From here on, the term Z21 will be used to refer to all four versions of the Z21 family of central stations. If
+something applies to only one of the versions, it will be specified.
 
 The Z21Client was developed and tested using two z21Start central stations; one locked and one unlocked. This is
 the reason why none of the LocoNet and CAN bus functionality is implemented in the Z21Client class.
 
-The is implemented according to the Roco document *'Z21 LAN Protocol Specification'*, version 1.13 EN, dated 6th of 
+The implementation is based on the Roco document *'Z21 LAN Protocol Specification'*, version 1.13 EN, dated 6
 November 2023. The document can be downloaded from the Z21 website.
 
 ## Fully functional example project
@@ -269,44 +272,44 @@ https://github.com/J-Wachs/Z21Dashboard
 The Z21Client class uses UDP to communicate with the Z21 central station. In your application, you must first
 establish a connection to the Z21.
 
-As the archiceture of the Z21Client class is event-driven, you must subscribe to the events you want to handle
+As the architecture of the Z21Client class is event-driven, you must subscribe to the events you want to handle
 in your application. For example, to handle locomotive status updates, you would subscribe to the
-'LocoStatusReceived' event.
+*'LocoInfoReceived'* event.
 
-The nessecary changes to the broadcast flags on the Z21 will be done automatically by the Z21Client class when you
-add you method to the Z21Class event.
+The necessary changes to the broadcast flags on the Z21 are handled automatically by the Z21Client class when you
+add your method to the Z21Client event.
 
-Example of subscribing to the LocoStatusReceived event:
+Example of subscribing to the LocoInfoReceived event:
 ```csharp
 ...
-@using IZ21Client Z21Client
+using IZ21Client Z21Client
 ...
 
 ...
-Z21Client.LocoInfoReceived += OnLocoInfoReceived;
+Z21Client.OnLocoInfoReceived += OnLocoInfoReceived;
 ...
 
 private async void OnLocoInfoReceived(object? sender, LocoInfo e)
 {
 	// Handle the locomotive info received event
-	Console.WriteLine($"Loco Info Received: Address={e.Address}, Speed={e.CurrentSpeed}, Direction={e.Direction}");"
-
+	Console.WriteLine($"Loco Info Received: Address={e.Address}, Speed={e.CurrentSpeed}, Direction={e.Direction}");
+}
 ```
 
-### Implementation of M‰rklin Motorola protocol in Z21Client vs in Z21Client
+### Implementation of M√§rklin Motorola protocol in Z21Client vs in Z21
 
-The Z21 supports both DCC and M‰rklin Motorola protocols for controlling locomotives. The following versions of the 
-protocols are implementen as follows:
-* DCC, 14 speed steps: Protocol is DCC and speed steps is set to 14
-* DCC, 28 speed steps: Protocol is DCC and speed steps is set to 28
-* DCC, 128 speedsteps: Protocol is DCC and speed steps is set to 128
-* M‰rklin Motorola 1, 14 speed steps: Protocol is M‰rklin Motorola and speed steps is set to 14
-* M‰rklin Motorola 2, 14 speed steps: Protocol is M‰rklin Motorola and speed steps is set to 28
-* M‰rklin Motorola 2, 28 speed steps: Protocol is M‰rklin Motorola and speed steps is set to 128
+The Z21 supports both DCC and M√§rklin Motorola protocols for controlling locomotives. The following versions of the 
+protocols are implemented as follows:
+* DCC, 14 speed steps: Protocol = DCC, speed steps = 14
+* DCC, 28 speed steps: Protocol = DCC, speed steps = 28
+* DCC, 128 speed steps: Protocol = DCC, speed steps = 128
+* M√§rklin Motorola 1, 14 speed steps: Protocol = M√§rklin Motorola, speed steps = 14
+* M√§rklin Motorola 2, 14 speed steps: Protocol = M√§rklin Motorola, speed steps = 28
+* M√§rklin Motorola 2, 28 speed steps: Protocol = M√§rklin Motorola, speed steps = 128
 
 Because of this, the Z21 reports and expects the speed steps to be in the range 14, 28 or 128, even when using the
-M‰rklin Motorola protocol. The Z21Client has been developed to reflect the protocol and speed steps as one would
-expect it to be. Thus, when using the M‰rklin Motorola protocol, the speed steps will be 14, 14 or 28 respectively.
+M√§rklin Motorola protocol. The Z21Client has been developed to reflect the protocol and speed steps as one would
+expect it to be. Thus, when using the M√§rklin Motorola protocol, the speed steps will be 14, 14 or 28 respectively.
 
 The locomotive information class 'LocoInfo' used in the Z21Client class, reflects this implementation, and have two 
 speed step properties:
@@ -315,28 +318,29 @@ speed step properties:
 
 ### Disclaimer: Implementation of not documented 'Locomotive Slot Information'
 
-Roco have in their tool 'Maintenance Tool' an option to see the 120 locomotive slots that is in the Z21. However,
-the official *'Z21 LAN Protocol Specification'* documentation does not mention the command and reponse to read these slots.
-By monitoring the data send between my z21 (two z21Start, one locked, one unlocked) I could see the commands.
-Because of this, I have implemented undocumented functionality. It works in firmware 1.43 (part of Maintenance Tool
-V1.18.3). There is no guarantee that this command and the repsonse will work in future releases of the firmware.
+Roco have in their tool *Maintenance Tool* an option to see the 120 locomotive slots that are in the Z21. However,
+the official *'Z21 LAN Protocol Specification'* documentation does not mention the command and response to read these slots.
+By monitoring the data sent between my Z21s (two z21Start, one locked, one unlocked) I could see the commands.
+Because of this, I have implemented undocumented functionality. It works in firmware 1.43
+(part of Maintenance Tool V1.18.3). There is no guarantee that this command and the response will work in future
+releases of the firmware.
 
 ## Workaround for Z21 firmware bug
 
 In the latest firmware version (1.43) for the Z21 family, there is what seems like a bug to me. When explicitly
 requesting information about a locomotive (that is, you call the Z21 command LAN_X_GET_LOCO_INFO, wrapped in
-Z21Clint.GetLocoInfoAsync()). For locomotives configured to use the M‰rklin Motorola protocol the protocol-bit in
-byte DB2 in the response, is not set. However, when you received events caused by changes to the locomotive, e.g.
-speed, direction, F-keys the protocol-bit is set correctly in the response.
+Z21Client.GetLocoInfoAsync()), the protocol bit in byte DB2 in the response is not set for locomotives configured
+to use the M√§rklin Motorola protocol. However, the protocol bit is correctly set in events caused by changes to the
+locomotive (for example speed, direction, function keys).
 
-To circumvent this bug, the Z21Client handle this by requesting the protocol of the locomotive, and give you a 
-correct response in the LocoInfoReceived event.
+To work around this bug, Z21Client requests the protocol of the locomotive separately and then provides the correct
+protocol in the LocoInfoReceived event.
 
 ## Installation instructions
 
 ### Getting and trying put the Z21Client class
 
-Download the repo and create a project in which to use the Z21Class. if you need inspiration, please see my project
+Download the repo and create a project in which to use the Z21Client. If you need inspiration, please see my project
 'Z21Dashboard' on Github:
 
 https://github.com/J-Wachs/Z21Dashboard
@@ -355,7 +359,7 @@ builder.Services.AddSingleton<IZ21Client, Z21Client>();
 ...
 ```
 
-## Modifying the Z21Clint for your own use
+## Modifying the Z21Client for your own use
 
 Maybe you need more information to be returned. Maybe you need to use a config value for some of the data returned.
 Maybe you need one of the LocoNet or CAN bus commands/events.
@@ -410,6 +414,270 @@ to connect more than once.
 
 Take a look at the Z21Client especially the Z21Dashboard application, in order to see how it is implemented and 
 get inspired on what you can do with it.
+
+<hr>
+
+# Z21Client C# Klasse, Deutch
+
+Eine C#-Klasse zur Kommunikation mit den z21-, z21Start-, Z21- und
+Z21 XL-Modellbahn-Zentralstationen von Roco/Fleischmann.
+
+Die Z21Client-Klasse unterst√ºtzt folgende Funktionen:
+
+* Mehrsprachig. D√§nisch/Deutsch, wenn in Windows D√§nisch/Deutsch eingestellt ist.
+  F√ºr alle anderen Sprachen werden die Texte auf Englisch angezeigt.
+* Verbindung zur Z21 √ºber UDP
+* Empfangen von Informationen √ºber Lokomotiven (Geschwindigkeit, Richtung,
+  Funktionen, Protokoll), wenn andere Steuerungen verwendet werden
+* Empfangen von Informationen √ºber Weichen (Position, Protokoll), wenn
+  andere Steuerungen verwendet werden
+* Senden von Kommandos zur Steuerung von Lokomotiven (Geschwindigkeit,
+  Richtung, Funktionen, Protokoll)
+* Senden von Kommandos zur Steuerung von Weichen (Position, Protokoll)
+* Lesen von R√ºckmeldungen der Z21 (z. B. Lokstatus)
+* Unterst√ºtzung mehrerer Lokomotiven
+* Ereignisgesteuerte Architektur zur Verarbeitung von Antworten und
+  Aktualisierungen
+* Asynchrone Operationen f√ºr nicht blockierende Kommunikation
+* Fehlerbehandlung und Wiederverbindungslogik
+* Unterst√ºtzung der von z21/Z21 verwendeten Protokolle (DCC, M√§rklin
+  Motorola)
+* Logging-M√∂glichkeiten zur Fehlerbehebung und √úberwachung
+* Z21Client wurde mit der Methode "AI Pair Programming" entwickelt
+
+## Was ist neu in dieser Version
+
+* Meldungen auf Deutsch hinzugef√ºgt. Bitte beachten Sie, dass die deutschen Meldungen von einer KI
+  √ºbersetzt wurden und daher m√∂glicherweise weniger genau sind als die d√§nischen und englischen Meldungen.
+* Viele Tests zum Testprojekt hinzugef√ºgt
+
+## z21- und z21Start-Sperrinformation
+
+Wenn Ihre z21 oder z21Start gesperrt ist, k√∂nnen Sie weiterhin Kommandos an
+sie senden. Diese werden jedoch von der z21/z21Start ignoriert.
+
+Wenn die z21/z21Start gesperrt ist, k√∂nnen Sie die Z21Client-Klasse dennoch
+verwenden, um eine √úberwachungsanwendung zu schreiben, die den Status von
+Lokomotiven und Weichen ausliest. Sie k√∂nnen auch Methoden in Z21Client
+aufrufen, um das Protokoll von Lokomotiven und Weichendekodern zu √§ndern.
+Mehr √ºber die Methoden (die z21-Kommandos kapseln), die bei gesperrter
+z21/z21Start aufgerufen werden k√∂nnen, erfahren Sie in der offiziellen Z21
+LAN Protocol-Dokumentation auf der Z21-Website.
+
+Bitte beachten Sie, dass bei der Markteinf√ºhrung der z21 (im wei√üen
+Geh√§use) einige Ger√§te gesperrt und andere freigeschaltet waren. Um Ihre
+z21 oder z21Start zu entsperren, k√∂nnen Sie einen Freischaltcode erwerben:
+
+* Roco Artikel 10814. Enth√§lt einen WLAN-Access-Point sowie einen
+  Freischaltcode f√ºr z21Start und z21 (wei√ües Geh√§use).
+* Roco Artikel 10818. Enth√§lt einen Freischaltcode f√ºr z21Start und z21
+  (wei√ües Geh√§use).
+
+Im Folgenden wird der Begriff Z21 f√ºr alle vier Versionen der Z21-Familie
+von Zentralstationen verwendet. Wenn etwas nur f√ºr eine der Versionen gilt,
+wird dies angegeben.
+
+Der Z21Client wurde mit zwei z21Start-Zentralstationen entwickelt und
+getestet, einer gesperrten und einer freigeschalteten. Das ist der Grund,
+warum keine LocoNet- und CAN-Bus-Funktionalit√§t in der Z21Client-Klasse
+implementiert ist.
+
+Die Implementierung basiert auf dem Roco-Dokument *"Z21 LAN Protocol
+Specification"*, Version 1.13 EN, vom 6. November 2023. Das Dokument kann
+von der Z21-Website heruntergeladen werden.
+
+## Voll funktionsf√§higes Beispielprojekt
+
+Um ein Beispiel f√ºr die Nutzung des Z21Client zu sehen, besuchen Sie bitte
+mein Projekt *Z21Dashboard* auf Github:
+
+[https://github.com/J-Wachs/Z21Dashboard](https://github.com/J-Wachs/Z21Dashboard)
+
+## Wie funktioniert es?
+
+Die Z21Client-Klasse verwendet UDP, um mit der Z21-Zentralstation zu
+kommunizieren. In Ihrer Anwendung m√ºssen Sie zun√§chst eine Verbindung zur
+Z21 herstellen.
+
+Da die Architektur der Z21Client-Klasse ereignisgesteuert ist, m√ºssen Sie
+auf die Ereignisse abonnieren, die Sie in Ihrer Anwendung verarbeiten
+m√∂chten. Um beispielsweise Aktualisierungen des Lokstatus zu verarbeiten,
+abonnieren Sie das Ereignis *'OnLocoInfoReceived'*.
+
+Die notwendigen √Ñnderungen an den Broadcast-Flags der Z21 werden
+automatisch von der Z21Client-Klasse vorgenommen, wenn Sie Ihre Methode
+dem Z21Client-Ereignis hinzuf√ºgen.
+
+Beispiel f√ºr die Anmeldung am OnLocoInfoReceived-Ereignis:
+```csharp
+...
+using IZ21Client Z21Client
+...
+
+...
+Z21Client.OnLocoInfoReceived += OnLocoInfoReceived;
+...
+
+private async void OnLocoInfoReceived(object? sender, LocoInfo e)
+{
+	// Empfangene Lokinformation verarbeiten
+	Console.WriteLine($"Loco Info Received: Address={e.Address},
+	Speed={e.CurrentSpeed}, Direction={e.Direction}");
+}
+```
+
+### Implementierung des M√§rklin Motorola-Protokolls in Z21Client vs. Z21
+
+Die Z21 unterst√ºtzt sowohl DCC als auch M√§rklin Motorola zur Steuerung von
+Lokomotiven. Die folgenden Protokollversionen sind wie folgt implementiert:
+* DCC, 14 Fahrstufen: Protokoll = DCC, Fahrstufen = 14
+* DCC, 28 Fahrstufen: Protokoll = DCC, Fahrstufen = 28
+* DCC, 128 Fahrstufen: Protokoll = DCC, Fahrstufen = 128
+* M√§rklin Motorola 1, 14 Fahrstufen: Protokoll = M√§rklin Motorola,
+  Fahrstufen = 14
+* M√§rklin Motorola 2, 14 Fahrstufen: Protokoll = M√§rklin Motorola,
+  Fahrstufen = 28
+* M√§rklin Motorola 2, 28 Fahrstufen: Protokoll = M√§rklin Motorola,
+  Fahrstufen = 128
+
+Deshalb meldet und erwartet die Z21 die Fahrstufen im Bereich 14, 28 oder
+128, auch wenn das M√§rklin Motorola-Protokoll verwendet wird. Z21Client
+wurde entwickelt, um das Protokoll und die Fahrstufen so wiederzugeben, wie
+man es normalerweise erwarten w√ºrde. Beim M√§rklin Motorola-Protokoll sind
+die Fahrstufen also 14, 14 bzw. 28.
+
+Die *LocoInfo*-Klasse in Z21Client spiegelt diese Implementierung wider und
+hat zwei Fahrstufen-Eigenschaften:
+* **SpeedSteps:** Die Fahrstufen wie in Z21Client implementiert (DCC: 14,
+  28, 128; MM: 14, 14, 28)
+* **NativeSpeedSteps:** Die Fahrstufen wie in der Z21 implementiert. Immer
+  14, 28 oder 128 - auch f√ºr das MM-Protokoll.
+
+### Hinweis: Implementierung der nicht dokumentierten "Locomotive Slot Information"
+
+Roco bietet in seinem Werkzeug *Maintenance Tool* eine M√∂glichkeit, die 120
+Lokomotiv-Slots in der Z21 anzuzeigen. Die offizielle *"Z21 LAN Protocol
+Specification"*-Dokumentation erw√§hnt jedoch nicht das Kommando und die
+Antwort zum Auslesen dieser Slots. Durch die √úberwachung der Daten zwischen
+meinen Z21s (zwei z21Start, eine gesperrt, eine freigeschaltet) konnte ich
+die Kommandos erkennen.
+
+Deshalb habe ich nicht dokumentierte Funktionalit√§t implementiert. Sie
+funktioniert in Firmware 1.43 (Bestandteil von Maintenance Tool V1.18.3).
+Es gibt keine Garantie, dass dieses Kommando und die Antwort in zuk√ºnftigen
+Firmware-Versionen funktionieren.
+
+## Workaround f√ºr einen Z21-Firmware-Fehler
+
+In der neuesten Firmware-Version (1.43) f√ºr die Z21-Familie gibt es meiner
+Meinung nach einen Fehler. Wenn man explizit Informationen √ºber eine
+Lokomotive anfordert (d. h. das Z21-Kommando LAN_X_GET_LOCO_INFO aufruft,
+verpackt in Z21Client.GetLocoInfoAsync()), wird das Protokoll-Bit in Byte
+DB2 der Antwort f√ºr Lokomotiven, die f√ºr M√§rklin Motorola konfiguriert
+sind, nicht gesetzt. Das Protokoll-Bit wird jedoch korrekt in Ereignissen
+gesetzt, die durch √Ñnderungen an der Lokomotive verursacht werden
+(z. B. Geschwindigkeit, Richtung, Funktionstasten).
+
+Um diesen Fehler zu umgehen, fordert Z21Client das Protokoll der
+Lokomotive separat an und liefert dann das korrekte Protokoll im
+OnLocoInfoReceived-Ereignis.
+
+## Installationsanleitung
+
+### Herunterladen und Ausprobieren der Z21Client-Klasse
+
+Laden Sie das Repo herunter und erstellen Sie ein Projekt, in dem Sie
+Z21Client verwenden m√∂chten. Wenn Sie Inspiration brauchen, sehen Sie sich
+bitte mein Projekt *Z21Dashboard* auf Github an:
+
+[https://github.com/J-Wachs/Z21Dashboard](https://github.com/J-Wachs/Z21Dashboard)
+
+### Einrichten des eigenen Projekts f√ºr die Nutzung der Z21Client-Klasse
+
+Um die Z21Client-Klasse in eigenen Projekten zu verwenden, m√ºssen Sie das
+Komponentenprojekt zu Ihrer L√∂sung hinzuf√ºgen. Anschlie√üend m√ºssen Sie
+*Z21Client* in der Program.cs- oder MauiProgram.cs-Datei Ihres Projekts
+hinzuf√ºgen:
+
+```csharp
+...
+// Hinzugef√ºgt f√ºr Z21Client
+builder.Services.AddSingleton<IZ21UdpClient, Z21UdpClient>();
+builder.Services.AddSingleton<IZ21Client, Z21Client>();
+// Ende
+...
+```
+
+## Anpassen des Z21Client f√ºr den eigenen Gebrauch
+
+Vielleicht ben√∂tigen Sie mehr zur√ºckgegebene Informationen. Vielleicht
+m√∂chten Sie einen Konfigurationswert f√ºr einige der zur√ºckgegebenen Daten
+verwenden. Vielleicht ben√∂tigen Sie eines der LocoNet- oder
+CAN-Bus-Kommandos/ Ereignisse.
+
+Bitte passen Sie eine lokale Version gerne an Ihre Bed√ºrfnisse an.
+
+## Einen Fehler gefunden?
+
+Bitte erstellen Sie ein Issue im Repo.
+
+## Bekannte Probleme (in Arbeit)
+
+Derzeit keine.
+
+## FAQ
+
+### Wenn ich die Methode QueryForZ21s aufrufe, wird meine Z21 nicht
+angezeigt
+
+Die zur√ºckgegebene Liste ist leer, und es wird kein Fehler ausgel√∂st. Sie
+k√∂nnen sich weiterhin mit Z21Client mit Ihrer Z21-Zentralstation (alle
+Modelle) verbinden, Kommandos senden und Daten empfangen. Die Methode gibt
+typischerweise eine leere Liste zur√ºck, wenn der PC drahtlos mit dem
+Netzwerk verbunden ist.
+
+Um Z21-Ger√§te im Netzwerk zu finden, sendet QueryForZ21s einen
+UDP-Broadcast, auf den die Z21-Zentralstationen antworten m√ºssen. Viele
+Access Points und Router blockieren UDP-Broadcasts, wodurch Ihre Z21 den
+Broadcast m√∂glicherweise nicht empf√§ngt und nicht antwortet. Es ist auch
+m√∂glich, dass Ihr PC die Antwort von der Z21 nicht empf√§ngt.
+
+Pr√ºfen Sie die Konfiguration Ihres Access Points oder Routers, ob es eine
+Einstellung gibt, die UDP-Broadcasts blockiert. Falls ja, deaktivieren Sie
+diese Einstellung. Einige Router und Access Points haben auch eine
+Einstellung, die UDP-Broadcasts nur im drahtlosen Netzwerk blockiert.
+Andere blockieren UDP-Broadcasts im drahtlosen Netzwerk standardm√§√üig ohne
+entsprechende Einstellung. Verbinden Sie in diesem Fall Ihren PC testweise
+per Kabel mit dem Netzwerk, um zu pr√ºfen, ob das Problem behoben wird.
+Wenn ja, blockiert Ihr Access Point oder Router wahrscheinlich
+UDP-Broadcasts im drahtlosen Netzwerk.
+
+### Werden Sie LocoNet- und CAN-Bus-Funktionalit√§t implementieren?
+
+Die kurze Antwort ist nein. Die lange Antwort ist, dass ich keine Z21 oder
+Z21 XL besitze, daher besteht f√ºr mich kein Bedarf und ich kann die
+Funktionalit√§t nicht testen.
+
+### Werden Sie Unterst√ºtzung f√ºr eine drahtlose Verbindung zur Z21
+implementieren?
+
+Tats√§chlich k√∂nnen Sie, wenn Ihr Netzwerk korrekt konfiguriert ist und Sie
+Roco 10814 besitzen oder Ihren eigenen Access Point verwenden, drahtlos
+auf die Z21 zugreifen. Mein Projekt Z21Dashboard wurde √ºber ein drahtloses
+LAN getestet und funktioniert einwandfrei. Manchmal musste ich mich jedoch
+mehr als einmal verbinden.
+
+### Wie fange ich an, meine eigene Anwendung zu schreiben?
+
+Sehen Sie sich Z21Client an - insbesondere die Z21Dashboard-Anwendung -
+um zu sehen, wie sie implementiert ist, und lassen Sie sich inspirieren,
+was Sie selbst damit machen k√∂nnen.
+
+## Liste der implementierten Z21 LAN Protocol-Kommandos
+
+F√ºr eine √úbersicht √ºber die implementierten Z21 LAN Protocol-Kommandos
+siehe die Tabelle, indem Sie
+[hier klicken](#implemented-z21-lan-protocol-commands).
 
 ## Implemented Z21 LAN Protocol Commands
 
