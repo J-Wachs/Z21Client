@@ -1,5 +1,5 @@
 ﻿[For English version, click here](#z21client-c-class)<br />
-[Für die deutsche Version hier klicken](#z21client-c-klasse-deutch)
+[Für die deutsche Version hier klicken](#z21client-c-klasse-deutsch)
 
 Danish version:
 # Z21Client C# klasse
@@ -42,8 +42,8 @@ der kan kaldes når z21/z21Start er låst, i den officielle Z21 LAN Protcol doko
 Bemærk, at da z21 (i hvidt kabinet) oprindeligt blev lanceret, var nogle låste og andre ulåste. For at låse
 din z21 eller z21Start op, kan du købe en oplåsningskode:
 
-* Roco varenummer 10814. Indeholder et trådløst access-point samt oplåsningskode til z21Start og z21 (hvidt kabinet).
-* Roco varenummer 10818. Indeholder oplåsningskode til z21Start og z21 (hvidt kabinet).
+* Roco varenummer 10814. Indeholder et trådløst access-point samt oplåsningskode til z21Start og z21 (hvidt kabinet)
+* Roco varenummer 10818. Indeholder oplåsningskode til z21Start og z21 (hvidt kabinet)
 
 Fra nu af vil betegnelsen Z21 blive brugt om alle fire versioner af Z21-familien af centralstationer. Hvis noget
 kun gælder én af versionerne, vil det blive angivet.
@@ -66,7 +66,7 @@ Z21Client-klassen bruger UDP til at kommunikere med Z21-centralen. I din applika
 oprette forbindelse til Z21.
 
 Da arkitekturen i Z21Client-klassen er event-drevet, skal du abonnere på de events, du ønsker at håndtere
-i din applikation. For eksempel skal du abonnere på eventet *�LocoStatusReceived�* for at håndtere
+i din applikation. For eksempel skal du abonnere på eventet *LocoStatusReceived* for at håndtere
 opdateringer af lokomotivstatus.
 
 De nødvendige ændringer af broadcast-flagene på Z21 bliver automatisk håndteret af Z21Client-klassen, når du
@@ -204,8 +204,8 @@ skulle jeg dog oprette forbindelse mere end én gang.
 Tag et kig på Z21Client – særligt Z21Dashboard-applikationen – for at se, hvordan den er implementeret og
 for inspiration til, hvad du selv kan lave.
 
-## Liste over implementerede Z21 LAN Protocol-kommandoer
-For at se en oversigt over implementerede Z21 LAN Protocol-kommandoer, se tabellen ved at klikke [her](#implemented-z21-lan-protocol-commands).
+## Liste over implementerede Z21 LAN Protokol-kommandoer
+For at se en oversigt over implementerede Z21 LAN Protokol-kommandoer, se tabellen ved at klikke [her](#implemented-z21-lan-protocol-commands).
 
 <hr>
 
@@ -233,7 +233,7 @@ The Z21Client class supports the following features:
 ## What is new in this version
 
 * Added messages in German. Please note that the German messages are translated by an AI, and therefore may
-  be less accurate than the Danish and English messages.
+  be less accurate than the Danish and English messages
 * Added many tests to the test project
 
 ## z21 and z21Start locking information
@@ -249,8 +249,8 @@ call when the z21/z21Start is locked, in the official Z21 LAN Protocol documenta
 Please note, that when the z21 (in white case) initially was launched, some was locked, and some was unlocked. To
 unlock your z21 or z21Start, you can purchase an unlock code:
 
-* Roco item 10814. Contains a wireless access point and unlock code for z21Start and z21 (white case).
-* Roco item 10818. Contains unlock code for z21Start and z21 (white case).
+* Roco item 10814. Contains a wireless access point and unlock code for z21Start and z21 (white case)
+* Roco item 10818. Contains unlock code for z21Start and z21 (white case)
 
 From here on, the term Z21 will be used to refer to all four versions of the Z21 family of central stations. If
 something applies to only one of the versions, it will be specified.
@@ -338,7 +338,7 @@ protocol in the LocoInfoReceived event.
 
 ## Installation instructions
 
-### Getting and trying put the Z21Client class
+### Getting and trying out the Z21Client class
 
 Download the repo and create a project in which to use the Z21Client. If you need inspiration, please see my project
 'Z21Dashboard' on Github:
@@ -415,9 +415,13 @@ to connect more than once.
 Take a look at the Z21Client especially the Z21Dashboard application, in order to see how it is implemented and 
 get inspired on what you can do with it.
 
+## List of implemented Z21 LAN Protocol commands
+To see a list of the implemented Z21 LAN Protocol commands, see the table by clicking
+[here](#implemented-z21-lan-protocol-commands).
+
 <hr>
 
-# Z21Client C# Klasse, Deutch
+# Z21Client C# Klasse, Deutsch
 
 Eine C#-Klasse zur Kommunikation mit den z21-, z21Start-, Z21- und
 Z21 XL-Modellbahn-Zentralstationen von Roco/Fleischmann.
@@ -448,7 +452,7 @@ Die Z21Client-Klasse unterstützt folgende Funktionen:
 ## Was ist neu in dieser Version
 
 * Meldungen auf Deutsch hinzugefügt. Bitte beachten Sie, dass die deutschen Meldungen von einer KI
-  übersetzt wurden und daher möglicherweise weniger genau sind als die dänischen und englischen Meldungen.
+  übersetzt wurden und daher möglicherweise weniger genau sind als die dänischen und englischen Meldungen
 * Viele Tests zum Testprojekt hinzugefügt
 
 ## z21- und z21Start-Sperrinformation
@@ -469,9 +473,9 @@ Gehäuse) einige Geräte gesperrt und andere freigeschaltet waren. Um Ihre
 z21 oder z21Start zu entsperren, können Sie einen Freischaltcode erwerben:
 
 * Roco Artikel 10814. Enthält einen WLAN-Access-Point sowie einen
-  Freischaltcode für z21Start und z21 (weißes Gehäuse).
+  Freischaltcode für z21Start und z21 (weißes Gehäuse)
 * Roco Artikel 10818. Enthält einen Freischaltcode für z21Start und z21
-  (weißes Gehäuse).
+  (weißes Gehäuse)
 
 Im Folgenden wird der Begriff Z21 für alle vier Versionen der Z21-Familie
 von Zentralstationen verwendet. Wenn etwas nur für eine der Versionen gilt,
@@ -627,8 +631,7 @@ Derzeit keine.
 
 ## FAQ
 
-### Wenn ich die Methode QueryForZ21s aufrufe, wird meine Z21 nicht
-angezeigt
+### Wenn ich die Methode QueryForZ21s aufrufe, wird meine Z21 nicht angezeigt
 
 Die zurückgegebene Liste ist leer, und es wird kein Fehler ausgelöst. Sie
 können sich weiterhin mit Z21Client mit Ihrer Z21-Zentralstation (alle
@@ -658,8 +661,7 @@ Die kurze Antwort ist nein. Die lange Antwort ist, dass ich keine Z21 oder
 Z21 XL besitze, daher besteht für mich kein Bedarf und ich kann die
 Funktionalität nicht testen.
 
-### Werden Sie Unterstützung für eine drahtlose Verbindung zur Z21
-implementieren?
+### Werden Sie Unterstützung für eine drahtlose Verbindung zur Z21 implementieren?
 
 Tatsächlich können Sie, wenn Ihr Netzwerk korrekt konfiguriert ist und Sie
 Roco 10814 besitzen oder Ihren eigenen Access Point verwenden, drahtlos
@@ -678,6 +680,8 @@ was Sie selbst damit machen können.
 Für eine Übersicht über die implementierten Z21 LAN Protocol-Kommandos
 siehe die Tabelle, indem Sie
 [hier klicken](#implemented-z21-lan-protocol-commands).
+
+<hr>
 
 ## Implemented Z21 LAN Protocol Commands
 

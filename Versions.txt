@@ -1,4 +1,4 @@
-Version of 2026-08-02
+Version of 2026-08-03
 * Added German translation of messages. The German messages has been translated by an AI, and therefore may not be correct.
   Please let me know if you find any mistakes in the German translation
 * Added German section to README.md
@@ -34,15 +34,17 @@ Version of 2025-12-23:
 * Update of README.md
 * Update of test project to reflect name change of certain classes/records
 * Change to and rename of several classes to records. SystemState: Changed Capabilities from byte
-  to record. Z21Client: Exposed HardwareInfo, Isz21, Z21Code, Capabilities and SerialNumber as properties
+  to record
+* Exposed HardwareInfo, Isz21, Z21Code, Capabilities and SerialNumber as properties
 
 Version of 2025-12-14:
 * Added to README.md that Z21Client is developed using the 'AI Pair Programming' method
-* Upgraded NuPkgs.
+* Upgraded NuPkgs
 * QueryForZ21sAsync added write to log before throwing an exception
 * Added validation of parameters for certain Z21 commands
 * README.md: Spelling mistakes corrected, and text about protocol used to communicate with Z21 is corrected
-* Updated projects to .NET 10. UDP client moved to it's own class
+* Updated projects to .NET 10
+* UDP client moved to it's own class
 * Added test project
 * Added method to query for Z21s on the network
 * Added info about multilangugage
