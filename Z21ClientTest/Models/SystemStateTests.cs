@@ -15,7 +15,7 @@ public class SystemStateTests
             temperatureC: 25,
             supplyVoltagemV: 12000,
             vccVoltagemV: 5000,
-            centralState: 0,
+            centralState: new StatusChanged(0),
             centralStateEx: 0);
 
         // Assert

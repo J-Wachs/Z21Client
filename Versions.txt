@@ -1,3 +1,19 @@
+Version of 2026-09-20
+* Language: Added French translations
+* New event: Added event OnStatusChanged to Z21Client, which is raised when the
+  status of the Z21 changes. 
+* Event OnSystemStateChanged has been changed to return status in the new
+  record structure
+* Record SystemState has been changed to use StatusChanged record for
+  CentralState information
+* Bug fix: After connect, disconnect and re-connect, some events were not
+  raised correctly. This has been fixed by doing a rewrite of the event
+  handling in Z21Client
+* Bug fix: The firmware workaround for incorrect reporting of use
+  of Märklin Motorola protocol has been adjusted, as it was applied
+  to all addresses and the maximum MM address can be 255 in version 2 of the
+  protocol
+
 Version of 2026-08-03
 * Added German translation of messages. The German messages has been translated by an AI, and therefore may not be correct.
   Please let me know if you find any mistakes in the German translation

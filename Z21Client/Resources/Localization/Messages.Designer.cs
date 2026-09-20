@@ -79,7 +79,7 @@ namespace Z21Client.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Subscribing to RailComDataReceived event. Adding AllRailCom broadcast flag and starting polling..
+        ///   Looks up a localized string similar to Subscribing to RailComDataReceived event. Adding RailCom broadcast flag and starting polling..
         /// </summary>
         internal static string Text0003 {
             get {
@@ -88,7 +88,7 @@ namespace Z21Client.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unsubscribing from RailComDataReceived event. Removing AllRailCom broadcast flag and stopping polling..
+        ///   Looks up a localized string similar to Unsubscribing from RailComDataReceived event. Removing RailCom broadcast flag and stopping polling..
         /// </summary>
         internal static string Text0004 {
             get {
@@ -957,6 +957,51 @@ namespace Z21Client.Resources.Localization {
         internal static string Text0100 {
             get {
                 return ResourceManager.GetString("Text0100", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GetStatusAsync: Requested z21/Z21 status.
+        /// </summary>
+        internal static string Text0101 {
+            get {
+                return ResourceManager.GetString("Text0101", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received Status Changed Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded..
+        /// </summary>
+        internal static string Text0102 {
+            get {
+                return ResourceManager.GetString("Text0102", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GetHardwareInfoAsync: Command not supported in firmware version {0}.
+        /// </summary>
+        internal static string Text0103 {
+            get {
+                return ResourceManager.GetString("Text0103", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SetTurnoutModeAsync: Command with MM protocol is not supported in firmware version {0}.
+        /// </summary>
+        internal static string Text0104 {
+            get {
+                return ResourceManager.GetString("Text0104", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SetLocoFunctionAsync: Function {0} on address {1} is not allowed for firmware {2}.
+        /// </summary>
+        internal static string Text0105 {
+            get {
+                return ResourceManager.GetString("Text0105", resourceCulture);
             }
         }
     }

@@ -38,6 +38,11 @@ internal static class Z21Commands
     internal static readonly byte[] GetSerialNumber = { 0x04, 0x00, (byte)(Z21ProtocolConstants.HeaderGetSerialNumber & 0xFF), (byte)(Z21ProtocolConstants.HeaderGetSerialNumber >> 8) };
 
     /// <summary>
+    /// Command to request the current status of the Z21. (LAN_X_GET_STATUS)
+    /// </summary>
+    internal static readonly byte[] GetStatus = { 0x07, 0x00, (byte)(Z21ProtocolConstants.HeaderXBus & 0xFF), (byte)(Z21ProtocolConstants.HeaderXBus >> 8), Z21ProtocolConstants.XHeaderGetStatus, 0x24, 0x05 };
+
+    /// <summary>
     /// Command to request the current system state. (LAN_SYSTEMSTATE_GETDATA)
     /// </summary>
     internal static readonly byte[] GetSystemState = { 0x04, 0x00, (byte)(Z21ProtocolConstants.HeaderGetSystemState & 0xFF), (byte)(Z21ProtocolConstants.HeaderGetSystemState >> 8) };

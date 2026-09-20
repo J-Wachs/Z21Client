@@ -24,7 +24,7 @@ public enum BroadcastFlags : uint
     /// <summary>
     /// Broadcasts for RailCom data of subscribed locomotives.
     /// </summary>
-    RailComSubscribed = 0x00000004,
+    RailCom = 0x00000004,
 
     /// <summary>
     /// Broadcasts for fast clock time messages. (FW >= 1.43)

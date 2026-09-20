@@ -44,6 +44,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
 
     private const int Z21_PORT = 21105;
 
+    private FirmwareVersion? _firmwareVersion;
+
     // --- START: Added for Firmware Bug Workaround ---
     // This dictionary acts as a temporary holding area for loco info requests.
     // It's used to solve a race condition caused by a firmware bug where a LAN_X_GET_LOCO_INFO 
@@ -62,14 +64,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     private DateTime _lastMessageReceivedTimestamp;
     private int _failedPingCount;
     private BroadcastFlags _subscripedBroadcastFlags = BroadcastFlags.None;
-    private EventHandler<LocoInfo>? _locoInfoReceived;
     private EventHandler<RBusData>? _rBusDataReceived;
     private EventHandler<RailComData>? _railComDataReceived;
     private EventHandler<SystemState>? _systemStateChanged;
     private readonly SemaphoreSlim _sendToZ21Lock = new(1, 1);
-
-    private Timer? _railComPollingTimer;
-    private readonly HashSet<ushort> _receivedRailComAddresses = [];
 
     #region Exposed events
 
@@ -92,31 +90,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<HardwareInfo>? OnHardwareInfoReceived;
 
     /// <inheritdoc/>
-    public event EventHandler<LocoInfo>? OnLocoInfoReceived
-    {
-        add
-        {
-            if (_locoInfoReceived is null && HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
-            {
-                // "Subscribing to AllLocoInfoReceived event. Adding AllLocoInfo broadcast flag."
-                logger.LogInformation(Messages.Text0001);
-                _subscripedBroadcastFlags |= BroadcastFlags.AllLocoInfo;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
-            _locoInfoReceived += value;
-        }
-        remove
-        {
-            _locoInfoReceived -= value;
-            if (_locoInfoReceived is null && HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
-            {
-                // "Unsubscribing from AllLocoInfoReceived event. Removing AllLocoInfo broadcast flag."
-                logger.LogInformation(Messages.Text0002);
-                _subscripedBroadcastFlags &= ~BroadcastFlags.AllLocoInfo;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
-        }
-    }
+    public event EventHandler<LocoInfo>? OnLocoInfoReceived;
 
     /// <inheritdoc/>
     public event EventHandler<LocoSlotInfo>? OnLocoSlotInfoReceived;
@@ -129,33 +103,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     {
         add
         {
-            if (_railComDataReceived is null)
-            {
-                // "Subscribing to RailComDataReceived event. Adding AllRailCom broadcast flag and starting polling."
-                logger.LogInformation(Messages.Text0003);
-                _subscripedBroadcastFlags |= BroadcastFlags.AllRailCom;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-
-                // Start the timer to poll for RailCom data every second
-                _railComPollingTimer = new Timer(RailComPollingCallback, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(2));
-            }
             _railComDataReceived += value;
+            SubscribeToRailComIfConnected();
         }
         remove
         {
             _railComDataReceived -= value;
-            if (_railComDataReceived is null)
-            {
-                // "Unsubscribing from RailComDataReceived event. Removing AllRailCom broadcast flag and stopping polling."
-                logger.LogInformation(Messages.Text0004);
-
-                // Stop and dispose the timer
-                _railComPollingTimer?.Dispose();
-                _railComPollingTimer = null;
-
-                _subscripedBroadcastFlags &= ~BroadcastFlags.AllRailCom;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
+            UnSubscribeFromRailComIfConnected();
         }
     }
 
@@ -164,25 +118,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     {
         add
         {
-            if (_rBusDataReceived is null)
-            {
-                // "Subscribing to RBusDataReceived event. Adding RBus broadcast flag."
-                logger.LogInformation(Messages.Text0005);
-                _subscripedBroadcastFlags |= BroadcastFlags.RBus;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
             _rBusDataReceived += value;
+            SubscribeToRBusIfConnected();
         }
         remove
         {
             _rBusDataReceived -= value;
-            if (_rBusDataReceived is null)
-            {
-                // "Unsubscribing from RBusDataReceived event. Removing RBus broadcast flag."
-                logger.LogInformation(Messages.Text0006);
-                _subscripedBroadcastFlags &= ~BroadcastFlags.RBus;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
+            UnSubscribeFromRBusIfConnected();
         }
     }
 
@@ -190,29 +132,20 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public event EventHandler<SerialNumber>? OnSerialNumberReceived;
 
     /// <inheritdoc/>
+    public event EventHandler<StatusChanged>? OnStatusChanged;
+
+    /// <inheritdoc/>
     public event EventHandler<SystemState>? OnSystemStateChanged
     {
         add
         {
-            if (_systemStateChanged is null)
-            {
-                // "Subscribing to SystemStateChanged event. Adding SystemState broadcast flag."
-                logger.LogInformation(Messages.Text0007);
-                _subscripedBroadcastFlags |= BroadcastFlags.SystemState;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
             _systemStateChanged += value;
+            SubscribeToSystemStateChangedIfConnected();
         }
         remove
         {
             _systemStateChanged -= value;
-            if (_systemStateChanged is null)
-            {
-                // "Unsubscribing from SystemStateChanged event. Removing SystemState broadcast flag."
-                logger.LogInformation(Messages.Text0008);
-                _subscripedBroadcastFlags &= ~BroadcastFlags.SystemState;
-                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
-            }
+            UnsubscribeFromSystemStateChangedIfConnected();
         }
     }
 
@@ -238,6 +171,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task<bool> ConnectAsync(string host, int port = Z21_PORT)
     {
+        // The fields are reset here to ensure that any previous connection's
+        // state does not interfere with the new connection attempt.
+        HardwareInfo = null;
+        Z21Code = null;
+        Isz21 = null;
+        Capabilities = null;
+        SerialNumber = null;
+        _firmwareVersion = null;
+
         // "Connecting to Z21 at {Host}:{Port}..."
         logger.LogInformation(Messages.Text0009, host, port);
 
@@ -286,12 +228,17 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         _cancellationTokenSource = new CancellationTokenSource();
         _receiveTask = Task.Run(() => ReceiveLoop(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
 
+        if (await MakeCallToFirmwareVersionAsync() is false)
+        {
+            return false;
+        }
+
         if (await MakeCallToHardwareInfoAsync() is false)
         {
             return false;
         }
 
-        if (HardwareInfo is not null && HardwareInfo.FwVersion.Version >= Z21FirmwareVersions.V1_42)
+        if (HardwareInfo is not null && _firmwareVersion?.Version >= Z21FirmwareVersions.V1_42)
         {
             if (await MakeCallToSystemStateAsync() is false)
             {
@@ -318,7 +265,16 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         _failedPingCount = 0;
 
         _subscripedBroadcastFlags = BroadcastFlags.Basic | BroadcastFlags.SystemState;
+        if (_firmwareVersion?.Version >= Z21FirmwareVersions.V1_20)
+        {
+            // "Subscribing to AllLocoInfoReceived event. Adding AllLocoInfo broadcast flag."
+            logger.LogInformation(Messages.Text0001);
+            _subscripedBroadcastFlags |= BroadcastFlags.AllLocoInfo;
+        }
         await SetBroadcastFlags(_subscripedBroadcastFlags);
+
+        SubscribeToRailComIfConnected();
+        SubscribeToRBusIfConnected();
 
         _keepAliveTimer = new Timer(KeepAliveCallback, null, TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(45));
         _watchdogTimer = new Timer(WatchdogCallback, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
@@ -344,12 +300,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         {
             await _watchdogTimer.DisposeAsync();
             _watchdogTimer = null;
-        }
-
-        if (_railComPollingTimer is not null)
-        {
-            await _railComPollingTimer.DisposeAsync();
-            _railComPollingTimer = null;
         }
 
         // Check local flag
@@ -392,12 +342,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             udpClient.Close();
             IsConnected = false;
         }
-
-        HardwareInfo = null;
-        Z21Code = null;
-        Isz21 = null;
-        Capabilities = null;
-        SerialNumber = null;
 
         // "Disconnected."
         logger.LogInformation(Messages.Text0020);
@@ -463,38 +407,84 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task GetHardwareInfoAsync()
     {
-        await SendCommandAsync(Z21Commands.GetHardwareInfo);
-        // "GetHardwareInfoAsync: Requested the hardware information"
-        logger.LogInformation(Messages.Text0087);
+        // According to the Z21 LAN Protocol Specification, the GetHardwareInfo
+        // command is only supported in firmware versions 1.20 and above.
+        // but before that, firmware versions was for specific devides, so we return a reply accordingly.
+        if (_firmwareVersion?.Version == Z21FirmwareVersions.V1_10 ||
+            _firmwareVersion?.Version == Z21FirmwareVersions.V1_11)
+        {
+            var data = BuildHardwareInfoData(HardwareType.Z21Old, _firmwareVersion);
+            ParseHardwareInfo(data);
+            // "GetHardwareInfoAsync: Requested the hardware information"
+            logger.LogInformation(Messages.Text0087);
+            return;
+        }
+
+        if (_firmwareVersion?.Version == Z21FirmwareVersions.V1_12)
+        {
+            var data = BuildHardwareInfoData(HardwareType.SmartRail, _firmwareVersion);
+            ParseHardwareInfo(data);
+            // "GetHardwareInfoAsync: Requested the hardware information"
+            logger.LogInformation(Messages.Text0087);
+            return;
+        }
+
+        if (_firmwareVersion?.Version >= Z21FirmwareVersions.V1_20)
+        {
+            await SendCommandAsync(Z21Commands.GetHardwareInfo);
+            // "GetHardwareInfoAsync: Requested the hardware information"
+            logger.LogInformation(Messages.Text0087);
+        }
+        else
+        {
+            // "GetHardwareInfoAsync: Command not supported in firmare version {fwVersion}"
+            logger.LogError(Messages.Text0103, HardwareInfo?.FwVersion.Version);
+        }
     }
 
     /// <inheritdoc/>
     public async Task GetLocoInfoAsync(ushort address)
     {
-        // --- START: Firmware Bug Workaround ---
-        // Register this address as a pending request. This signals to the parsing methods
-        // that we are actively waiting for a combined LocoInfo and LocoMode response
-        // due to a firmware bug where LAN_X_GET_LOCO_INFO doesn't provide complete protocol data.
-        _pendingLocoInfoRequests[address] = null;
-        // --- END: Firmware Bug Workaround ---
+        async Task SendGetLocoInfoCommandAsync(ushort address)
+        {
+            var command = new byte[Z21ProtocolConstants.LengthGetLocoInfo];
+            BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoInfo).CopyTo(command, 0);
+            BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
+            command[4] = Z21ProtocolConstants.XHeaderGetLocoInfo;
+            command[5] = 0xF0;
+            var (adrMsb, adrLsb) = ConvertLocoAddressForXBus(address);
+            command[6] = adrMsb;
+            command[7] = adrLsb;
+            command[8] = CalculateChecksum(command);
+            await SendCommandAsync(command);
+            // "GetLocoInfoAsync: Requested loco info for address {Address}"
+            logger.LogInformation(Messages.Text0021, address);
+        }
 
-        var command = new byte[Z21ProtocolConstants.LengthGetLocoInfo];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthGetLocoInfo).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.XHeader).CopyTo(command, 2);
-        command[4] = Z21ProtocolConstants.XHeaderGetLocoInfo;
-        command[5] = 0xF0;
-        var (adrMsb, adrLsb) = ConvertLocoAddressForXBus(address);
-        command[6] = adrMsb;
-        command[7] = adrLsb;
-        command[8] = CalculateChecksum(command);
-        await SendCommandAsync(command);
-        // "GetLocoInfoAsync: Requested loco info for address {Address}"
-        logger.LogInformation(Messages.Text0021, address);
+        // The firmware bug concerns only Märklin Motorola protocol, which 
+        // has a maximum address of 255. Therefore, we only apply the workaround for addresses <= 255.
+        if (address <= Constants.HighestMärklinMotorolaAddressInZ21)
+        {
+            // --- START: Firmware Bug Workaround ---
+            // Register this address as a pending request. This signals to the parsing methods
+            // that we are actively waiting for a combined LocoInfo and LocoMode response
+            // due to a firmware bug where LAN_X_GET_LOCO_INFO doesn't provide complete protocol data.
+            _pendingLocoInfoRequests[address] = null;
+            // --- END: Firmware Bug Workaround ---
 
-        // --- START: Firmware Bug Workaround ---
-        // Immediately request the loco mode as well to get the correct protocol information.
-        await GetLocoModeAsync(address);
-        // --- END: Firmware Bug Workaround ---
+            await SendGetLocoInfoCommandAsync(address);
+
+            // --- START: Firmware Bug Workaround ---
+            // Immediately request the loco mode as well to get the correct protocol information.
+            await GetLocoModeAsync(address);
+            // --- END: Firmware Bug Workaround ---
+        }
+        else
+        {
+            // As addresses > 255 are by standard defined as DCC, they are not affected by the
+            // firmware bug, we can send the command normally.
+            await SendGetLocoInfoCommandAsync(address);
+        }
     }
 
     /// <inheritdoc/>
@@ -570,6 +560,15 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         await SendCommandAsync(Z21Commands.GetSerialNumber);
         // "GetSerialtNumberAsync: Requested z21/Z21 serial number"
         logger.LogInformation(Messages.Text0025);
+    }
+
+    /// <inheritdoc/>
+    public async Task GetStatusAsync()
+    {
+        await SendCommandAsync(Z21Commands.GetStatus);
+        // "GetStatusAsync: Requested z21/Z21 status"
+        logger.LogInformation(Messages.Text0101);
+
     }
 
     /// <inheritdoc/>
@@ -661,7 +660,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     }
 
     /// <inheritdoc />
-    public async Task SetCVValueOnProgTrackAsync( ushort cvAddress, byte cvValue)
+    public async Task SetCVValueOnProgTrackAsync(ushort cvAddress, byte cvValue)
     {
         cvAddress--;
         var command = new byte[Z21ProtocolConstants.LengthSetCVValueFromProgTrack];
@@ -717,6 +716,13 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task SetLocoFunctionAsync(ushort address, byte functionIndex)
     {
+        if (functionIndex > 28 && HardwareInfo?.FwVersion.Version < Z21FirmwareVersions.V1_42)
+        {
+            // "SetLocoFunctionAsync: Function {functionIndex} on address {address} is not allowed for firmware {fwVersion}"
+            logger.LogInformation(Messages.Text0105, functionIndex, address, HardwareInfo?.FwVersion.Version);
+            return;
+        }
+
         var command = new byte[Z21ProtocolConstants.LengthSetLocoFunction];
         BitConverter.GetBytes(Z21ProtocolConstants.LengthSetLocoFunction).CopyTo(command, 0);
         BitConverter.GetBytes(Z21ProtocolConstants.HeaderXBus).CopyTo(command, 2);
@@ -759,16 +765,26 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <inheritdoc/>
     public async Task SetTurnoutModeAsync(ushort address, TurnoutMode mode)
     {
-        var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
-        BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
-        BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
-        // According to the documentation, for this command the two high bits are not to be set when address >= 128.
-        command[4] = (byte)(address >> 8);
-        command[5] = (byte)(address & 0xFF);
-        command[6] = (byte)mode;
-        await SendCommandAsync(command);
-        // "Setting turnout mode for address {Address} to {Mode}"
-        logger.LogInformation(Messages.Text0033, address, mode);
+        if (mode is TurnoutMode.DCC ||
+            mode is TurnoutMode.MM && HardwareInfo?.FwVersion.Version >= Z21FirmwareVersions.V1_20)
+        {
+            var command = new byte[Z21ProtocolConstants.LengthSetTurnoutMode];
+            BitConverter.GetBytes(Z21ProtocolConstants.LengthSetTurnoutMode).CopyTo(command, 0);
+            BitConverter.GetBytes(Z21ProtocolConstants.HeaderSetTurnoutMode).CopyTo(command, 2);
+            // According to the documentation, for this command the two high bits are not to be set when address >= 128.
+            command[4] = (byte)(address >> 8);
+            command[5] = (byte)(address & 0xFF);
+            command[6] = (byte)mode;
+            await SendCommandAsync(command);
+            // "Setting turnout mode for address {Address} to {Mode}"
+            logger.LogInformation(Messages.Text0033, address, mode);
+        }
+        else
+        {
+            // "SetTurnoutModeAsync: Command with MM protocol is not supported in firmware version {fwVersion}"
+            logger.LogError(Messages.Text0104, HardwareInfo?.FwVersion.Version);
+            return;
+        }
     }
 
     /// <inheritdoc/>
@@ -927,11 +943,11 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// Converts the given speed step to the Roco-specific speed step value based on the loco mode and native speed steps.
     /// 
     /// The speed must be in internal interval based on the protocol speedstep.
-    /// MM1 14 steps: 0-14
-    /// MM2 14 steps: 0-14
-    /// MM2 28 steps: 0-28
-    /// DCC 14 steps : 0-14
-    /// DCC 28 steps: 0-28
+    /// MM1 14 steps:  0-14
+    /// MM2 14 steps:  0-14
+    /// MM2 28 steps:  0-28
+    /// DCC 14 steps:  0-14
+    /// DCC 28 steps:  0-28
     /// DCC 128 steps: 0-126
     /// </summary>
     /// <param name="speed">The speed in internal interval based on the nativeSpeedStep.</param>
@@ -1015,6 +1031,32 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             // "Sending keep-alive message to Z21."
             logger.LogInformation(Messages.Text0038);
             _ = GetSystemStateAsync();
+        }
+    }
+
+    /// <summary>
+    /// Make call to get firmware version and set properties accordingly.
+    /// </summary>
+    /// <returns></returns>
+    private async Task<bool> MakeCallToFirmwareVersionAsync()
+    {
+        // Get firmware info
+        var (isSuccess, firmwareInfoRetrieved) = await AsyncEventHelper.ExecuteAndWaitAsync<FirmwareVersion>(
+            triggerAction: async () => await GetFirmwareVersionAsync(),
+            subscribe: h => OnFirmwareVersionReceived += h,
+            unsubscribe: h => OnFirmwareVersionReceived -= h,
+            timeoutMs: 5000
+            );
+
+        if (isSuccess)
+        {
+            // The result data property is not used, as we have set the HardwareInfo property in the event handler.
+            _firmwareVersion = firmwareInfoRetrieved;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -1120,27 +1162,6 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Start the poll for RailCom data by requesting info from the next locomotive in the internal buffer in Z21 periodically.
-    /// </summary>
-    /// <param name="state"></param>
-    private void RailComPollingCallback(object? state)
-    {
-        _receivedRailComAddresses.Clear();
-        _ = GetNextRailComDataAsync();
-    }
-
-    /// <summary>
-    /// Call Z21 command GetNextRailComData to request data for the next locomotive in the internal buffer.
-    /// </summary>
-    /// <returns></returns>
-    private async Task GetNextRailComDataAsync()
-    {
-        await SendCommandAsync(Z21Commands.GetRailComDataNext);
-        // "Requesting RailCom data from next locomotive in ring buffer"
-        logger.LogInformation(Messages.Text0039);
     }
 
     /// <summary>
@@ -1489,6 +1510,9 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             case Z21ProtocolConstants.XHeaderCVData:
                 ParseCVValue(data);
                 break;
+            case Z21ProtocolConstants.XHeaderStatusChanged:
+                ParseStatus(data);
+                break;
             default:
                 // "Received an unhandled X-Bus command with X-Header: 0x{XHeader:X2}"
                 logger.LogError(Messages.Text0055, xHeader);
@@ -1496,6 +1520,10 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
     }
 
+    /// <summary>
+    /// Parses the CV value received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
     private void ParseCVValue(ReadOnlySpan<byte> data)
     {
         if (OnCVValueReceived is null)
@@ -1531,16 +1559,12 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <param name="data"></param>
     private void ParseRailComData(ReadOnlySpan<byte> data)
     {
-        if (_railComDataReceived is null || data.Length < 17) return;
-        var railComData = new RailComData(data[4..]);
-        if (_railComPollingTimer is not null)
+        if (_railComDataReceived is null || data.Length < 17)
         {
-            bool isNewAddressInCycle = _receivedRailComAddresses.Add(railComData.LocoAddress);
-            if (isNewAddressInCycle)
-            {
-                _ = GetNextRailComDataAsync();
-            }
+            return;
         }
+
+        var railComData = new RailComData(data[4..]);
         _railComDataReceived.Invoke(this, railComData);
         // "RailCom data for loco {Address} received."
         logger.LogInformation(Messages.Text0056, railComData.LocoAddress);
@@ -1742,7 +1766,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             Isz21 = HardwareInfo?.HwType is HardwareType.z21Small or HardwareType.z21Start;
             if (HardwareInfo is not null)
             {
-                OnHardwareInfoReceived.Invoke(this, HardwareInfo);
+                OnHardwareInfoReceived?.Invoke(this, HardwareInfo);
             }
             // "Hardware Info received: {HWType}, Firmware: {FWVersion}"
             logger.LogInformation(Messages.Text0070, HardwareInfo?.HwType, HardwareInfo?.FwVersion);
@@ -1752,6 +1776,29 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             // "Failed to parse firmware version from LAN_GET_HWINFO response."
             logger.LogError(Messages.Text0071);
         }
+    }
+
+    /// <summary>
+    /// Parse the Status Changed message received from Z21.
+    /// </summary>
+    /// <param name="data"></param>
+    private void ParseStatus(ReadOnlySpan<byte> data)
+    {
+        if (OnStatusChanged is null)
+            return;
+
+        byte receivedChecksum = data[7];
+        byte calculatedChecksum = CalculateChecksum(data);
+        if (receivedChecksum != calculatedChecksum)
+        {
+            // "Received Status Changed Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded."
+            logger.LogWarning(Messages.Text0102, receivedChecksum, calculatedChecksum);
+            return;
+        }
+
+        var status = new StatusChanged(data[6]);
+
+        OnStatusChanged.Invoke(this, status);
     }
 
     /// <summary>
@@ -1806,7 +1853,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
                 var completedLocoInfo = new LocoInfo(pendingLocoInfo, mode);
 
                 // Raise the final, correct event.
-                _locoInfoReceived?.Invoke(this, completedLocoInfo);
+                OnLocoInfoReceived?.Invoke(this, completedLocoInfo);
                 // "Firmware bug workaround: Combined LocoInfo and LocoMode for address {Address} and raised event."
                 logger.LogInformation(Messages.Text0072, address);
 
@@ -1851,7 +1898,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     /// <param name="data"></param>
     private void ParseLocoInfo(ReadOnlySpan<byte> data)
     {
-        if (_locoInfoReceived is null)
+        if (OnLocoInfoReceived is null)
             return;
 
         int expectedMinLength = 14;
@@ -1891,7 +1938,7 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         }
         // --- END: Firmware Bug Workaround ---
 
-        _locoInfoReceived.Invoke(this, locoInfo);
+        OnLocoInfoReceived.Invoke(this, locoInfo);
         // "Loco Info for address {Address} received and processed."
         logger.LogInformation(Messages.Text0078, address);
     }
@@ -1951,7 +1998,8 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
             temperatureC: BitConverter.ToInt16(data[10..]),
             supplyVoltagemV: BitConverter.ToInt16(data[12..]),
             vccVoltagemV: BitConverter.ToInt16(data[14..]),
-            centralState: data[16],
+            //centralState: data[16],
+            centralState: new StatusChanged(data[16]),
             centralStateEx: data[17],
             capabilities: capabilities
         );
@@ -1976,6 +2024,118 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
         // "Setting broadcast flags to {subscripedBroadcastFlags}"
         logger.LogInformation(Messages.Text0083, subscripedBroadcastFlags);
     }
+    
+    /// <summary>
+    /// Subscribe to RailCom data if connected.
+    /// </summary>
+    private void SubscribeToRailComIfConnected()
+    {
+        if (IsConnected)
+        {
+            BroadcastFlags fwDependendBroadcastFlag = _firmwareVersion?.Version >= Z21FirmwareVersions.V1_29
+                ? BroadcastFlags.AllRailCom
+                : BroadcastFlags.RailCom;
+
+            if (_railComDataReceived is null || _railComDataReceived is not null &&
+                _subscripedBroadcastFlags.HasFlag(fwDependendBroadcastFlag) is false)
+            {
+                // "Subscribing to RailComDataReceived event. Adding RailCom broadcast flag and starting polling."
+                logger.LogInformation(Messages.Text0003);
+                _subscripedBroadcastFlags |= fwDependendBroadcastFlag;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe from RailCom data if connected.
+    /// </summary>
+    private void UnSubscribeFromRailComIfConnected()
+    {
+        if (IsConnected)
+        {
+            BroadcastFlags fwDependendBroadcastFlag = _firmwareVersion?.Version >= Z21FirmwareVersions.V1_29
+                ? BroadcastFlags.AllRailCom
+                : BroadcastFlags.RailCom;
+
+            if (_railComDataReceived is null)
+            {
+                // "Unsubscribing from RailComDataReceived event. Removing RailCom broadcast flag and stopping polling."
+                logger.LogInformation(Messages.Text0004);
+
+                _subscripedBroadcastFlags &= ~fwDependendBroadcastFlag;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Subscribe to RBus data if connected.
+    /// </summary>
+    private void SubscribeToRBusIfConnected()
+    {
+        if (IsConnected)
+        {
+            if (_rBusDataReceived is not null && _subscripedBroadcastFlags.HasFlag(BroadcastFlags.RBus) is false)
+            {
+                // "Subscribing to RBusDataReceived event. Adding RBus broadcast flag."
+                logger.LogInformation(Messages.Text0002);
+                _subscripedBroadcastFlags |= BroadcastFlags.RBus;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe from RBus data if connected.
+    /// </summary>
+    private void UnSubscribeFromRBusIfConnected()
+    {
+        if (IsConnected)
+        {
+            if (_rBusDataReceived is null)
+            {
+                // "Unsubscribing from RBusDataReceived event. Removing RBus broadcast flag."
+                logger.LogInformation(Messages.Text0005);
+                _subscripedBroadcastFlags &= ~BroadcastFlags.RBus;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Subscribe to SystemStateChanged event if connected.
+    /// </summary>
+    private void SubscribeToSystemStateChangedIfConnected()
+    {
+        if (IsConnected)
+        {
+            if (_systemStateChanged is not null && _subscripedBroadcastFlags.HasFlag(BroadcastFlags.SystemState) is false)
+            {
+                // "Subscribing to SystemStateChanged event. Adding SystemState broadcast flag."
+                logger.LogInformation(Messages.Text0006);
+                _subscripedBroadcastFlags |= BroadcastFlags.SystemState;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribe from SystemStateChanged event if connected.
+    /// </summary>
+    private void UnsubscribeFromSystemStateChangedIfConnected()
+    {
+        if (IsConnected)
+        {
+            if (_systemStateChanged is null)
+            {
+                // "Unsubscribing from SystemStateChanged event. Removing SystemState broadcast flag."
+                logger.LogInformation(Messages.Text0007);
+                _subscripedBroadcastFlags &= ~BroadcastFlags.SystemState;
+                _ = SetBroadcastFlags(_subscripedBroadcastFlags);
+            }
+        }
+    }
 
     /// <summary>
     /// Calculate checksum for a given data span.
@@ -1996,5 +2156,32 @@ public sealed class Z21Client(ILogger<Z21Client> logger, IZ21UdpClient udpClient
     public async ValueTask DisposeAsync()
     {
         await DisconnectAsync();
+    }
+
+    /// <summary>
+    /// Builds the hardware information data packet to be sent to the Z21 central station.
+    /// This packet includes the hardware type and firmware version, along with a checksum for data integrity.
+    /// </summary>
+    /// <param name="hardwareType">The type of hardware.</param>
+    /// <param name="firmwareVersion">The firmware version.</param>
+    /// <returns>A byte array representing the hardware information data packet.</returns>
+    private static byte[] BuildHardwareInfoData(HardwareType hardwareType, FirmwareVersion firmwareVersion)
+    {
+        var data = new byte[12];
+        data[0] = 0x0D; // Length
+        data[1] = 0x00;
+        data[2] = 0x1A; // Command (LAN_HARDWARE_INFO)
+        data[3] = 0x00;
+        BitConverter.GetBytes((uint)hardwareType).CopyTo(data, 4);
+        BitConverter.GetBytes(((byte)firmwareVersion.Version.Major << 8) | firmwareVersion.Version.Minor).CopyTo(data, 8);
+
+        byte checksum = 0;
+        for (int i = 0; i < 11; i++)
+        {
+            checksum ^= data[i];
+        }
+        data[12] = checksum;
+
+        return data;
     }
 }

@@ -181,10 +181,19 @@ public static class Z21ProtocolConstants
     public const ushort XHeader = 0x0040;
 
     public const byte XHeaderCVData = 0x64;
+
+    public const byte XHeaderStatusChanged = 0x62;
+
+
     /// <summary>
     /// X-Header for a response that emergency stop was issued (LAN_BC_STOPPED).
     /// </summary>
     public const byte XHeaderEmergencyStop = 0x81;
+
+    /// <summary>
+    /// X-Header for getting the status of the Z21 system (LAN_X_GET_STATUS).
+    /// </summary>
+    public const byte XHeaderGetStatus = 0x21;
 
     /// <summary>
     /// Represents the protocol header value used to set the locomotive drive state in XHeader messages.
@@ -242,7 +251,10 @@ public static class Z21ProtocolConstants
     /// </summary>
     public const ushort HeaderGetLocoSlotInfo = 0x00AF;
 
-
+    /// <summary>
+    /// Represents the protocol header value used to request the current status of the Z21 system.
+    /// </summary>
+    public const ushort HeaderGetStatus = 0x2262;
 
     public const byte XHeaderCVOnPOM = 0xE6;
 

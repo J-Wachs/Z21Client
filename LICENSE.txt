@@ -1,3 +1,30 @@
+MIT-licens
+
+Ophavsret (c) 2025–2026 Jesper Wachs
+
+Der gives hermed uden beregning enhver person, der erhverver en kopi af
+denne software og de tilhørende dokumentationsfiler ("Softwaren"),
+tilladelse til uden begrænsninger at håndtere Softwaren, herunder uden
+begrænsning rettighederne til at bruge, kopiere, ændre, sammenflette,
+offentliggøre, distribuere, underlicensere og/eller sælge kopier af
+Softwaren samt at tillade personer, som Softwaren leveres til, at gøre
+det samme, på følgende betingelser:
+
+Ovenstående meddelelse om ophavsret og denne tilladelsesmeddelelse skal
+medtages i alle kopier eller væsentlige dele af Softwaren.
+
+SOFTWAREN LEVERES "SOM DEN ER" UDEN NOGEN FORM FOR GARANTI, HVERKEN
+UDTRYKKELIG ELLER UNDERFORSTÅET, HERUNDER, MEN IKKE BEGRÆNSET TIL,
+GARANTIER FOR SALGBARHED, EGNETHED TIL ET BESTEMT FORMÅL OG
+IKKE-KRÆNKELSE AF TREDJEMANDS RETTIGHEDER. UNDER INGEN OMSTÆNDIGHEDER
+KAN FORFATTERNE ELLER OPHAVSRETTHAVERNE HOLDES ANSVARLIGE FOR KRAV,
+SKADER ELLER ANDEN FORM FOR ANSVAR, UANSET OM DET ER BASERET PÅ
+KONTRAKT, SKADEVOLDENDE HANDLING ELLER ANDEN JURIDISK TEORI, SOM
+OPSTÅR SOM FØLGE AF, UD AF ELLER I FORBINDELSE MED SOFTWAREN ELLER
+BRUGEN AF ELLER ANDEN HÅNDTERING AF SOFTWAREN.
+
+-------------------------------------------------------------------------------
+
 MIT License
 
 Copyright (c) 2025-2026 Jesper Wachs
@@ -19,3 +46,63 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+MIT-Lizenz
+
+Copyright (c) 2025–2026 Jesper Wachs
+
+Hiermit wird jeder Person, die eine Kopie dieser Software und der
+zugehörigen Dokumentationsdateien (die „Software“) erhält, kostenlos die
+Erlaubnis erteilt, die Software ohne Einschränkung zu verwenden. Dies
+umfasst insbesondere die Rechte, die Software zu nutzen, zu kopieren, zu
+ändern, zusammenzuführen, zu veröffentlichen, zu verbreiten,
+unterzulizenzieren und/oder Kopien der Software zu verkaufen sowie
+Personen, denen die Software zur Verfügung gestellt wird, dies ebenfalls
+zu gestatten, vorbehaltlich der folgenden Bedingungen:
+
+Der vorstehende Copyright-Hinweis sowie dieser Genehmigungshinweis müssen
+in allen Kopien oder wesentlichen Teilen der Software enthalten sein.
+
+DIE SOFTWARE WIRD „WIE BESEHEN“ UND OHNE JEDE AUSDRÜCKLICHE ODER
+STILLSCHWEIGENDE GEWÄHRLEISTUNG ZUR VERFÜGUNG GESTELLT, EINSCHLIESSLICH,
+ABER NICHT BESCHRÄNKT AUF, DIE GEWÄHRLEISTUNGEN DER MARKTGÄNGIGKEIT,
+DER EIGNUNG FÜR EINEN BESTIMMTEN ZWECK UND DER NICHTVERLETZUNG VON
+RECHTEN DRITTER. IN KEINEM FALL SIND DIE AUTOREN ODER
+URHEBERRECHTSINHABER FÜR IRGENDWELCHE ANSPRÜCHE, SCHÄDEN ODER
+SONSTIGE HAFTUNG VERANTWORTLICH, UNABHÄNGIG DAVON, OB DIESE AUS
+EINEM VERTRAG, EINER UNERLAUBTEN HANDLUNG ODER EINER ANDEREN
+RECHTSTHEORIE ENTSTEHEN UND OB SIE AUS, DURCH ODER IN VERBINDUNG MIT
+DER SOFTWARE ODER DER NUTZUNG ODER EINER ANDEREN HANDHABUNG DER
+SOFTWARE ENTSTEHEN.
+
+-------------------------------------------------------------------------------
+
+Licence MIT
+
+Copyright (c) 2025–2026 Jesper Wachs
+
+La présente licence est accordée gratuitement à toute personne obtenant
+une copie de ce logiciel et des fichiers de documentation associés
+(le « Logiciel »), afin de traiter le Logiciel sans restriction, y
+compris, sans limitation, les droits d'utiliser, de copier, de modifier,
+de fusionner, de publier, de distribuer, de sous-licencier et/ou de
+vendre des copies du Logiciel, ainsi que d'autoriser les personnes
+auxquelles le Logiciel est fourni à en faire de même, sous réserve des
+conditions suivantes :
+
+L'avis de droit d'auteur ci-dessus ainsi que le présent avis
+d'autorisation doivent être inclus dans toutes les copies ou parties
+substantielles du Logiciel.
+
+LE LOGICIEL EST FOURNI « EN L'ÉTAT », SANS GARANTIE D'AUCUNE SORTE,
+EXPRESSE OU IMPLICITE, Y COMPRIS, SANS LIMITATION, LES GARANTIES DE
+QUALITÉ MARCHANDE, D'ADÉQUATION À UN USAGE PARTICULIER ET
+D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS LES AUTEURS OU LES
+DÉTENTEURS DES DROITS D'AUTEUR NE POURRONT ÊTRE TENUS RESPONSABLES
+DE TOUTE RÉCLAMATION, DE TOUT DOMMAGE OU DE TOUTE AUTRE
+RESPONSABILITÉ, QUE CE SOIT DANS LE CADRE D'UNE ACTION CONTRACTUELLE,
+D'UNE ACTION EN RESPONSABILITÉ DÉLICTUELLE OU DE TOUTE AUTRE
+THÉORIE JURIDIQUE, DÉCOULANT DE, RÉSULTANT DE OU LIÉE AU LOGICIEL
+OU À L'UTILISATION OU À TOUTE AUTRE UTILISATION DU LOGICIEL.

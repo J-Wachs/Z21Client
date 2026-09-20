@@ -74,6 +74,11 @@ public interface IZ21Client : IAsyncDisposable
     event EventHandler<SerialNumber> OnSerialNumberReceived;
 
     /// <summary>
+    /// Response to call to GetStatus..
+    /// </summary>
+    event EventHandler<StatusChanged> OnStatusChanged;
+
+    /// <summary>
     /// Occurs when the system state is received from the Z21.
     /// </summary>
     event EventHandler<SystemState> OnSystemStateChanged;
@@ -215,6 +220,12 @@ public interface IZ21Client : IAsyncDisposable
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task GetSerialNumberAsync();
+
+    /// <summary>
+    /// Sends a request to get the current status from the Z21.
+    /// </summary>
+    /// <returns></returns>
+    Task GetStatusAsync();
 
     /// <summary>
     /// Sends a request to get the current system state from the Z21.

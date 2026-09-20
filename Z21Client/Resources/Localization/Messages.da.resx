@@ -127,10 +127,10 @@
     <value>Afmelder fra AllLocoInfoReceived-hændelse. Fjerner AllLocoInfo broadcast-flag.</value>
   </data>
   <data name="Text0003" xml:space="preserve">
-    <value>Tilmelder til RailComDataReceived-hændelse. Tilføjer AllRailCom broadcast-flag og starter polling.</value>
+    <value>Tilmelder til RailComDataReceived-hændelse. Tilføjer RailCom broadcast-flag og starter polling.</value>
   </data>
   <data name="Text0004" xml:space="preserve">
-    <value>Afmelder fra RailComDataReceived-hændelse. Fjerner AllRailCom broadcast-flag og stopper polling.</value>
+    <value>Afmelder fra RailComDataReceived-hændelse. Fjerner RailCom broadcast-flag og stopper polling.</value>
   </data>
   <data name="Text0005" xml:space="preserve">
     <value>Tilmelder til RBusDataReceived-hændelse. Tilføjer RBus broadcast-flag.</value>
@@ -416,5 +416,20 @@
   </data>
   <data name="Text0100" xml:space="preserve">
     <value>Skrev CV {cvAddress}, value '{cvValue'} på programmeringssporet</value>
+  </data>
+  <data name="Text0101" xml:space="preserve">
+    <value>GetStatusAsync: Efterspurgt z21/Z21 status</value>
+  </data>
+  <data name="Text0102" xml:space="preserve">
+    <value>Modtaget statusændring-pakke med ugyldig kontrolsum. Modtaget: 0x{Received:X2}, Beregnet: 0x{Calculated:X2}. Pakke kasseret.</value>
+  </data>
+  <data name="Text0103" xml:space="preserve">
+    <value>GetHardwareInfoAsync: Kommando er ikke understøttet i firmware version {fwVersion}</value>
+  </data>
+  <data name="Text0104" xml:space="preserve">
+    <value>SetTurnoutModeAsync: Kommando med MM protokollen er ikke understøttet i firmware version {0}</value>
+  </data>
+  <data name="Text0105" xml:space="preserve">
+    <value>SetLocoFunctionAsync: Funktion {0} på adresse {1} er ikke tilladt med firmware {2}</value>
   </data>
 </root>

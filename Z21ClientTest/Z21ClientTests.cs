@@ -3,6 +3,7 @@ using Moq;
 using System.Net;
 using System.Reflection;
 using Z21Client;
+using Z21Client.Infrastructure;
 using Z21Client.Models;
 
 namespace Z21ClientTest;
@@ -386,5 +387,15 @@ public class Z21ClientTests
 
         var remoteEndPointField = typeof(Z21Client.Z21Client).GetField("_remoteEndPoint", BindingFlags.NonPublic | BindingFlags.Instance)!;
         remoteEndPointField.SetValue(client, new IPEndPoint(IPAddress.Loopback, 21105));
+
+        // Simulate that firmware and hardware info has been retrieved, so commands
+        // gated on a minimum firmware version are sent in tests.
+        var firmwareVersion = new FirmwareVersion((byte)Z21FirmwareVersions.V1_20.Major, (byte)Z21FirmwareVersions.V1_20.Minor);
+
+        var firmwareVersionField = typeof(Z21Client.Z21Client).GetField("_firmwareVersion", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        firmwareVersionField.SetValue(client, firmwareVersion);
+
+        var hardwareInfoField = typeof(Z21Client.Z21Client).GetField("<HardwareInfo>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        hardwareInfoField.SetValue(client, new HardwareInfo(HardwareType.Z21New, firmwareVersion));
     }
 }

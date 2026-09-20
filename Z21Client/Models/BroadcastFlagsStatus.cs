@@ -13,7 +13,7 @@ public sealed record BroadcastFlagsStatus(uint flags)
 
     public bool IsRBusEnabled => (Flags & (uint)BroadcastFlags.RBus) != 0;
 
-    public bool IsRailComSubscribedEnabled => (Flags & (uint)BroadcastFlags.RailComSubscribed) != 0;
+    public bool IsRailComSubscribedEnabled => (Flags & (uint)BroadcastFlags.RailCom) != 0;
 
     public bool IsFastClockEnabled => (Flags & (uint)BroadcastFlags.FastClock) != 0;
 

@@ -127,10 +127,10 @@
     <value>Unsubscribing from AllLocoInfoReceived event. Removing AllLocoInfo broadcast flag.</value>
   </data>
   <data name="Text0003" xml:space="preserve">
-    <value>Subscribing to RailComDataReceived event. Adding AllRailCom broadcast flag and starting polling.</value>
+    <value>Subscribing to RailComDataReceived event. Adding RailCom broadcast flag and starting polling.</value>
   </data>
   <data name="Text0004" xml:space="preserve">
-    <value>Unsubscribing from RailComDataReceived event. Removing AllRailCom broadcast flag and stopping polling.</value>
+    <value>Unsubscribing from RailComDataReceived event. Removing RailCom broadcast flag and stopping polling.</value>
   </data>
   <data name="Text0005" xml:space="preserve">
     <value>Subscribing to RBusDataReceived event. Adding RBus broadcast flag.</value>
@@ -416,5 +416,20 @@
   </data>
   <data name="Text0100" xml:space="preserve">
     <value>Wrote CV {cvAddress}, value '{cvValue}' on programming track</value>
+  </data>
+  <data name="Text0101" xml:space="preserve">
+    <value>GetStatusAsync: Requested z21/Z21 status</value>
+  </data>
+  <data name="Text0102" xml:space="preserve">
+    <value>Received Status Changed Info packet with invalid checksum. Received: 0x{Received:X2}, Calculated: 0x{Calculated:X2}. Packet discarded.</value>
+  </data>
+  <data name="Text0103" xml:space="preserve">
+    <value>GetHardwareInfoAsync: Command not supported in firmware version {0}</value>
+  </data>
+  <data name="Text0104" xml:space="preserve">
+    <value>SetTurnoutModeAsync: Command with MM protocol is not supported in firmware version {0}</value>
+  </data>
+  <data name="Text0105" xml:space="preserve">
+    <value>SetLocoFunctionAsync: Function {0} on address {1} is not allowed for firmware {2}</value>
   </data>
 </root>

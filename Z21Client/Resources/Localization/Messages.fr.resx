@@ -118,318 +118,318 @@
 	<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Text0089" xml:space="preserve">
-	<value>Slot-Nummer muss zwischen 1 und 120 liegen. Der angegebene Wert ist {slotNumber}.</value>
+	<value>Le numéro de slot doit être compris entre 1 et 120. La valeur indiquée est {slotNumber}.</value>
   </data>
   <data name="Text0001" xml:space="preserve">
-	<value>Abonnement für AllLocoInfoReceived-Ereignis. Hinzufügen der AllLocoInfo-Broadcast-Flag.</value>
+	<value>Abonnement à l'événement AllLocoInfoReceived. Ajout du drapeau de diffusion AllLocoInfo.</value>
   </data>
   <data name="Text0002" xml:space="preserve">
-	<value>Abonnement für AllLocoInfoReceived-Ereignis beenden. Entfernen der AllLocoInfo-Broadcast-Flag.</value>
+	<value>Désabonnement de l'événement AllLocoInfoReceived. Suppression du drapeau de diffusion AllLocoInfo.</value>
   </data>
   <data name="Text0003" xml:space="preserve">
-	<value>Abonnement für RailComDataReceived-Ereignis. Hinzufügen der AllRailCom-Broadcast-Flag und Starten der Abfrage.</value>
+	<value>Abonnement à l'événement RailComDataReceived. Ajout du drapeau de diffusion RailCom et démarrage de l'interrogation.</value>
   </data>
   <data name="Text0004" xml:space="preserve">
-	<value>Abonnement für RailComDataReceived-Ereignis beenden. Entfernen der AllRailCom-Broadcast-Flag und Stoppen der Abfrage.</value>
+	<value>Désabonnement de l'événement RailComDataReceived. Suppression du drapeau de diffusion RailCom et arrêt de l'interrogation.</value>
   </data>
   <data name="Text0005" xml:space="preserve">
-	<value>Abonnement für RBusDataReceived-Ereignis. Hinzufügen der RBus-Broadcast-Flag.</value>
+	<value>Abonnement à l'événement RBusDataReceived. Ajout du drapeau de diffusion RBus.</value>
   </data>
   <data name="Text0006" xml:space="preserve">
-	<value>Abonnement für RBusDataReceived-Ereignis beenden. Entfernen der RBus-Broadcast-Flag.</value>
+	<value>Désabonnement de l'événement RBusDataReceived. Suppression du drapeau de diffusion RBus.</value>
   </data>
   <data name="Text0007" xml:space="preserve">
-	<value>Abonnement für SystemStateChanged-Ereignis. Hinzufügen der SystemState-Broadcast-Flag.</value>
+	<value>Abonnement à l'événement SystemStateChanged. Ajout du drapeau de diffusion SystemState.</value>
   </data>
   <data name="Text0008" xml:space="preserve">
-	<value>Abonnement für SystemStateChanged-Ereignis beenden. Entfernen der SystemState-Broadcast-Flag.</value>
+	<value>Désabonnement de l'événement SystemStateChanged. Suppression du drapeau de diffusion SystemState.</value>
   </data>
   <data name="Text0009" xml:space="preserve">
-	<value>Verbinde mit Z21 auf {Host}:{Port}...</value>
+	<value>Connexion à la Z21 à {Host}:{Port}...</value>
   </data>
   <data name="Text0010" xml:space="preserve">
-	<value>Bereits verbunden. Bitte zuerst trennen.</value>
+	<value>Déjà connecté. Veuillez d'abord vous déconnecter.</value>
   </data>
   <data name="Text0011" xml:space="preserve">
-	<value>Verbindung fehlgeschlagen: Host {Host} ist nicht erreichbar (Ping fehlgeschlagen).</value>
+	<value>Échec de la connexion : l'hôte {Host} n'est pas joignable (échec du ping).</value>
   </data>
   <data name="Text0012" xml:space="preserve">
-	<value>Ungültige IP-Adresse angegeben: {Host}</value>
+	<value>Adresse IP invalide fournie : {Host}</value>
   </data>
   <data name="Text0013" xml:space="preserve">
-	<value>UdpClient erstellt und an lokalen Port {Port} gebunden</value>
+	<value>UdpClient créé et lié pour écouter sur le port local {Port}</value>
   </data>
   <data name="Text0014" xml:space="preserve">
-	<value>Fehler beim Erstellen und Binden des UdpClient an Port {Port}. Der Port wird möglicherweise bereits von einer anderen Anwendung verwendet.</value>
+	<value>Échec de la création et de la liaison du UdpClient sur le port {Port}. Le port est peut-être déjà utilisé par une autre application.</value>
   </data>
   <data name="Text0015" xml:space="preserve">
-	<value>Verbindung fehlgeschlagen: Host hat auf Ping geantwortet, aber nicht auf das Z21-Kommando (Handshake fehlgeschlagen).</value>
+	<value>Échec de la connexion : l'hôte a répondu au ping, mais n'a pas répondu à la commande Z21 (échec de la négociation).</value>
   </data>
   <data name="Text0016" xml:space="preserve">
-	<value>Z21-Client-Verbindung überprüft und vollständig gestartet.</value>
+	<value>Connexion du client Z21 vérifiée et entièrement démarrée.</value>
   </data>
   <data name="Text0017" xml:space="preserve">
-	<value>Trenne Verbindung von Z21...</value>
+	<value>Déconnexion de la Z21...</value>
   </data>
   <data name="Text0018" xml:space="preserve">
-	<value>Empfangsauftrag wurde beim Trennen wie erwartet abgebrochen.</value>
+	<value>La tâche de réception a été annulée avec succès comme prévu lors de la déconnexion.</value>
   </data>
   <data name="Text0019" xml:space="preserve">
-	<value>Empfangsauftrag wurde beim Trennen nicht innerhalb der erwarteten Zeit abgebrochen.</value>
+	<value>La tâche de réception ne s'est pas annulée dans le délai prévu lors de la déconnexion.</value>
   </data>
   <data name="Text0020" xml:space="preserve">
-	<value>Verbindung getrennt.</value>
+	<value>Déconnecté.</value>
   </data>
   <data name="Text0021" xml:space="preserve">
-	<value>GetLocoInfoAsync: Lokinformationen für Adresse {Address} angefordert</value>
+	<value>GetLocoInfoAsync : informations de la loco demandées pour l'adresse {Address}</value>
   </data>
   <data name="Text0022" xml:space="preserve">
-	<value>GetLocoModeAsync: Lokmodus für Adresse {Address} angefordert</value>
+	<value>GetLocoModeAsync : mode de la loco demandé pour l'adresse {Address}</value>
   </data>
   <data name="Text0023" xml:space="preserve">
-	<value>GetRailComDataAsync: RailCom-Informationen für Lok {locoAddress} angefordert</value>
+	<value>GetRailComDataAsync : informations RailCom demandées pour la loco {locoAddress}</value>
   </data>
   <data name="Text0024" xml:space="preserve">
-	<value>GetRBusDataAsync: R-Bus-Daten für Gruppenindex {groupIndex} angefordert</value>
+	<value>GetRBusDataAsync : données R-Bus demandées pour l'index de groupe {groupIndex}</value>
   </data>
   <data name="Text0025" xml:space="preserve">
-	<value>GetSerialNumberAsync: Seriennummer der z21/Z21 angefordert</value>
+	<value>GetSerialtNumberAsync : numéro de série de la z21/Z21 demandé</value>
   </data>
   <data name="Text0026" xml:space="preserve">
-	<value>GetSystemStateAsync: Systemstatus angefordert</value>
+	<value>GetSystemStateAsync : état du système demandé</value>
   </data>
   <data name="Text0027" xml:space="preserve">
-	<value>GetTurnoutModeAsync: Weichenmodus für Adresse {address} angefordert</value>
+	<value>GetTurnoutModeAsync : mode de l'aiguillage demandé pour l'adresse {address}</value>
   </data>
   <data name="Text0028" xml:space="preserve">
-	<value>GetZ21CodeAsync: z21/Z21-(Feature-)Code angefordert</value>
+	<value>GetZ21CodeAsync : code (fonctionnalité) de la z21/Z21 demandé</value>
   </data>
   <data name="Text0029" xml:space="preserve">
-	<value>Fahrkommando für Adresse {Address}: Geschwindigkeit={Speed}, Roco-Wert={rocoValue}, Fahrstufen={NativeSpeedSteps}, Richtung={Direction}</value>
+	<value>Définition de la conduite de la loco pour l'adresse {Address} : Speed={Speed}, rocoValue={rocoValue} NativeSteps={NativeSpeedSteps}, Direction={Direction}</value>
   </data>
   <data name="Text0030" xml:space="preserve">
-	<value>Funktion {functionIndex} für Lokadresse {address} umschalten</value>
+	<value>Basculement de la fonction {functionIndex} pour l'adresse de la loco {address}</value>
   </data>
   <data name="Text0031" xml:space="preserve">
-	<value>Lokmodus für Adresse {Address} auf {Mode} setzen</value>
+	<value>Définition du mode de la loco pour l'adresse {Address} à {Mode}</value>
   </data>
   <data name="Text0032" xml:space="preserve">
-	<value>Notstopp-Kommando senden.</value>
+	<value>Envoi de la commande d'arrêt d'urgence.</value>
   </data>
   <data name="Text0033" xml:space="preserve">
-	<value>Weichenmodus für Adresse {Address} auf {Mode} setzen</value>
+	<value>Définition du mode de l'aiguillage pour l'adresse {Address} à {Mode}</value>
   </data>
   <data name="Text0034" xml:space="preserve">
-	<value>Weichenstellung für Adresse {address}, Stellung {position}</value>
+	<value>Définition de la position de l'aiguillage adresse {address}, position {position}</value>
   </data>
   <data name="Text0035" xml:space="preserve">
-	<value>Gleisstrom ausschalten</value>
+	<value>Coupure de l'alimentation des voies</value>
   </data>
   <data name="Text0036" xml:space="preserve">
-	<value>Gleisstrom einschalten</value>
+	<value>Mise sous tension des voies</value>
   </data>
   <data name="Text0037" xml:space="preserve">
-	<value>Ausnahme während des Pings zu {Host}.</value>
+	<value>Une exception s'est produite lors du ping vers {Host}.</value>
   </data>
   <data name="Text0038" xml:space="preserve">
-	<value>Keep-Alive-Nachricht an Z21 senden.</value>
+	<value>Envoi d'un message keep-alive à la Z21.</value>
   </data>
   <data name="Text0039" xml:space="preserve">
-	<value>RailCom-Daten der nächsten Lok im Ringpuffer anfordern</value>
+	<value>Demande des données RailCom de la locomotive suivante dans le tampon circulaire</value>
   </data>
   <data name="Text0040" xml:space="preserve">
-	<value>Verbindung zu Z21 verloren. Keine Antwort auf mehrere Pings.</value>
+	<value>Connexion à la Z21 perdue. Aucune réponse à plusieurs pings.</value>
   </data>
   <data name="Text0041" xml:space="preserve">
-	<value>Längere Zeit keine Nachricht von Z21 empfangen. Ping zur Verbindungsprüfung...</value>
+	<value>Aucun message reçu de la Z21 depuis un certain temps. Envoi d'un ping pour vérifier la connexion...</value>
   </data>
   <data name="Text0042" xml:space="preserve">
-	<value>Ping erfolgreich, Z21 ist noch im Netzwerk. Warte auf Daten.</value>
+	<value>Ping réussi, la Z21 est toujours sur le réseau. En attente de données.</value>
   </data>
   <data name="Text0043" xml:space="preserve">
-	<value>Ping fehlgeschlagen. Fehlerzähler: {Count}</value>
+	<value>Échec du ping. Nombre d'échecs : {Count}</value>
   </data>
   <data name="Text0044" xml:space="preserve">
-	<value>Ausnahme während des Watchdog-Pings. Fehlerzähler: {Count}</value>
+	<value>Une exception s'est produite lors du ping du watchdog. Nombre d'échecs : {Count}</value>
   </data>
   <data name="Text0045" xml:space="preserve">
-	<value>Kommando kann nicht gesendet werden. Client ist nicht verbunden.</value>
+	<value>Impossible d'envoyer la commande. Le client n'est pas connecté.</value>
   </data>
   <data name="Text0046" xml:space="preserve">
-	<value>Fehler beim Senden des Kommandos an die Zentrale. Ausnahme: {message}</value>
+	<value>Échec de l'envoi de la commande à la centrale. Exception : {message}</value>
   </data>
   <data name="Text0047" xml:space="preserve">
-	<value>Fehler in der Empfangsschleife. Ausnahme: {message}</value>
+	<value>Une erreur s'est produite dans la boucle de réception. Exception : {message}</value>
   </data>
   <data name="Text0048" xml:space="preserve">
-	<value>Empfangene Daten fehlerhaft: Nicht genügend Bytes zum Lesen der Nachrichtenlänge. Verbleibende Bytes: {Length}</value>
+	<value>Données mal formées reçues : pas assez d'octets pour lire la longueur du message. Octets restants : {Length}</value>
   </data>
   <data name="Text0049" xml:space="preserve">
-	<value>Nachricht der Länge null im Datenstrom gefunden. Verarbeitung dieses Pakets wird gestoppt.</value>
+	<value>Message de longueur nulle rencontré dans le flux de données. Arrêt de l'analyse de ce paquet.</value>
   </data>
   <data name="Text0050" xml:space="preserve">
-	<value>Empfangene Daten fehlerhaft: Puffer ist kleiner als die angegebene Nachrichtenlänge. Erwartet: {Expected}, Verbleibend: {Actual}</value>
+	<value>Données mal formées reçues : le tampon est plus petit que la longueur de message indiquée. Attendu : {Expected}, restant réel : {Actual}</value>
   </data>
   <data name="Text0051" xml:space="preserve">
-	<value>Unbehandeltes oder fehlerhaftes Paket empfangen. Header: 0x{Header:X4}, Länge: {Length}</value>
+	<value>Paquet non géré ou mal formé reçu. En-tête : 0x{Header:X4}, longueur : {Length}</value>
   </data>
   <data name="Text0052" xml:space="preserve">
-	<value>Empfangenes Loco-Slot-Info-Paket zu kurz. Mindestens 24 Bytes erwartet, erhalten {Length}</value>
+	<value>Le paquet Loco Slot Info reçu est trop court. Au moins 24 octets attendus, reçu {Length}</value>
   </data>
   <data name="Text0053" xml:space="preserve">
-	<value>Loco-Slot-Info für Slot {SlotNumber} empfangen: Adresse={Address}</value>
+	<value>Loco Slot Info pour le slot {SlotNumber} reçu : Address={Address}</value>
   </data>
   <data name="Text0054" xml:space="preserve">
-	<value>Unbekanntes X-Bus-Kommando an Z21 gesendet</value>
+	<value>Envoi d'une commande X-Bus inconnue à la Z21</value>
   </data>
   <data name="Text0055" xml:space="preserve">
-	<value>Unbehandeltes X-Bus-Kommando mit X-Header: 0x{XHeader:X2} empfangen</value>
+	<value>Commande X-Bus non gérée reçue avec l'en-tête X : 0x{XHeader:X2}</value>
   </data>
   <data name="Text0056" xml:space="preserve">
-	<value>RailCom-Daten für Lok {Address} empfangen.</value>
+	<value>Données RailCom pour la loco {Address} reçues.</value>
   </data>
   <data name="Text0057" xml:space="preserve">
-	<value>Z21-Code empfangen: {LockState}</value>
+	<value>Code Z21 reçu : {LockState}</value>
   </data>
   <data name="Text0058" xml:space="preserve">
-	<value>R-Bus-Daten für Gruppe {GroupIndex} empfangen.</value>
+	<value>Données R-Bus pour le groupe {GroupIndex} reçues.</value>
   </data>
   <data name="Text0059" xml:space="preserve">
-	<value>Lokmodus für Adresse {Address} empfangen: {Mode}</value>
+	<value>Mode de l'aiguillage pour l'adresse {Address} reçu : {Mode}</value>
   </data>
   <data name="Text0060" xml:space="preserve">
-	<value>Empfangenes Notstopp-Paket zu kurz. 7 Bytes erwartet, erhalten {Length}</value>
+	<value>Le paquet d'arrêt d'urgence reçu est trop court. 7 octets attendus, reçu {Length}</value>
   </data>
   <data name="Text0061" xml:space="preserve">
-	<value>Empfangenes Notstopp-Paket mit ungültiger Prüfsumme. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet d'arrêt d'urgence reçu avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré.</value>
   </data>
   <data name="Text0062" xml:space="preserve">
-	<value>Notstopp empfangen</value>
+	<value>Arrêt d'urgence reçu</value>
   </data>
   <data name="Text0063" xml:space="preserve">
-	<value>Empfangenes Weicheninfo-Paket zu kurz. 9 Bytes erwartet, erhalten {Length}</value>
+	<value>Le paquet Turnout Info reçu est trop court. 9 octets attendus, reçu {Length}</value>
   </data>
   <data name="Text0064" xml:space="preserve">
-	<value>Empfangenes Weicheninfo-Paket mit ungültiger Prüfsumme. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet Turnout Info reçu avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré.</value>
   </data>
   <data name="Text0065" xml:space="preserve">
-	<value>Weicheninfo für Adresse {Address} empfangen: {State}</value>
+	<value>Turnout Info pour l'adresse {Address} reçu : {State}</value>
   </data>
   <data name="Text0066" xml:space="preserve">
-	<value>Empfangenes Gleisstrom-Info-Paket zu kurz. 7 Bytes erwartet, erhalten {Length}</value>
+	<value>Le paquet Track Power Info reçu est trop court. 7 octets attendus, reçu {Length}</value>
   </data>
   <data name="Text0067" xml:space="preserve">
-	<value>Empfangenes Gleisstrom-Info-Paket mit ungültiger Prüfsumme. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet Track Power Info reçu avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré.</value>
   </data>
   <data name="Text0068" xml:space="preserve">
-	<value>Gleisstromstatus empfangen: {trackPowerInfo}</value>
+	<value>État de l'alimentation des voies reçu : {trackPowerInfo}</value>
   </data>
   <data name="Text0069" xml:space="preserve">
-	<value>Seriennummer empfangen: {SerialNumber}</value>
+	<value>Numéro de série reçu : {SerialNumber}</value>
   </data>
   <data name="Text0070" xml:space="preserve">
-	<value>Hardware-Info empfangen: {HWType}, Firmware: {FWVersion}</value>
+	<value>Informations matérielles reçues : {HWType}, firmware : {FWVersion}</value>
   </data>
   <data name="Text0071" xml:space="preserve">
-	<value>Firmware-Version aus LAN_GET_HWINFO-Antwort konnte nicht analysiert werden.</value>
+	<value>Échec de l'analyse de la version du firmware à partir de la réponse LAN_GET_HWINFO.</value>
   </data>
   <data name="Text0072" xml:space="preserve">
-	<value>Firmware-Bug-Workaround: LocoInfo und LocoMode für Adresse {Address} kombiniert und Ereignis ausgelöst.</value>
+	<value>Contournement de bogue du firmware : LocoInfo et LocoMode combinés pour l'adresse {Address} et événement déclenché.</value>
   </data>
   <data name="Text0073" xml:space="preserve">
-	<value>Lokmodus für Adresse {Address} empfangen: {Mode}</value>
+	<value>Mode de la loco pour l'adresse {Address} reçu : {Mode}</value>
   </data>
   <data name="Text0074" xml:space="preserve">
-	<value>Broadcast-Flags empfangen und verarbeitet. Flags: 0x{Flags:X8}</value>
+	<value>Drapeaux de diffusion reçus et traités. Drapeaux : 0x{Flags:X8}</value>
   </data>
   <data name="Text0075" xml:space="preserve">
-	<value>Empfangenes Lokinfo-Paket zu kurz. Mindestens {Length} Bytes erwartet, erhalten {ActualLength}</value>
+	<value>Le paquet Loco Info reçu est trop court. Au moins {Length} octets attendus, reçu {ActualLength}</value>
   </data>
   <data name="Text0076" xml:space="preserve">
-	<value>Empfangenes Lokinfo-Paket mit ungültiger Prüfsumme. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet Loco Info reçu avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré.</value>
   </data>
   <data name="Text0077" xml:space="preserve">
-	<value>Firmware-Bug-Workaround: Teilweise Lokinfo für Adresse {Address} gespeichert, warte auf LocoMode.</value>
+	<value>Contournement de bogue du firmware : LocoInfo partiel stocké pour l'adresse {Address}, en attente de LocoMode.</value>
   </data>
   <data name="Text0078" xml:space="preserve">
-	<value>Lokinfo für Adresse {Address} empfangen und verarbeitet.</value>
+	<value>Loco Info pour l'adresse {Address} reçu et traité.</value>
   </data>
   <data name="Text0079" xml:space="preserve">
-	<value>Firmware-Version empfangen und verarbeitet: {Version}</value>
+	<value>Version du firmware reçue et traitée : {Version}</value>
   </data>
   <data name="Text0080" xml:space="preserve">
-	<value>Firmware-Version aus empfangenen Daten konnte nicht analysiert werden.</value>
+	<value>Échec de l'analyse de la version du firmware à partir des données reçues.</value>
   </data>
   <data name="Text0081" xml:space="preserve">
-	<value>Systemstatus-Paket zu kurz. Mindestens 18 Bytes erwartet, erhalten {Length}</value>
+	<value>Le paquet d'état du système est trop court. Au moins 18 octets attendus, reçu {Length}</value>
   </data>
   <data name="Text0082" xml:space="preserve">
-	<value>Systemstatus empfangen und erfolgreich verarbeitet. Interne Spannung: {volt} mV.</value>
+	<value>État du système reçu et traité avec succès. Tension interne : {volt} mV.</value>
   </data>
   <data name="Text0083" xml:space="preserve">
-	<value>Broadcast-Flags auf {subscripedBroadcastFlags} setzen</value>
+	<value>Définition des drapeaux de diffusion à {subscripedBroadcastFlags}</value>
   </data>
   <data name="Text0084" xml:space="preserve">
-	<value>GetLocoSlotInfoAsync: Lokinfo für Slot {slotNumber} angefordert</value>
+	<value>GetLocoSlotInfoAsync : informations de la loco demandées pour le slot {slotNumber}</value>
   </data>
   <data name="Text0085" xml:space="preserve">
-	<value>GetBroadcastFlagsAsync: Broadcast-Flags angefordert</value>
+	<value>GetBroadcastFlagsAsync : drapeaux de diffusion demandés</value>
   </data>
   <data name="Text0086" xml:space="preserve">
-	<value>GetFirmwareVersionAsync: Firmware-Version angefordert</value>
+	<value>GetFirmwareVersionAsync : version du firmware demandée</value>
   </data>
   <data name="Text0087" xml:space="preserve">
-	<value>GetHardwareInfoAsync: Hardware-Informationen angefordert</value>
+	<value>GetHardwareInfoAsync : informations matérielles demandées</value>
   </data>
   <data name="Text0088" xml:space="preserve">
-	<value>Z21-Suche ist nicht möglich, solange eine Verbindung zu einer Z21-Zentrale besteht. Bitte zuerst trennen.</value>
+	<value>Impossible d'effectuer la découverte Z21 lorsqu'on est connecté à une centrale Z21. Veuillez d'abord vous déconnecter.</value>
   </data>
   <data name="Text0090" xml:space="preserve">
-	<value>Gruppenindex muss 0 oder 1 sein. Der angegebene Wert ist {groupIndex}.</value>
+	<value>L'index de groupe doit être 0 ou 1. La valeur indiquée est {groupIndex}.</value>
   </data>
   <data name="Text0091" xml:space="preserve">
-	<value>CV {cvAddress} von Lok {address} auf dem Hauptgleis angefordert</value>
+	<value>CV {cvAddress} demandé à la loco {address} sur la voie principale</value>
   </data>
   <data name="Text0092" xml:space="preserve">
-	<value>CV {cv} empfangen. Wert: '{cvValue}'</value>
+	<value>CV {cv} reçu. Il contient la valeur '{cvValue}'</value>
   </data>
   <data name="Text0093" xml:space="preserve">
-	<value>CV {cvAddress} auf dem Programmiergleis angefordert</value>
+	<value>CV {cvAddress} demandé sur la voie de programmation</value>
   </data>
   <data name="Text0095" xml:space="preserve">
-	<value>CV-Programmierung: Kein ACK vom Decoder empfangen</value>
+	<value>Programmation CV : aucun ACK reçu du décodeur</value>
   </data>
   <data name="Text0094" xml:space="preserve">
-	<value>CV-Programmierung: Kurzschluss aufgetreten</value>
+	<value>Programmation CV : court-circuit survenu</value>
   </data>
   <data name="Text0096" xml:space="preserve">
-	<value>Beim Empfang des CV-Werts ist das DB0-Byte nicht 0x14. Daten ignoriert</value>
+	<value>Lors de la réception de la valeur CV, l'octet DB0 n'est pas 0x14. Données ignorées</value>
   </data>
   <data name="Text0097" xml:space="preserve">
-	<value>CV-Wert-Paket mit ungültiger Prüfsumme. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet de valeur CV avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré</value>
   </data>
   <data name="Text0098" xml:space="preserve">
-	<value>Adresse {address}, CV {cvAddress}, Wert '{cvValue}' auf dem Hauptgleis geschrieben</value>
+	<value>Écrit à l'adresse {address}, CV {cvAddress}, valeur '{cvValue}' sur la voie principale</value>
   </data>
   <data name="Text0099" xml:space="preserve">
-	<value>Adresse {address}, CV {cvAddress}, Bit {bit}, Wert '{bitValue}' geschrieben</value>
+	<value>Écrit à l'adresse {address}, CV {cvAddress}, bit {bit}, valeur '{bitValue}'</value>
   </data>
   <data name="Text0100" xml:space="preserve">
-	<value>CV {cvAddress}, Wert '{cvValue}' auf dem Programmiergleis geschrieben</value>
+	<value>Écrit CV {cvAddress}, valeur '{cvValue}' sur la voie de programmation</value>
   </data>
   <data name="Text0101" xml:space="preserve">
-	<value>GetStatusAsync: z21/Z21-Status angefordert</value>
+	<value>GetStatusAsync : état de la z21/Z21 demandé</value>
   </data>
   <data name="Text0102" xml:space="preserve">
-	<value>Statusänderungs-Infopaket mit ungültiger Prüfsumme empfangen. Empfangen: 0x{Received:X2}, Berechnet: 0x{Calculated:X2}. Paket verworfen.</value>
+	<value>Paquet Status Changed Info reçu avec une somme de contrôle invalide. Reçu : 0x{Received:X2}, calculé : 0x{Calculated:X2}. Paquet ignoré.</value>
   </data>
   <data name="Text0103" xml:space="preserve">
-	<value>GetHardwareInfoAsync: Befehl wird in Firmware-Version {0} nicht unterstützt</value>
+	<value>GetHardwareInfoAsync : commande non prise en charge dans la version du firmware {0}</value>
   </data>
   <data name="Text0104" xml:space="preserve">
-	<value>SetTurnoutModeAsync: Befehl mit MM-Protokoll wird in Firmware-Version {0} nicht unterstützt</value>
+	<value>SetTurnoutModeAsync : la commande avec le protocole MM n'est pas prise en charge dans la version du firmware {0}</value>
   </data>
   <data name="Text0105" xml:space="preserve">
-	<value>SetLocoFunctionAsync: Funktion {0} auf Adresse {1} ist für Firmware {2} nicht zulässig</value>
+	<value>SetLocoFunctionAsync : la fonction {0} à l'adresse {1} n'est pas autorisée pour le firmware {2}</value>
   </data>
 </root>

@@ -33,7 +33,7 @@ public sealed record SystemState
     public int TemperatureC { get; }
     public int SupplyVoltagemV { get; }
     public int VccVoltagemV { get; }
-    public byte CentralState { get; }
+    public StatusChanged CentralState { get; }
     public byte CentralStateEx { get; }
     public Caps? Capabilities { get; }
 
@@ -44,7 +44,7 @@ public sealed record SystemState
         int temperatureC,
         int supplyVoltagemV,
         int vccVoltagemV,
-        byte centralState,
+        StatusChanged centralState,
         byte centralStateEx,
         Caps? capabilities = null)
     {
